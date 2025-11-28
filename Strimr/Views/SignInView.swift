@@ -46,8 +46,8 @@ struct SignInView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.blue)
-                .foregroundStyle(.white)
+                .background(.brandPrimary)
+                .foregroundStyle(.brandPrimaryForeground)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .disabled(isAuthenticating)

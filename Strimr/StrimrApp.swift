@@ -8,6 +8,7 @@ struct StrimrApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(sessionStore)
+                .preferredColorScheme(.dark)
         }
     }
 }
