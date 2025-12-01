@@ -7,9 +7,6 @@
     "Browse" : {
 
     },
-    "Explore filters, genres, and collections for %@." : {
-
-    },
     "Home" : {
 
     },
@@ -39,6 +36,9 @@
 
     },
     "Loading libraries" : {
+
+    },
+    "Loading library" : {
 
     },
     "Loading recommendations" : {
@@ -106,7 +106,13 @@
     "No artwork" : {
 
     },
+    "No items" : {
+
+    },
     "No libraries yet" : {
+
+    },
+    "Nothing to browse yet." : {
 
     },
     "Nothing to show yet." : {
@@ -440,6 +446,9 @@
           }
         }
       }
+    },
+    "Try again later." : {
+
     },
     "Try refreshing to load your Plex libraries." : {
 

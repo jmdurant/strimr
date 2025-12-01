@@ -1,0 +1,85 @@
+import Foundation
+import Observation
+
+@MainActor
+@Observable
+final class LibraryBrowseViewModel {
+    let library: Library
+    var items: [MediaItem] = []
+    var isLoading = false
+    var isLoadingMore = false
+    var errorMessage: String?
+    private var reachedEnd = false
+
+    @ObservationIgnored private let plexApiManager: PlexAPIManager
+
+    init(library: Library, plexApiManager: PlexAPIManager) {
+        self.library = library
+        self.plexApiManager = plexApiManager
+    }
+
+    func load() async {
+        guard items.isEmpty else { return }
+        await fetch(reset: true)
+    }
+
+    func loadMore() async {
+        guard !isLoading, !isLoadingMore, !reachedEnd else { return }
+        await fetch(reset: false)
+    }
+
+    private func fetch(reset: Bool) async {
+        guard let sectionId = library.sectionId else {
+            resetState(error: "Missing library identifier.")
+            return
+        }
+        guard let api = plexApiManager.server else {
+            resetState(error: "Select a server to browse.")
+            return
+        }
+
+        if reset {
+            isLoading = true
+        } else {
+            isLoadingMore = true
+        }
+        errorMessage = nil
+        defer {
+            isLoading = false
+            isLoadingMore = false
+        }
+
+        do {
+            let start = reset ? 0 : items.count
+            let response = try await api.getSectionsItems(
+                sectionId: sectionId,
+                pagination: PlexPagination(start: start, size: 20)
+            )
+
+            let newItems = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
+            let total = response.mediaContainer.totalSize ?? (start + newItems.count)
+
+            if reset {
+                items = newItems
+            } else {
+                items.append(contentsOf: newItems)
+            }
+
+            reachedEnd = items.count >= total || newItems.isEmpty
+        } catch {
+            if reset {
+                resetState(error: error.localizedDescription)
+            } else {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func resetState(error: String? = nil) {
+        items = []
+        errorMessage = error
+        isLoading = false
+        isLoadingMore = false
+        reachedEnd = false
+    }
+}

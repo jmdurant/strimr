@@ -29,7 +29,13 @@ struct LibraryDetailView: View {
                         onSelectMedia: onSelectMedia
                     )
                 case .browse:
-                    LibraryBrowseView(library: library)
+                    LibraryBrowseView(
+                        viewModel: LibraryBrowseViewModel(
+                            library: library,
+                            plexApiManager: plexApiManager
+                        ),
+                        onSelectMedia: onSelectMedia
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
