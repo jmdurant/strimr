@@ -7,6 +7,9 @@
     "Browse" : {
 
     },
+    "Episodes" : {
+
+    },
     "Genres" : {
 
     },
@@ -35,6 +38,9 @@
         }
       }
     },
+    "Loading episodes…" : {
+
+    },
     "Loading home" : {
 
     },
@@ -45,6 +51,9 @@
 
     },
     "Loading recommendations" : {
+
+    },
+    "Loading seasons…" : {
 
     },
     "media.labels.seasonEpisode %lld %lld" : {
@@ -106,10 +115,19 @@
     "No artwork" : {
 
     },
+    "No episodes for this season." : {
+
+    },
     "No items" : {
 
     },
     "No libraries yet" : {
+
+    },
+    "No seasons available yet." : {
+
+    },
+    "No seasons available." : {
 
     },
     "Nothing to browse yet." : {
@@ -131,6 +149,9 @@
 
     },
     "Search" : {
+
+    },
+    "Season" : {
 
     },
     "serverSelection.connection.localFormat %@" : {

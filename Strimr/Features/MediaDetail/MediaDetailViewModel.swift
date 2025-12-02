@@ -5,13 +5,20 @@ import SwiftUI
 @MainActor
 @Observable
 final class MediaDetailViewModel {
-    private let plexApiManager: PlexAPIManager
+    @ObservationIgnored private let plexApiManager: PlexAPIManager
 
     var media: MediaItem
     var heroImageURL: URL?
     var isLoading = false
     var errorMessage: String?
     var backdropGradient: [Color] = []
+    var seasons: [MediaItem] = []
+    var episodes: [MediaItem] = []
+    var selectedSeasonId: String?
+    var isLoadingSeasons = false
+    var isLoadingEpisodes = false
+    var seasonsErrorMessage: String?
+    var episodesErrorMessage: String?
 
     init(media: MediaItem, plexApiManager: PlexAPIManager) {
         self.media = media
@@ -22,12 +29,14 @@ final class MediaDetailViewModel {
     func loadDetails() async {
         guard let api = plexApiManager.server else {
             errorMessage = "Select a server to load details."
+            if media.type == .show {
+                seasonsErrorMessage = "Select a server to load seasons."
+            }
             return
         }
 
         isLoading = true
         errorMessage = nil
-        defer { isLoading = false }
 
         do {
             let response = try await api.getMetadata(ratingKey: media.metadataRatingKey)
@@ -39,6 +48,30 @@ final class MediaDetailViewModel {
         } catch {
             errorMessage = error.localizedDescription
         }
+
+        isLoading = false
+        await loadSeasonsIfNeeded(forceReload: true)
+    }
+
+    func loadSeasonsIfNeeded(forceReload: Bool = false) async {
+        guard media.type == .show else { return }
+        guard forceReload || seasons.isEmpty else { return }
+        await fetchSeasons()
+    }
+
+    func selectSeason(id: String) async {
+        guard selectedSeasonId != id else { return }
+        selectedSeasonId = id
+        episodes = []
+        episodesErrorMessage = nil
+        await fetchEpisodes(for: id)
+    }
+
+    func imageURL(for media: MediaItem, width: Int = 320, height: Int = 180) -> URL? {
+        guard let api = plexApiManager.server else { return nil }
+
+        let path = media.thumbPath ?? media.parentThumbPath ?? media.grandparentThumbPath
+        return path.flatMap { api.transcodeImageURL(path: $0, width: width, height: height) }
     }
 
     private func resolveArtwork() {
@@ -86,6 +119,93 @@ final class MediaDetailViewModel {
 
     var ratingText: String? {
         media.rating.map { String(format: "%.1f", $0) }
+    }
+
+    var selectedSeason: MediaItem? {
+        seasons.first(where: { $0.id == selectedSeasonId })
+    }
+
+    var selectedSeasonTitle: String {
+        selectedSeason?.title ?? "Season"
+    }
+
+    func runtimeText(for item: MediaItem) -> String? {
+        guard let duration = item.duration else { return nil }
+        let minutes = Int(duration / 60)
+        let hours = minutes / 60
+        let remainingMinutes = minutes % 60
+        if hours > 0 {
+            return "\(hours)h \(remainingMinutes)m"
+        }
+        return "\(remainingMinutes)m"
+    }
+
+    func progressFraction(for item: MediaItem) -> Double? {
+        guard let percentage = item.viewProgressPercentage else { return nil }
+        return min(1, max(0, percentage / 100))
+    }
+
+    private func fetchSeasons() async {
+        guard let api = plexApiManager.server else {
+            seasonsErrorMessage = "Select a server to load seasons."
+            return
+        }
+
+        isLoadingSeasons = true
+        seasonsErrorMessage = nil
+        episodesErrorMessage = nil
+        defer { isLoadingSeasons = false }
+
+        do {
+            let response = try await api.getMetadataChildren(ratingKey: media.metadataRatingKey)
+            let fetchedSeasons = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
+            seasons = fetchedSeasons
+            episodes = []
+
+            guard !fetchedSeasons.isEmpty else {
+                selectedSeasonId = nil
+                episodes = []
+                return
+            }
+
+            let nextSeasonId = selectedSeasonId ?? fetchedSeasons.first?.id
+            selectedSeasonId = nextSeasonId
+
+            if let seasonId = nextSeasonId {
+                await fetchEpisodes(for: seasonId)
+            } else {
+                episodes = []
+            }
+        } catch {
+            seasons = []
+            selectedSeasonId = nil
+            episodes = []
+            seasonsErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func fetchEpisodes(for seasonId: String) async {
+        guard let api = plexApiManager.server else {
+            episodesErrorMessage = "Select a server to load episodes."
+            return
+        }
+
+        isLoadingEpisodes = true
+        episodesErrorMessage = nil
+        defer { isLoadingEpisodes = false }
+
+        do {
+            let response = try await api.getMetadataChildren(ratingKey: seasonId)
+            let fetchedEpisodes = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
+
+            guard selectedSeasonId == seasonId else { return }
+            episodes = fetchedEpisodes
+        } catch {
+            if selectedSeasonId == seasonId {
+                episodes = []
+                episodesErrorMessage = error.localizedDescription
+            }
+        }
     }
 }
 

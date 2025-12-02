@@ -1,8 +1,8 @@
+#if os(tvOS)
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 import UIKit
 
-#if os(tvOS)
 struct SignInTVView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(PlexAPIManager.self) private var plexApi
