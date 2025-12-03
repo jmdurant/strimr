@@ -5,9 +5,11 @@ struct MediaDetailView: View {
     @State var viewModel: MediaDetailViewModel
     @State private var isSummaryExpanded = false
     private let heroHeight: CGFloat = 320
+    private let onPlay: () -> Void
 
-    init(viewModel: MediaDetailViewModel) {
+    init(viewModel: MediaDetailViewModel, onPlay: @escaping () -> Void = {}) {
         _viewModel = State(initialValue: viewModel)
+        self.onPlay = onPlay
     }
 
     var body: some View {
@@ -18,7 +20,8 @@ struct MediaDetailView: View {
                 MediaDetailHeaderSection(
                     viewModel: bindableViewModel,
                     isSummaryExpanded: $isSummaryExpanded,
-                    heroHeight: heroHeight
+                    heroHeight: heroHeight,
+                    onPlay: onPlay
                 )
 
                 if bindableViewModel.media.type == .show {

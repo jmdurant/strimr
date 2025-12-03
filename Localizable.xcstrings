@@ -4,13 +4,16 @@
     "Add a Plex server or pull to refresh." : {
 
     },
-    "Browse" : {
+    "Buffering..." : {
 
     },
     "Episode %lld" : {
 
     },
     "Genres" : {
+
+    },
+    "HDR" : {
 
     },
     "Home" : {
@@ -179,13 +182,10 @@
     "Play" : {
 
     },
-    "Player" : {
-
-    },
     "Read more" : {
 
     },
-    "Recommended" : {
+    "Replay" : {
 
     },
     "Search" : {
@@ -487,6 +487,7 @@
       }
     },
     "signIn.tv.codeLabel %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -503,6 +504,7 @@
       }
     },
     "signIn.tv.subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

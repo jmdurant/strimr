@@ -5,6 +5,7 @@ struct MediaDetailHeaderSection: View {
     @Bindable var viewModel: MediaDetailViewModel
     @Binding var isSummaryExpanded: Bool
     let heroHeight: CGFloat
+    let onPlay: () -> Void
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -197,7 +198,7 @@ struct MediaDetailHeaderSection: View {
     }
 
     private var playButton: some View {
-        Button(action: {}) {
+        Button(action: onPlay) {
             HStack(spacing: 8) {
                 Image(systemName: "play.fill")
                 Text("Play")

@@ -69,7 +69,10 @@ struct MainTabView: View {
                 viewModel: MediaDetailViewModel(
                     media: media,
                     plexApiManager: plexApiManager
-                )
+                ),
+                onPlay: {
+                    coordinator.showPlayer(for: media)
+                }
             )
         }
     }
