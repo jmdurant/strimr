@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @Environment(PlexAPIManager.self) private var plexApiManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
     @StateObject private var coordinator = MainCoordinator()
     @State private var homeViewModel: HomeViewModel
     @State private var libraryViewModel: LibraryViewModel
@@ -68,7 +68,7 @@ struct MainTabView: View {
             MediaDetailView(
                 viewModel: MediaDetailViewModel(
                     media: media,
-                    plexApiManager: plexApiManager
+                    context: plexApiContext
                 ),
                 onPlay: {
                     coordinator.showPlayer(for: media)
@@ -79,13 +79,13 @@ struct MainTabView: View {
 }
 
 #Preview {
-    let api = PlexAPIManager()
-    let session = SessionManager(apiManager: api)
+    let context = PlexAPIContext()
+    let session = SessionManager(context: context)
 
     return MainTabView(
-        homeViewModel: HomeViewModel(plexApiManager: api),
-        libraryViewModel: LibraryViewModel(plexApiManager: api)
+        homeViewModel: HomeViewModel(context: context),
+        libraryViewModel: LibraryViewModel(context: context)
     )
-    .environment(api)
+    .environment(context)
     .environment(session)
 }

@@ -8,11 +8,11 @@ final class ServerSelectionViewModel {
     var isLoading = false
 
     @ObservationIgnored private let sessionManager: SessionManager
-    @ObservationIgnored private let plexApi: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
 
-    init(sessionManager: SessionManager, plexApiManager: PlexAPIManager) {
+    init(sessionManager: SessionManager, context: PlexAPIContext) {
         self.sessionManager = sessionManager
-        plexApi = plexApiManager
+        self.context = context
     }
 
     func load() async {
@@ -20,7 +20,8 @@ final class ServerSelectionViewModel {
         defer { isLoading = false }
 
         do {
-            servers = try await plexApi.cloud.getResources().filter { !$0.connections.isEmpty }
+            let repository = ResourceRepository(context: context)
+            servers = try await repository.getResources().filter { !$0.connections.isEmpty }
         } catch {
             servers = []
         }

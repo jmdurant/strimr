@@ -5,7 +5,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class MediaDetailViewModel {
-    @ObservationIgnored private let plexApiManager: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
 
     var media: MediaItem
     var heroImageURL: URL?
@@ -20,14 +20,14 @@ final class MediaDetailViewModel {
     var seasonsErrorMessage: String?
     var episodesErrorMessage: String?
 
-    init(media: MediaItem, plexApiManager: PlexAPIManager) {
+    init(media: MediaItem, context: PlexAPIContext) {
         self.media = media
-        self.plexApiManager = plexApiManager
+        self.context = context
         resolveArtwork()
     }
 
     func loadDetails() async {
-        guard let api = plexApiManager.server else {
+        guard let metadataRepository = try? MetadataRepository(context: context) else {
             errorMessage = "Select a server to load details."
             if media.type == .show {
                 seasonsErrorMessage = "Select a server to load seasons."
@@ -39,7 +39,7 @@ final class MediaDetailViewModel {
         errorMessage = nil
 
         do {
-            let response = try await api.getMetadata(ratingKey: media.metadataRatingKey)
+            let response = try await metadataRepository.getMetadata(ratingKey: media.metadataRatingKey)
             if let item = response.mediaContainer.metadata?.first {
                 media = MediaItem(plexItem: item)
                 resolveArtwork()
@@ -68,22 +68,22 @@ final class MediaDetailViewModel {
     }
 
     func imageURL(for media: MediaItem, width: Int = 320, height: Int = 180) -> URL? {
-        guard let api = plexApiManager.server else { return nil }
+        guard let imageRepository = try? ImageRepository(context: context) else { return nil }
 
         let path = media.thumbPath ?? media.parentThumbPath ?? media.grandparentThumbPath
-        return path.flatMap { api.transcodeImageURL(path: $0, width: width, height: height) }
+        return path.flatMap { imageRepository.transcodeImageURL(path: $0, width: width, height: height) }
     }
 
     private func resolveArtwork() {
-        guard let api = plexApiManager.server else {
+        guard let imageRepository = try? ImageRepository(context: context) else {
             heroImageURL = nil
             return
         }
 
         heroImageURL = media.artPath.flatMap {
-            api.transcodeImageURL(path: $0, width: 1400, height: 800)
+            imageRepository.transcodeImageURL(path: $0, width: 1400, height: 800)
         } ?? media.thumbPath.flatMap {
-            api.transcodeImageURL(path: $0, width: 1400, height: 800)
+            imageRepository.transcodeImageURL(path: $0, width: 1400, height: 800)
         }
         resolveGradient()
     }
@@ -146,7 +146,7 @@ final class MediaDetailViewModel {
     }
 
     private func fetchSeasons() async {
-        guard let api = plexApiManager.server else {
+        guard let metadataRepository = try? MetadataRepository(context: context) else {
             seasonsErrorMessage = "Select a server to load seasons."
             return
         }
@@ -157,7 +157,7 @@ final class MediaDetailViewModel {
         defer { isLoadingSeasons = false }
 
         do {
-            let response = try await api.getMetadataChildren(ratingKey: media.metadataRatingKey)
+            let response = try await metadataRepository.getMetadataChildren(ratingKey: media.metadataRatingKey)
             let fetchedSeasons = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
             seasons = fetchedSeasons
             episodes = []
@@ -185,7 +185,7 @@ final class MediaDetailViewModel {
     }
 
     private func fetchEpisodes(for seasonId: String) async {
-        guard let api = plexApiManager.server else {
+        guard let metadataRepository = try? MetadataRepository(context: context) else {
             episodesErrorMessage = "Select a server to load episodes."
             return
         }
@@ -195,7 +195,7 @@ final class MediaDetailViewModel {
         defer { isLoadingEpisodes = false }
 
         do {
-            let response = try await api.getMetadataChildren(ratingKey: seasonId)
+            let response = try await metadataRepository.getMetadataChildren(ratingKey: seasonId)
             let fetchedEpisodes = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
 
             guard selectedSeasonId == seasonId else { return }

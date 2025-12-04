@@ -2,20 +2,20 @@ import SwiftUI
 
 @main
 struct StrimrApp: App {
-    @State private var plexApiManager: PlexAPIManager
+    @State private var plexApiContext: PlexAPIContext
     @State private var sessionManager: SessionManager
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     init() {
-        let api = PlexAPIManager()
-        _plexApiManager = State(initialValue: api)
-        _sessionManager = State(initialValue: SessionManager(apiManager: api))
+        let context = PlexAPIContext()
+        _plexApiContext = State(initialValue: context)
+        _sessionManager = State(initialValue: SessionManager(context: context))
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(plexApiManager)
+                .environment(plexApiContext)
                 .environment(sessionManager)
                 .preferredColorScheme(.dark)
         }

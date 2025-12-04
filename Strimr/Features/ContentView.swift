@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(SessionManager.self) private var sessionManager
-    @Environment(PlexAPIManager.self) private var plexApiManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
 
     var body: some View {
         ZStack {
@@ -23,13 +23,13 @@ struct ContentView: View {
                 SelectServerView(
                     viewModel: ServerSelectionViewModel(
                         sessionManager: sessionManager,
-                        plexApiManager: plexApiManager
+                        context: plexApiContext
                     )
                 )
             case .ready:
                 MainTabView(
-                    homeViewModel: HomeViewModel(plexApiManager: plexApiManager),
-                    libraryViewModel: LibraryViewModel(plexApiManager: plexApiManager)
+                    homeViewModel: HomeViewModel(context: plexApiContext),
+                    libraryViewModel: LibraryViewModel(context: plexApiContext)
                 )
             }
         }
@@ -37,6 +37,8 @@ struct ContentView: View {
 }
 
 #Preview {
+    let context = PlexAPIContext()
     ContentView()
-        .environment(SessionManager(apiManager: PlexAPIManager()))
+        .environment(context)
+        .environment(SessionManager(context: context))
 }

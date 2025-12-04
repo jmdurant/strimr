@@ -118,15 +118,15 @@ struct SelectServerView: View {
 }
 
 #Preview {
-    let api = PlexAPIManager()
+    let context = PlexAPIContext()
     let session = SessionManager(
-        apiManager: api
+        context: context
     )
 
     return SelectServerView(
         viewModel: ServerSelectionViewModel(
             sessionManager: session,
-            plexApiManager: api
+            context: context
         )
     )
 }

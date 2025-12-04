@@ -1,41 +1,17 @@
 import Foundation
 
-final class PlexCloudAPI {
+final class PlexCloudNetworkClient {
+    private let session: URLSession = .shared
     private let baseURL = URL(string: "https://plex.tv/api/v2")!
-    private var clientIdentifier: String?
     private var authToken: String?
-    private let session: URLSession
-
-    init(session: URLSession = .shared) {
-        self.session = session
-    }
-
-    func setClientIdentifier(_ clientIdentifier: String) {
+    private var clientIdentifier: String
+    
+    init(authToken: String?, clientIdentifier: String) {
+        self.authToken = authToken
         self.clientIdentifier = clientIdentifier
     }
-
-    func setAuthToken(_ authToken: String?) {
-        self.authToken = authToken
-    }
-
-    func requestPin() async throws -> PlexCloudPin {
-        try await request(
-            path: "/pins",
-            method: "POST",
-            queryItems: [URLQueryItem(name: "strong", value: "true")],
-            headers: ["X-Plex-Product": "Strimr"]
-        )
-    }
-
-    func pollToken(pinId: Int) async throws -> PlexCloudPin {
-        try await request(path: "/pins/\(pinId)", method: "GET")
-    }
-
-    func getUser() async throws -> PlexCloudUser {
-        try await request(path: "/user", method: "GET")
-    }
-
-    private func request<Response: Decodable>(
+    
+    func request<Response: Decodable>(
         path: String,
         method: String,
         queryItems: [URLQueryItem]? = nil,

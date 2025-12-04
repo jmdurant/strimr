@@ -1,46 +1,22 @@
 import Foundation
 
-final class PlexCloudAPI {
-    private let baseURL = URL(string: "https://plex.tv/api/v2")!
-    private var clientIdentifier: String?
-    private var authToken: String?
-    private let session: URLSession
-
-    init(session: URLSession = .shared) {
-        self.session = session
-    }
-
-    func setClientIdentifier(_ clientIdentifier: String) {
-        self.clientIdentifier = clientIdentifier
-    }
-
-    func setAuthToken(_ authToken: String?) {
+final class PlexServerNetworkClient {
+    private let session: URLSession = .shared
+    private var authToken: String
+    private var baseURL: URL
+    private var language: String
+    
+    init(authToken: String, baseURL: URL, language: String = "en") {
         self.authToken = authToken
+        self.baseURL = baseURL
+        self.language = language
     }
-
-    func requestPin() async throws -> PlexCloudPin {
-        try await request(
-            path: "/pins",
-            method: "POST",
-            queryItems: [URLQueryItem(name: "strong", value: "true")],
-            headers: ["X-Plex-Product": "Strimr"]
-        )
-    }
-
-    func pollToken(pinId: Int) async throws -> PlexCloudPin {
-        try await request(path: "/pins/\(pinId)", method: "GET")
-    }
-
-    func getUser() async throws -> PlexCloudUser {
-        try await request(path: "/user", method: "GET")
-    }
-
-    private func request<Response: Decodable>(
+    
+    func request<Response: Decodable>(
         path: String,
-        method: String,
         queryItems: [URLQueryItem]? = nil,
-        headers: [String: String] = [:],
-        body: Data? = nil
+        method: String = "GET",
+        headers: [String: String] = [:]
     ) async throws -> Response {
         guard var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false) else {
             throw PlexAPIError.invalidURL
@@ -54,12 +30,9 @@ final class PlexCloudAPI {
 
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue(clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
-        if let authToken {
-            request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
-        }
+        request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
+        request.setValue(language, forHTTPHeaderField: "X-Plex-Language")
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
@@ -76,6 +49,7 @@ final class PlexCloudAPI {
             let decoder = JSONDecoder()
             return try decoder.decode(Response.self, from: data)
         } catch {
+            debugPrint(error)
             throw PlexAPIError.decodingFailed(error)
         }
     }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MediaCard: View {
-    @Environment(PlexAPIManager.self) private var plexApi
+    @Environment(PlexAPIContext.self) private var plexApiContext
 
     enum Layout {
         case landscape
@@ -31,7 +31,7 @@ struct MediaCard: View {
             VStack(alignment: .leading, spacing: 8) {
                 MediaImageView(
                     viewModel: MediaImageViewModel(
-                        plexApi: plexApi,
+                        context: plexApiContext,
                         artworkKind: artworkKind,
                         media: media
                     )

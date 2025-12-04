@@ -11,21 +11,18 @@ final class SessionManager {
         case ready
     }
 
-    @ObservationIgnored private let plexApi: PlexAPIManager
-
+    @ObservationIgnored private let context: PlexAPIContext
     private(set) var status: Status = .hydrating
     private(set) var authToken: String?
     private(set) var user: PlexCloudUser?
     private(set) var plexServer: PlexCloudResource?
-    private(set) var clientIdentifier: String = ""
 
     @ObservationIgnored private let keychain = Keychain(service: "dev.strimr.app")
     @ObservationIgnored private let tokenKey = "strimr.plex.authToken"
-    @ObservationIgnored private let clientIdKey = "strimr.plex.clientId"
     @ObservationIgnored private let serverIdDefaultsKey = "strimr.plex.serverIdentifier"
 
-    init(apiManager: PlexAPIManager) {
-        plexApi = apiManager
+    init(context: PlexAPIContext) {
+        self.context = context
         Task { await hydrate() }
     }
 
@@ -34,7 +31,9 @@ final class SessionManager {
         do {
             let storedToken = try keychain.string(forKey: tokenKey)
             authToken = storedToken
-            plexApi.cloud.setAuthToken(storedToken)
+            if let storedToken {
+                context.setAuthToken(storedToken)
+            }
 
             if let token = storedToken {
                 try await bootstrapAuthenticatedSession(with: token)
@@ -51,7 +50,7 @@ final class SessionManager {
         do {
             try keychain.setString(token, forKey: tokenKey)
             authToken = token
-            plexApi.cloud.setAuthToken(token)
+            context.setAuthToken(token)
             try await bootstrapAuthenticatedSession(with: token)
         } catch {
             await clearSession()
@@ -69,15 +68,18 @@ final class SessionManager {
     func selectServer(_ server: PlexCloudResource) {
         plexServer = server
         UserDefaults.standard.set(server.clientIdentifier, forKey: serverIdDefaultsKey)
-        plexApi.selectServer(server)
+        context.selectServer(server)
         if authToken != nil {
             status = .ready
         }
     }
 
     private func bootstrapAuthenticatedSession(with token: String) async throws {
-        let userResponse = try await plexApi.cloud.getUser()
-        let resources = try await plexApi.cloud.getResources().filter { !$0.connections.isEmpty }
+        let userRepo = UserRepository(context: context)
+        let resourcesRepo = ResourceRepository(context: context)
+
+        let userResponse = try await userRepo.getUser()
+        let resources = try await resourcesRepo.getResources().filter { !$0.connections.isEmpty }
 
         user = userResponse
         authToken = token
@@ -90,7 +92,7 @@ final class SessionManager {
             selectServer(server)
         } else {
             plexServer = nil
-            plexApi.removeServer()
+            context.removeServer()
             status = .needsServerSelection
         }
     }
@@ -99,6 +101,6 @@ final class SessionManager {
         authToken = nil
         user = nil
         plexServer = nil
-        plexApi.reset()
+        context.reset()
     }
 }

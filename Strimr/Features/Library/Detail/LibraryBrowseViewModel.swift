@@ -11,11 +11,11 @@ final class LibraryBrowseViewModel {
     var errorMessage: String?
     private var reachedEnd = false
 
-    @ObservationIgnored private let plexApiManager: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
 
-    init(library: Library, plexApiManager: PlexAPIManager) {
+    init(library: Library, context: PlexAPIContext) {
         self.library = library
-        self.plexApiManager = plexApiManager
+        self.context = context
     }
 
     func load() async {
@@ -33,7 +33,7 @@ final class LibraryBrowseViewModel {
             resetState(error: "Missing library identifier.")
             return
         }
-        guard let api = plexApiManager.server else {
+        guard let sectionRepository = try? SectionRepository(context: context) else {
             resetState(error: "Select a server to browse.")
             return
         }
@@ -51,7 +51,7 @@ final class LibraryBrowseViewModel {
 
         do {
             let start = reset ? 0 : items.count
-            let response = try await api.getSectionsItems(
+            let response = try await sectionRepository.getSectionsItems(
                 sectionId: sectionId,
                 pagination: PlexPagination(start: start, size: 20)
             )

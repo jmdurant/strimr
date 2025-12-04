@@ -9,11 +9,11 @@ final class LibraryRecommendedViewModel {
     var isLoading = false
     var errorMessage: String?
 
-    @ObservationIgnored private let plexApiManager: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
 
-    init(library: Library, plexApiManager: PlexAPIManager) {
+    init(library: Library, context: PlexAPIContext) {
         self.library = library
-        self.plexApiManager = plexApiManager
+        self.context = context
     }
 
     var hasContent: Bool {
@@ -30,7 +30,7 @@ final class LibraryRecommendedViewModel {
             resetState(error: "Missing library identifier.")
             return
         }
-        guard let api = plexApiManager.server else {
+        guard let hubRepository = try? HubRepository(context: context) else {
             resetState(error: "Select a server to load recommendations.")
             return
         }
@@ -40,7 +40,7 @@ final class LibraryRecommendedViewModel {
         defer { isLoading = false }
 
         do {
-            let response = try await api.getSectionHubs(sectionId: sectionId)
+            let response = try await hubRepository.getSectionHubs(sectionId: sectionId)
             let plexHubs = response.mediaContainer.hub
             hubs = plexHubs.map(Hub.init)
         } catch {

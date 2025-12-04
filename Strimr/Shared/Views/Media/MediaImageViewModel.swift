@@ -9,24 +9,19 @@ final class MediaImageViewModel {
         case art
     }
 
-    @ObservationIgnored private let plexApi: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
     var artworkKind: ArtworkKind
     var media: MediaItem
     private(set) var imageURL: URL? = nil
 
 
-    init(plexApi: PlexAPIManager, artworkKind: ArtworkKind, media: MediaItem) {
-        self.plexApi = plexApi
+    init(context: PlexAPIContext, artworkKind: ArtworkKind, media: MediaItem) {
+        self.context = context
         self.artworkKind = artworkKind
         self.media = media
     }
     
     func load() async {
-        guard let server = plexApi.server else {
-            imageURL = nil
-            return
-        }
-
         let path: String?
         switch artworkKind {
         case .thumb:
@@ -41,8 +36,8 @@ final class MediaImageViewModel {
         }
 
         do {
-            try await server.ensureConnection()
-            imageURL = server.transcodeImageURL(path: path)
+            let imageRepository = try ImageRepository(context: context)
+            imageURL = imageRepository.transcodeImageURL(path: path)
         } catch {
             imageURL = nil
         }

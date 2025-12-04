@@ -1,62 +1,5 @@
 import Foundation
 
-enum PlexQueryValue {
-    case string(String)
-    case int(Int)
-    case stringArray([String])
-    case intArray([Int])
-
-    func asQueryItem(key: String) -> URLQueryItem {
-        switch self {
-        case let .string(value):
-            return URLQueryItem(name: key, value: value)
-        case let .int(value):
-            return URLQueryItem(name: key, value: String(value))
-        case let .stringArray(values):
-            return URLQueryItem(name: key, value: values.joined(separator: ","))
-        case let .intArray(values):
-            return URLQueryItem(name: key, value: values.map(String.init).joined(separator: ","))
-        }
-    }
-}
-
-struct PlexPagination {
-    let start: Int
-    let size: Int
-
-    init(start: Int = 0, size: Int = 20) {
-        self.start = start
-        self.size = size
-    }
-}
-
-struct PlexSectionItemsParams {
-    var sort: String?
-    var limit: Int?
-    var additional: [String: PlexQueryValue] = [:]
-
-    func toQueryItems() -> [URLQueryItem] {
-        var items: [URLQueryItem] = []
-        if let sort {
-            items.append(URLQueryItem(name: "sort", value: sort))
-        }
-        if let limit {
-            items.append(URLQueryItem(name: "limit", value: String(limit)))
-        }
-        items.append(contentsOf: additional.map { $0.value.asQueryItem(key: $0.key) })
-        return items
-    }
-}
-
-struct PlexHubParams {
-    var sectionIds: [Int] = []
-
-    func toQueryItems() -> [URLQueryItem] {
-        guard !sectionIds.isEmpty else { return [] }
-        return [PlexQueryValue.intArray(sectionIds).asQueryItem(key: "sectionIds")]
-    }
-}
-
 final class PlexMediaServerAPI {
     private let resource: PlexCloudResource
     private let language: String
@@ -76,21 +19,6 @@ final class PlexMediaServerAPI {
         self.resource = resource
         self.language = language
         self.session = session
-    }
-
-    @discardableResult
-    func ensureConnection() async throws -> URL {
-        if let baseURL {
-            return baseURL
-        }
-        connectionCheckPerformed = true
-
-        guard let connection = try await resolveConnection() else {
-            throw PlexAPIError.unreachableServer
-        }
-
-        baseURL = connection.uri
-        return connection.uri
     }
 
     func transcodeImageURL(

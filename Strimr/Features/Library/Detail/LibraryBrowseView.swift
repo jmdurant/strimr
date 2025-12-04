@@ -48,10 +48,10 @@ struct LibraryBrowseView: View {
 }
 
 #Preview {
-    let api = PlexAPIManager()
+    let context = PlexAPIContext()
     let viewModel = LibraryBrowseViewModel(
         library: Library(id: "1", title: "Movies", type: .movie, sectionId: 1),
-        plexApiManager: api
+        context: context
     )
     viewModel.items = []
 
@@ -59,5 +59,5 @@ struct LibraryBrowseView: View {
         viewModel: viewModel,
         onSelectMedia: { _ in }
     )
-    .environment(api)
+    .environment(context)
 }

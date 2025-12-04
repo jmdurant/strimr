@@ -56,7 +56,7 @@ struct MediaDetailView: View {
 }
 
 #Preview {
-    let api = PlexAPIManager()
+    let context = PlexAPIContext()
     let sample = MediaItem(
         id: "1",
         summary: "A high-stakes story about streaming.",
@@ -86,7 +86,7 @@ struct MediaDetailView: View {
     )
 
     return MediaDetailView(
-        viewModel: MediaDetailViewModel(media: sample, plexApiManager: api)
+        viewModel: MediaDetailViewModel(media: sample, context: context)
     )
-    .environment(api)
+    .environment(context)
 }

@@ -5,7 +5,7 @@ import UIKit
 
 struct SignInView: View {
     @Environment(SessionManager.self) private var sessionManager
-    @Environment(PlexAPIManager.self) private var plexApi
+    @Environment(PlexAPIContext.self) private var plexContext
 
     @State private var isAuthenticating = false
     @State private var errorMessage: String?
@@ -97,7 +97,8 @@ extension SignInView {
         isAuthenticating = true
 
         do {
-            let pinResponse = try await plexApi.cloud.requestPin()
+            let authRepository = AuthRepository(context: plexContext)
+            let pinResponse = try await authRepository.requestPin()
             pin = pinResponse
 
             let url = plexAuthURL(pin: pinResponse)
@@ -157,7 +158,8 @@ extension SignInView {
         pollTask = Task {
             while !Task.isCancelled && isAuthenticating {
                 do {
-                    let result = try await plexApi.cloud.pollToken(pinId: pinID)
+                    let authRepository = AuthRepository(context: plexContext)
+                    let result = try await authRepository.pollToken(pinId: pinID)
                     if let token = result.authToken {
                         await sessionManager.signIn(with: token)
                         cancelSignIn()

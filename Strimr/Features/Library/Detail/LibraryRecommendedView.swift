@@ -74,10 +74,10 @@ struct LibraryRecommendedView: View {
 }
 
 #Preview {
-    let api = PlexAPIManager()
+    let context = PlexAPIContext()
     let viewModel = LibraryRecommendedViewModel(
         library: Library(id: "1", title: "Movies", type: .movie, sectionId: 1),
-        plexApiManager: api
+        context: context
     )
     viewModel.hubs = [
         Hub(id: "continuewatching", title: "Continue Watching", items: []),
@@ -87,5 +87,5 @@ struct LibraryRecommendedView: View {
         viewModel: viewModel,
         onSelectMedia: { _ in }
     )
-    .environment(api)
+    .environment(context)
 }

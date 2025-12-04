@@ -79,7 +79,7 @@ struct HomeView: View {
 #Preview {
     NavigationStack {
         HomeView(
-            viewModel: HomeViewModel(plexApiManager: PlexAPIManager())
+            viewModel: HomeViewModel(context: PlexAPIContext())
         )
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LibraryDetailView: View {
-    @Environment(PlexAPIManager.self) private var plexApiManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
     let library: Library
     let onSelectMedia: (MediaItem) -> Void
 
@@ -24,7 +24,7 @@ struct LibraryDetailView: View {
                     LibraryRecommendedView(
                         viewModel: LibraryRecommendedViewModel(
                             library: library,
-                            plexApiManager: plexApiManager
+                            context: plexApiContext
                         ),
                         onSelectMedia: onSelectMedia
                     )
@@ -32,7 +32,7 @@ struct LibraryDetailView: View {
                     LibraryBrowseView(
                         viewModel: LibraryBrowseViewModel(
                             library: library,
-                            plexApiManager: plexApiManager
+                            context: plexApiContext
                         ),
                         onSelectMedia: onSelectMedia
                     )
@@ -70,4 +70,5 @@ enum LibraryDetailTab: String, CaseIterable, Identifiable {
             onSelectMedia: { _ in }
         )
     }
+    .environment(PlexAPIContext())
 }

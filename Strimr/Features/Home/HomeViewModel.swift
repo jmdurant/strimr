@@ -9,11 +9,11 @@ final class HomeViewModel {
     var isLoading = false
     var errorMessage: String?
 
-    @ObservationIgnored private let plexApiManager: PlexAPIManager
+    @ObservationIgnored private let context: PlexAPIContext
     @ObservationIgnored private var loadTask: Task<Void, Never>?
 
-    init(plexApiManager: PlexAPIManager) {
-        self.plexApiManager = plexApiManager
+    init(context: PlexAPIContext) {
+        self.context = context
     }
 
     var hasContent: Bool {
@@ -28,20 +28,20 @@ final class HomeViewModel {
     func reload() async {
         loadTask?.cancel()
 
-        guard let api = plexApiManager.server else {
-            resetState(error: "Select a server to load content.")
-            return
-        }
-
         let task = Task { [weak self] in
-            await self?.fetchHubs(using: api)
+            await self?.fetchHubs()
             return
         }
         loadTask = task
         await task.value
     }
 
-    private func fetchHubs(using api: PlexMediaServerAPI) async {        
+    private func fetchHubs() async {
+        guard let hubRepository = try? HubRepository(context: context) else {
+            resetState(error: "Select a server to load content.")
+            return
+        }
+
         isLoading = true
         errorMessage = nil
         defer {
@@ -49,8 +49,8 @@ final class HomeViewModel {
         }
 
         do {
-            async let continueResponse = api.getContinueWatchingHub()
-            async let promotedResponse = api.getPromotedHub()
+            async let continueResponse = hubRepository.getContinueWatchingHub()
+            async let promotedResponse = hubRepository.getPromotedHub()
 
             let continueHub = try await continueResponse.mediaContainer.hub.first
             let promotedHubs = try await promotedResponse.mediaContainer.hub

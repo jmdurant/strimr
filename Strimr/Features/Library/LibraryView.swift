@@ -103,7 +103,7 @@ struct LibraryView: View {
 }
 
 #Preview {
-    let viewModel = LibraryViewModel(plexApiManager: PlexAPIManager())
+    let viewModel = LibraryViewModel(context: PlexAPIContext())
     viewModel.libraries = [
         Library(id: "1", title: "Movies", type: .movie, sectionId: 1),
         Library(id: "2", title: "Shows", type: .show, sectionId: 2),
