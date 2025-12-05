@@ -1,11 +1,18 @@
 import Foundation
 
-struct PlexHubParams {
-    var sectionIds: [Int] = []
+struct PlexHubParams: QueryItemConvertible {
+    var sectionIds: [Int]?
+    var count: Int?
+    var excludeFields: [String]?
+    var excludeContinueWatching: Bool?
 
-    func toQueryItems() -> [URLQueryItem] {
-        guard !sectionIds.isEmpty else { return [] }
-        return [PlexQueryValue.intArray(sectionIds).asQueryItem(key: "sectionIds")]
+    var queryItems: [URLQueryItem] {
+        [
+            URLQueryItem.makeArray("sectionIds", sectionIds),
+            URLQueryItem.make("count", count),
+            URLQueryItem.makeArray("excludeFields", excludeFields),
+            URLQueryItem.makeBoolFlag("excludeContinueWatching", excludeContinueWatching),
+        ].compactMap { $0 }
     }
 }
 
@@ -27,16 +34,20 @@ final class HubRepository {
     }
     
     func getContinueWatchingHub(params: PlexHubParams = PlexHubParams()) async throws -> PlexHubMediaContainer {
-        try await network.request(path: "/hubs/continueWatching", queryItems: params.toQueryItems())
+        try await network.request(path: "/hubs/continueWatching", queryItems: params.queryItems)
     }
 
     func getPromotedHub(params: PlexHubParams = PlexHubParams()) async throws -> PlexHubMediaContainer {
-        var queryItems = params.toQueryItems()
-        queryItems.append(contentsOf: [
-            URLQueryItem(name: "count", value: "20"),
-            URLQueryItem(name: "excludeFields", value: "summary"),
-            URLQueryItem(name: "excludeContinueWatching", value: "1"),
-        ])
+        var queryItems = params.queryItems
+        if params.count == nil {
+            queryItems.append(URLQueryItem(name: "count", value: "20"))
+        }
+        if params.excludeFields == nil {
+            queryItems.append(URLQueryItem(name: "excludeFields", value: "summary"))
+        }
+        if params.excludeContinueWatching == nil {
+            queryItems.append(URLQueryItem(name: "excludeContinueWatching", value: "1"))
+        }
         return try await network.request(path: "/hubs/promoted", queryItems: queryItems)
     }
 

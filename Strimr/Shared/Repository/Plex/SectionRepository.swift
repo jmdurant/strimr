@@ -1,20 +1,16 @@
 import Foundation
 
-struct PlexSectionItemsParams {
+struct PlexSectionItemsParams: QueryItemConvertible {
     var sort: String?
     var limit: Int?
-    var additional: [String: PlexQueryValue] = [:]
+    var includeMeta: Bool?
 
-    func toQueryItems() -> [URLQueryItem] {
-        var items: [URLQueryItem] = []
-        if let sort {
-            items.append(URLQueryItem(name: "sort", value: sort))
-        }
-        if let limit {
-            items.append(URLQueryItem(name: "limit", value: String(limit)))
-        }
-        items.append(contentsOf: additional.map { $0.value.asQueryItem(key: $0.key) })
-        return items
+    var queryItems: [URLQueryItem] {
+        [
+            URLQueryItem.make("sort", sort),
+            URLQueryItem.make("limit", limit),
+            URLQueryItem.makeBoolFlag("includeMeta", includeMeta),
+        ].compactMap { $0 }
     }
 }
 
@@ -46,22 +42,16 @@ final class SectionRepository {
     ) async throws -> PlexItemMediaContainer {
         try await network.request(
             path: "/library/sections/\(sectionId)/all",
-            queryItems: params.toQueryItems(),
-            headers: [
-                "X-Plex-Container-Start": String(pagination.start),
-                "X-Plex-Container-Size": String(pagination.size),
-            ]
+            queryItems: params.queryItems,
+            headers: pagination.headers
         )
     }
 
     func getSectionsItemsMeta(sectionId: Int) async throws -> PlexSectionMetaMediaContainer {
         try await network.request(
             path: "/library/sections/\(sectionId)/all",
-            queryItems: [URLQueryItem(name: "includeMeta", value: "1")],
-            headers: [
-                "X-Plex-Container-Start": "0",
-                "X-Plex-Container-Size": "0",
-            ]
+            queryItems: PlexSectionItemsParams(includeMeta: true).queryItems,
+            headers: PlexPagination(start: 0, size: 0).headers
         )
     }
 

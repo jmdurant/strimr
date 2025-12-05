@@ -9,23 +9,22 @@ enum PlexAPIError: Error {
     case decodingFailed(Error)
 }
 
-enum PlexQueryValue {
-    case string(String)
-    case int(Int)
-    case stringArray([String])
-    case intArray([Int])
+protocol QueryItemConvertible {
+    var queryItems: [URLQueryItem] { get }
+}
 
-    func asQueryItem(key: String) -> URLQueryItem {
-        switch self {
-        case let .string(value):
-            return URLQueryItem(name: key, value: value)
-        case let .int(value):
-            return URLQueryItem(name: key, value: String(value))
-        case let .stringArray(values):
-            return URLQueryItem(name: key, value: values.joined(separator: ","))
-        case let .intArray(values):
-            return URLQueryItem(name: key, value: values.map(String.init).joined(separator: ","))
-        }
+extension URLQueryItem {
+    static func make<T: LosslessStringConvertible>(_ name: String, _ value: T?) -> URLQueryItem? {
+        value.map { URLQueryItem(name: name, value: String($0)) }
+    }
+
+    static func makeArray<T: LosslessStringConvertible>(_ name: String, _ values: [T]?) -> URLQueryItem? {
+        guard let values, !values.isEmpty else { return nil }
+        return URLQueryItem(name: name, value: values.map(String.init).joined(separator: ","))
+    }
+
+    static func makeBoolFlag(_ name: String, _ value: Bool?) -> URLQueryItem? {
+        value.map { URLQueryItem(name: name, value: $0 ? "1" : "0") }
     }
 }
 
@@ -34,7 +33,14 @@ struct PlexPagination {
     let size: Int
 
     init(start: Int = 0, size: Int = 20) {
-        self.start = start
-        self.size = size
+        self.start = max(0, start)
+        self.size = max(0, size)
+    }
+
+    var headers: [String: String] {
+        [
+            "X-Plex-Container-Start": String(start),
+            "X-Plex-Container-Size": String(size),
+        ]
     }
 }
