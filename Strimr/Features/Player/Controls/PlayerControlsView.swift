@@ -32,6 +32,8 @@ struct PlayerControlsView: View {
                     onSeekForward: onSeekForward
                 )
 
+                Spacer()
+                
                 PlayerTimelineView(
                     position: $position,
                     duration: duration,
@@ -54,7 +56,7 @@ private struct PlayerControlsHeader: View {
     var onDismiss: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 12) {
             Button(action: onDismiss) {
                 Image(systemName: "chevron.backward")
                     .font(.headline.weight(.semibold))
@@ -67,13 +69,15 @@ private struct PlayerControlsHeader: View {
                     )
             }
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(media?.primaryLabel ?? "Now Playing")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .lineLimit(2)
+            VStack(alignment: .leading, spacing: 4) {
+                if let title = media?.primaryLabel {
+                    Text(title)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                }
 
-                if let subtitle = headerSubtitle(for: media) {
+                if let subtitle = media?.tertiaryLabel {
                     Text(subtitle)
                         .font(.callout)
                         .foregroundStyle(.white.opacity(0.8))
@@ -84,29 +88,13 @@ private struct PlayerControlsHeader: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 8) {
-                if supportsHDR {
+                if true {
                     PlayerBadge("HDR", systemImage: "sparkles")
                 }
             }
         }
-    }
-
-    private func headerSubtitle(for media: MediaItem?) -> String? {
-        guard let media else { return nil }
-
-        if let tertiary = media.tertiaryLabel {
-            return tertiary
-        }
-
-        if let secondary = media.secondaryLabel {
-            return secondary
-        }
-
-        if let year = media.year {
-            return String(year)
-        }
-
-        return media.summary
+        .padding(.horizontal, 24)
+        .padding(.vertical, 8)
     }
 }
 

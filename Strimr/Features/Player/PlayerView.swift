@@ -86,18 +86,20 @@ struct PlayerView: View {
     }
 
     private var bufferingOverlay: some View {
-        VStack(spacing: 10) {
-            ProgressView()
-                .progressViewStyle(.circular)
-                .tint(.white)
-
-            Text("Buffering")
-                .font(.callout.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.9))
+        VStack {
+            Spacer()
+            
+            HStack(spacing: 8) {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .tint(.white)
+                
+                Text("Buffering")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 14)
-        .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.bottom, 20)
     }
 
     private func positionBinding(for viewModel: PlayerViewModel) -> Binding<Double> {
