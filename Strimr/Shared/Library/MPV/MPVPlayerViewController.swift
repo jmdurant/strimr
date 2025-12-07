@@ -7,7 +7,7 @@ import Libmpv
 // https://github.com/KhronosGroup/MoltenVK/issues/2226
 final class MPVPlayerViewController: UIViewController {
     var metalLayer = MetalLayer()
-    var mpv: OpaquePointer!
+    var mpv: OpaquePointer?
     var playDelegate: MPVPlayerDelegate?
     lazy var queue = DispatchQueue(label: "mpv", qos: .userInitiated)
     
@@ -18,12 +18,17 @@ final class MPVPlayerViewController: UIViewController {
             // FIXME: target-colorspace-hint does not support being changed at runtime.
             // this option should be set as early as possible otherwise can cause issues
             // not recommended to use this way.
+            guard let mpv else { return }
             if hdrEnabled {
                 checkError(mpv_set_option_string(mpv, "target-colorspace-hint", "yes"))
             } else {
                 checkError(mpv_set_option_string(mpv, "target-colorspace-hint", "no"))
             }
         }
+    }
+
+    deinit {
+        destruct()
     }
     
     override func viewDidLoad() {
@@ -53,7 +58,7 @@ final class MPVPlayerViewController: UIViewController {
     
     func setupMpv() {
         mpv = mpv_create()
-        if mpv == nil {
+        guard let mpv else {
             print("failed creating context\n")
             exit(1)
         }
@@ -89,7 +94,7 @@ final class MPVPlayerViewController: UIViewController {
         mpv_observe_property(mpv, 0, MPVProperty.timePos, MPV_FORMAT_DOUBLE)
         mpv_observe_property(mpv, 0, MPVProperty.duration, MPV_FORMAT_DOUBLE)
         mpv_observe_property(mpv, 0, MPVProperty.demuxerCacheDuration, MPV_FORMAT_DOUBLE)
-        mpv_set_wakeup_callback(self.mpv, { (ctx) in
+        mpv_set_wakeup_callback(mpv, { (ctx) in
             let client = unsafeBitCast(ctx, to: MPVPlayerViewController.self)
             client.readEvents()
         }, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()))
@@ -104,11 +109,13 @@ final class MPVPlayerViewController: UIViewController {
     
     @objc public func enterBackground() {
         // fix black screen issue when app enter foreground again
+        guard let mpv else { return }
         pause()
         checkError(mpv_set_option_string(mpv, "vid", "no"))
     }
     
     @objc public func enterForeground() {
+        guard let mpv else { return }
         checkError(mpv_set_option_string(mpv, "vid", "auto"))
         play()
     }
@@ -158,14 +165,14 @@ final class MPVPlayerViewController: UIViewController {
     }
     
     private func getDouble(_ name: String) -> Double {
-        guard mpv != nil else { return 0.0 }
+        guard let mpv else { return 0.0 }
         var data = Double()
         mpv_get_property(mpv, name, MPV_FORMAT_DOUBLE, &data)
         return data
     }
     
     private func getString(_ name: String) -> String? {
-        guard mpv != nil else { return nil }
+        guard let mpv else { return nil }
         let cstr = mpv_get_property_string(mpv, name)
         let str: String? = cstr == nil ? nil : String(cString: cstr!)
         mpv_free(cstr)
@@ -173,19 +180,20 @@ final class MPVPlayerViewController: UIViewController {
     }
     
     private func getFlag(_ name: String) -> Bool {
+        guard let mpv else { return false }
         var data = Int64()
         mpv_get_property(mpv, name, MPV_FORMAT_FLAG, &data)
         return data > 0
     }
     
     private func setFlag(_ name: String, _ flag: Bool) {
-        guard mpv != nil else { return }
+        guard let mpv else { return }
         var data: Int = flag ? 1 : 0
         mpv_set_property(mpv, name, MPV_FORMAT_FLAG, &data)
     }
 
     private func setDouble(_ name: String, _ value: Double) {
-        guard mpv != nil else { return }
+        guard let mpv else { return }
         var data = value
         mpv_set_property(mpv, name, MPV_FORMAT_DOUBLE, &data)
     }
@@ -197,7 +205,7 @@ final class MPVPlayerViewController: UIViewController {
         checkForErrors: Bool = true,
         returnValueCallback: ((Int32) -> Void)? = nil
     ) {
-        guard mpv != nil else {
+        guard let mpv else {
             return
         }
         var cargs = makeCArgs(command, args).map { $0.flatMap { UnsafePointer<CChar>(strdup($0)) } }
@@ -232,8 +240,9 @@ final class MPVPlayerViewController: UIViewController {
         queue.async { [weak self] in
             guard let self else { return }
             
-            while self.mpv != nil {
-                let event = mpv_wait_event(self.mpv, 0)
+            while true {
+                guard let mpv = self.mpv else { break }
+                let event = mpv_wait_event(mpv, 0)
                 if event?.pointee.event_id == MPV_EVENT_NONE {
                     break
                 }
@@ -250,33 +259,32 @@ final class MPVPlayerViewController: UIViewController {
                                     let maxEDRRange = self.view.window?.screen.potentialEDRHeadroom ?? 1.0
                                     // display screen support HDR and current playing HDR video
                                     self.hdrAvailable = maxEDRRange > 1.0 && sigPeak > 1.0
-                                    self.playDelegate?.propertyChange(mpv: self.mpv, propertyName: propertyName, data: sigPeak)
+                                    self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: sigPeak)
                                 }
                             }
                         case MPVProperty.pause:
                             let pausedValue = UnsafePointer<Int64>(OpaquePointer(property.data))?.pointee ?? 0
                             let isPaused = pausedValue > 0
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: self.mpv, propertyName: propertyName, data: isPaused)
+                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: isPaused)
                             }
                         case MPVProperty.pausedForCache:
                             let buffering = UnsafePointer<Bool>(OpaquePointer(property.data))?.pointee ?? true
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: self.mpv, propertyName: propertyName, data: buffering)
+                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: buffering)
                             }
                         case MPVProperty.timePos, MPVProperty.duration, MPVProperty.demuxerCacheDuration:
                             let value = UnsafePointer<Double>(OpaquePointer(property.data))?.pointee
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: self.mpv, propertyName: propertyName, data: value)
+                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: value)
                             }
                         default: break
                         }
                     }
                 case MPV_EVENT_SHUTDOWN:
                     print("event: shutdown\n");
-                    mpv_terminate_destroy(mpv);
-                    mpv = nil;
-                    break;
+                    destruct()
+                    break
                 case MPV_EVENT_LOG_MESSAGE:
                     let msg = UnsafeMutablePointer<mpv_event_log_message>(OpaquePointer(event!.pointee.data))
                     print("[\(String(cString: (msg!.pointee.prefix)!))] \(String(cString: (msg!.pointee.level)!)): \(String(cString: (msg!.pointee.text)!))", terminator: "")
@@ -286,6 +294,21 @@ final class MPVPlayerViewController: UIViewController {
                 }
                 
             }
+        }
+    }
+
+    func destruct() {
+        NotificationCenter.default.removeObserver(self)
+        guard let mpv else { return }
+
+        // Drop the wakeup callback to avoid mpv calling back into a deallocated controller.
+        mpv_set_wakeup_callback(mpv, nil, nil)
+
+        let mpvHandle = mpv
+        self.mpv = nil
+
+        queue.async {
+            mpv_terminate_destroy(mpvHandle)
         }
     }
     

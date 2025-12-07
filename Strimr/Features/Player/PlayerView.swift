@@ -69,6 +69,7 @@ struct PlayerView: View {
         }
         .onDisappear {
             hideControlsWorkItem?.cancel()
+            coordinator.player?.destruct()
         }
         .task {
             await bindableViewModel.load()

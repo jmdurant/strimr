@@ -88,7 +88,7 @@ private struct PlayerControlsHeader: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 8) {
-                if true {
+                if supportsHDR {
                     PlayerBadge("HDR", systemImage: "sparkles")
                 }
             }
