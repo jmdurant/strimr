@@ -173,11 +173,33 @@ struct PlayerView: View {
     private func selectAudioTrack(_ id: Int?) {
         selectedAudioTrackID = id
         coordinator.selectAudioTrack(id: id)
+
+        guard
+            let id,
+            let track = audioTracks.first(where: { $0.id == id })
+        else {
+            return
+        }
+
+        Task {
+            await viewModel.persistStreamSelection(for: track)
+        }
     }
 
     private func selectSubtitleTrack(_ id: Int?) {
         selectedSubtitleTrackID = id
         coordinator.selectSubtitleTrack(id: id)
+
+        guard
+            let id,
+            let track = subtitleTracks.first(where: { $0.id == id })
+        else {
+            return
+        }
+
+        Task {
+            await viewModel.persistStreamSelection(for: track)
+        }
     }
 
     private func jump(by seconds: Double) {

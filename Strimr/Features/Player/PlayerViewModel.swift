@@ -18,6 +18,8 @@ final class PlayerViewModel {
 
     @ObservationIgnored private let ratingKey: String
     @ObservationIgnored private let context: PlexAPIContext
+    @ObservationIgnored private var activePartId: Int?
+    @ObservationIgnored private var streamsByFFIndex: [Int: PlexPartStream] = [:]
 
     init(ratingKey: String, context: PlexAPIContext) {
         self.ratingKey = ratingKey
@@ -34,6 +36,8 @@ final class PlayerViewModel {
         errorMessage = nil
         preferredAudioStreamFFIndex = nil
         preferredSubtitleStreamFFIndex = nil
+        activePartId = nil
+        streamsByFFIndex = [:]
         defer { isLoading = false }
 
         do {
@@ -48,6 +52,7 @@ final class PlayerViewModel {
             )
             let metadata = response.mediaContainer.metadata?.first
             media = metadata.map(MediaItem.init)
+            updatePartContext(from: metadata)
             resolvePreferredStreams(from: metadata)
             playbackURL = resolvePlaybackURL(from: metadata)
         } catch {
@@ -98,5 +103,46 @@ final class PlayerViewModel {
         preferredSubtitleStreamFFIndex = streams.first {
             $0.streamType == .subtitle && $0.selected == true
         }?.index
+    }
+
+    private func updatePartContext(from metadata: PlexItem?) {
+        let part = metadata?.media?.first?.parts.first
+        activePartId = part?.id
+
+        let streams = part?.stream ?? []
+        streamsByFFIndex = streams.reduce(into: [Int: PlexPartStream]()) { result, stream in
+            guard let index = stream.index else { return }
+            result[index] = stream
+        }
+    }
+
+    func persistStreamSelection(for track: MPVTrack) async {
+        guard
+            let ffIndex = track.ffIndex,
+            let stream = streamsByFFIndex[ffIndex],
+            let partId = activePartId
+        else {
+            return
+        }
+
+        do {
+            let playbackRepository = try PlaybackRepository(context: context)
+            switch track.type {
+            case .audio:
+                try await playbackRepository.setPreferredStreams(
+                    partId: partId,
+                    audioStreamId: stream.id
+                )
+            case .subtitle:
+                try await playbackRepository.setPreferredStreams(
+                    partId: partId,
+                    subtitleStreamId: stream.id
+                )
+            case .video:
+                break
+            }
+        } catch {
+            debugPrint("Failed to persist stream selection:", error)
+        }
     }
 }

@@ -18,6 +18,48 @@ final class PlexServerNetworkClient {
         method: String = "GET",
         headers: [String: String] = [:]
     ) async throws -> Response {
+        let request = try buildRequest(path: path, queryItems: queryItems, method: method, headers: headers)
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw PlexAPIError.requestFailed(statusCode: -1)
+        }
+        guard 200 ..< 300 ~= httpResponse.statusCode else {
+            throw PlexAPIError.requestFailed(statusCode: httpResponse.statusCode)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            debugPrint(error)
+            throw PlexAPIError.decodingFailed(error)
+        }
+    }
+
+    func send(
+        path: String,
+        queryItems: [URLQueryItem]? = nil,
+        method: String = "GET",
+        headers: [String: String] = [:]
+    ) async throws {
+        let request = try buildRequest(path: path, queryItems: queryItems, method: method, headers: headers)
+
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw PlexAPIError.requestFailed(statusCode: -1)
+        }
+        guard 200 ..< 300 ~= httpResponse.statusCode else {
+            throw PlexAPIError.requestFailed(statusCode: httpResponse.statusCode)
+        }
+    }
+
+    private func buildRequest(
+        path: String,
+        queryItems: [URLQueryItem]? = nil,
+        method: String = "GET",
+        headers: [String: String] = [:]
+    ) throws -> URLRequest {
         guard var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false) else {
             throw PlexAPIError.invalidURL
         }
@@ -37,20 +79,6 @@ final class PlexServerNetworkClient {
             request.setValue(value, forHTTPHeaderField: key)
         }
 
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw PlexAPIError.requestFailed(statusCode: -1)
-        }
-        guard 200 ..< 300 ~= httpResponse.statusCode else {
-            throw PlexAPIError.requestFailed(statusCode: httpResponse.statusCode)
-        }
-
-        do {
-            let decoder = JSONDecoder()
-            return try decoder.decode(Response.self, from: data)
-        } catch {
-            debugPrint(error)
-            throw PlexAPIError.decodingFailed(error)
-        }
+        return request
     }
 }
