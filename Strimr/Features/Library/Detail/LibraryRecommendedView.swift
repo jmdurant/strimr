@@ -44,26 +44,16 @@ struct LibraryRecommendedView: View {
     private func carousel(for hub: Hub) -> some View {
         if shouldUseLandscape(for: hub) {
             MediaCarousel(
+                layout: .landscape,
                 items: hub.items,
-                cardWidthFraction: 1/2,
-                spacing: 16
-            ) { media, width in
-                LandscapeMediaCard(media: media) {
-                    onSelectMedia(media)
-                }
-                .frame(width: width)
-            }
+                onSelectMedia: onSelectMedia
+            )
         } else {
             MediaCarousel(
+                layout: .portrait,
                 items: hub.items,
-                cardWidthFraction: 1/3,
-                spacing: 12
-            ) { media, width in
-                PortraitMediaCard(media: media) {
-                    onSelectMedia(media)
-                }
-                .frame(width: width)
-            }
+                onSelectMedia: onSelectMedia
+            )
         }
     }
 

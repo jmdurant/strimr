@@ -19,15 +19,10 @@ struct HomeView: View {
                 if let hub = viewModel.continueWatching, hub.hasItems {
                     MediaHubSection(title: hub.title) {
                         MediaCarousel(
+                            layout: .landscape,
                             items: hub.items,
-                            cardWidthFraction: 1/2,
-                            spacing: 16
-                        ) { media, width in
-                            LandscapeMediaCard(media: media) {
-                                onSelectMedia(media)
-                            }
-                            .frame(width: width)
-                        }
+                            onSelectMedia: onSelectMedia
+                        )
                     }
                 }
 
@@ -36,15 +31,10 @@ struct HomeView: View {
                         if hub.hasItems {
                             MediaHubSection(title: hub.title) {
                                 MediaCarousel(
+                                    layout: .portrait,
                                     items: hub.items,
-                                    cardWidthFraction: 1/3,
-                                    spacing: 12
-                                ) { media, width in
-                                    PortraitMediaCard(media: media) {
-                                        onSelectMedia(media)
-                                    }
-                                    .frame(width: width)
-                                }
+                                    onSelectMedia: onSelectMedia
+                                )
                             }
                         }
                     }

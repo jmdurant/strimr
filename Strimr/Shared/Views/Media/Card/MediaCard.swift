@@ -36,35 +36,33 @@ struct MediaCard: View {
                         media: media
                     )
                 )
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(layout.aspectRatio, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(alignment: .bottomLeading) {
-                        if let progress {
-                            ProgressView(value: progress)
-                                .progressViewStyle(.linear)
-                                .tint(.brandPrimary)
-                                .padding(.horizontal, 10)
-                                .padding(.bottom, 10)
-                        }
+                .frame(maxWidth: .infinity)
+                .aspectRatio(layout.aspectRatio, contentMode: .fit)
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                )
+                .overlay(alignment: .bottomLeading) {
+                    if let progress {
+                        ProgressView(value: progress)
+                            .progressViewStyle(.linear)
+                            .tint(.brandPrimary)
+                            .padding(.horizontal, 10)
+                            .padding(.bottom, 10)
                     }
+                }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(media.primaryLabel)
                         .font(.headline)
                         .lineLimit(1)
-                    if let secondaryLabel = media.secondaryLabel {
-                        Text(secondaryLabel)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                    if let tertiaryLabel = media.tertiaryLabel {
-                        Text(tertiaryLabel)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
+                    Text(media.secondaryLabel ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(media.tertiaryLabel ?? "")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
             }
         }
