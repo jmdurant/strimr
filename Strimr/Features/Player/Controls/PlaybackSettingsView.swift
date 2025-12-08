@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct PlaybackSettingsView: View {
-    var audioTracks: [MPVTrack]
-    var subtitleTracks: [MPVTrack]
+    var audioTracks: [PlaybackSettingsTrack]
+    var subtitleTracks: [PlaybackSettingsTrack]
     var selectedAudioTrackID: Int?
     var selectedSubtitleTrackID: Int?
     var onSelectAudio: (Int?) -> Void
@@ -20,11 +20,11 @@ struct PlaybackSettingsView: View {
 
                     ForEach(audioTracks) { track in
                         TrackSelectionRow(
-                            title: track.displayName,
-                            subtitle: track.codec?.uppercased(),
+                            title: track.title,
+                            subtitle: track.subtitle,
                             isSelected: selectedAudioTrackID == track.id
                         ) {
-                            onSelectAudio(track.id)
+                            onSelectAudio(track.track.id)
                         }
                     }
                 }
@@ -40,11 +40,11 @@ struct PlaybackSettingsView: View {
 
                     ForEach(subtitleTracks) { track in
                         TrackSelectionRow(
-                            title: track.displayName,
-                            subtitle: track.codec?.uppercased(),
+                            title: track.title,
+                            subtitle: track.subtitle,
                             isSelected: selectedSubtitleTrackID == track.id
                         ) {
-                            onSelectSubtitle(track.id)
+                            onSelectSubtitle(track.track.id)
                         }
                     }
                 }
@@ -59,6 +59,42 @@ struct PlaybackSettingsView: View {
                 }
             }
         }
+    }
+}
+
+struct PlaybackSettingsTrack: Identifiable, Hashable {
+    let track: MPVTrack
+    let plexStream: PlexPartStream?
+
+    var id: Int { track.id }
+    private var plexCodec: String? { plexStream?.codec.uppercased() }
+
+    var title: String {
+        guard plexStream != nil else { return track.displayName }
+        
+        if let plexDisplayTitle = plexStream?.displayTitle, !plexDisplayTitle.isEmpty {
+            switch track.type {
+            case .subtitle:
+                if let plexCodec {
+                    return "\(plexDisplayTitle) (\(plexCodec))"
+                }
+                return plexDisplayTitle
+            default:
+                return plexDisplayTitle
+            }
+        }
+        
+        return track.displayName
+    }
+
+    var subtitle: String? {
+        guard plexStream != nil else { return track.codec?.uppercased() }
+
+        if let plexTitle = plexStream?.title, !plexTitle.isEmpty {
+            return plexTitle
+        }
+
+        return plexCodec ?? track.codec?.uppercased()
     }
 }
 

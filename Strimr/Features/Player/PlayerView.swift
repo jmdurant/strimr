@@ -11,6 +11,8 @@ struct PlayerView: View {
     @State private var showingSettings = false
     @State private var audioTracks: [MPVTrack] = []
     @State private var subtitleTracks: [MPVTrack] = []
+    @State private var settingsAudioTracks: [PlaybackSettingsTrack] = []
+    @State private var settingsSubtitleTracks: [PlaybackSettingsTrack] = []
     @State private var selectedAudioTrackID: Int?
     @State private var selectedSubtitleTrackID: Int?
     @State private var appliedPreferredAudio = false
@@ -98,8 +100,8 @@ struct PlayerView: View {
         }
         .sheet(isPresented: $showingSettings) {
             PlaybackSettingsView(
-                audioTracks: audioTracks,
-                subtitleTracks: subtitleTracks,
+                audioTracks: settingsAudioTracks,
+                subtitleTracks: settingsSubtitleTracks,
                 selectedAudioTrackID: selectedAudioTrackID,
                 selectedSubtitleTrackID: selectedSubtitleTrackID,
                 onSelectAudio: selectAudioTrack(_:),
@@ -158,6 +160,20 @@ struct PlayerView: View {
             await MainActor.run {
                 audioTracks = audio
                 subtitleTracks = subtitles
+
+                settingsAudioTracks = audio.map {
+                    PlaybackSettingsTrack(
+                        track: $0,
+                        plexStream: viewModel.plexStream(forFFIndex: $0.ffIndex)
+                    )
+                }
+
+                settingsSubtitleTracks = subtitles.map {
+                    PlaybackSettingsTrack(
+                        track: $0,
+                        plexStream: viewModel.plexStream(forFFIndex: $0.ffIndex)
+                    )
+                }
 
                 applyPreferredTracksIfNeeded(audioTracks: audio, subtitleTracks: subtitles)
 

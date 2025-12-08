@@ -26,6 +26,11 @@ final class PlayerViewModel {
     @ObservationIgnored private let context: PlexAPIContext
     @ObservationIgnored private var activePartId: Int?
     @ObservationIgnored private var streamsByFFIndex: [Int: PlexPartStream] = [:]
+    
+    func plexStream(forFFIndex ffIndex: Int?) -> PlexPartStream? {
+        guard let ffIndex else { return nil }
+        return streamsByFFIndex[ffIndex]
+    }
 
     init(ratingKey: String, context: PlexAPIContext) {
         self.ratingKey = ratingKey

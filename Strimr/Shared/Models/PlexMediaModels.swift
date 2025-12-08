@@ -105,7 +105,7 @@ struct PlexUltraBlurColors: Codable, Equatable, Hashable {
     let bottomLeft: String
 }
 
-struct PlexPartStream: Codable, Equatable {
+struct PlexPartStream: Codable, Equatable, Hashable {
     enum PlexPartStreamType: Int, Codable, Equatable {
         case video = 1
         case audio = 2
@@ -117,6 +117,8 @@ struct PlexPartStream: Codable, Equatable {
     let codec: String
     let streamType: PlexPartStreamType
     let selected: Bool?
+    let title: String?
+    let displayTitle: String
 }
 
 struct PlexPart: Codable, Equatable {
