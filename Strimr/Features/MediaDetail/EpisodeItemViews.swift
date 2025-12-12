@@ -9,6 +9,7 @@ struct EpisodeCardView: View {
     let isWatched: Bool
     let isUpdatingWatchStatus: Bool
     let onToggleWatch: (() -> Void)?
+    let onPlay: (() -> Void)?
 #if os(macOS)
     @State private var isHovering = false
 #endif
@@ -86,6 +87,10 @@ struct EpisodeCardView: View {
 #else
         // iOS: leave flat, image/overlays carry hierarchy
 #endif
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onPlay?()
+        }
     }
 }
 

@@ -25,7 +25,10 @@ struct MediaDetailView: View {
                 )
 
                 if bindableViewModel.media.type == .show {
-                    SeasonEpisodesSection(viewModel: bindableViewModel)
+                    SeasonEpisodesSection(
+                        viewModel: bindableViewModel,
+                        onPlay: onPlay
+                    )
                 }
 
                 CastSection(viewModel: bindableViewModel)

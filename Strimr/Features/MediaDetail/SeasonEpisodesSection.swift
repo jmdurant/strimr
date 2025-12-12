@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SeasonEpisodesSection: View {
     @Bindable var viewModel: MediaDetailViewModel
+    let onPlay: (String) -> Void
 
     var body: some View {
         Section {
@@ -187,6 +188,9 @@ struct SeasonEpisodesSection: View {
                             Task {
                                 await viewModel.toggleWatchStatus(for: episode)
                             }
+                        },
+                        onPlay: {
+                            onPlay(episode.id)
                         }
                     )
                 }
@@ -208,6 +212,9 @@ struct SeasonEpisodesSection: View {
                         Task {
                             await viewModel.toggleWatchStatus(for: episode)
                         }
+                    },
+                    onPlay: {
+                        onPlay(episode.id)
                     }
                 )
             }
@@ -227,6 +234,9 @@ struct SeasonEpisodesSection: View {
                         Task {
                             await viewModel.toggleWatchStatus(for: episode)
                         }
+                    },
+                    onPlay: {
+                        onPlay(episode.id)
                     }
                 )
                 if index < viewModel.episodes.count - 1 {
