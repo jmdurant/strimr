@@ -54,6 +54,15 @@ struct MainTabView: View {
             }
             .tabItem { Label("tabs.libraries", systemImage: "rectangle.stack.fill") }
             .tag(MainCoordinator.Tab.library)
+
+            NavigationStack(path: coordinator.pathBinding(for: .more)) {
+                MoreView()
+                    .navigationDestination(for: MoreRoute.self) { route in
+                        moreDestination(for: route)
+                    }
+            }
+            .tabItem { Label("tabs.more", systemImage: "ellipsis.circle") }
+            .tag(MainCoordinator.Tab.more)
         }
         .tint(.brandPrimary)
         .tabViewStyle(.sidebarAdaptable)
@@ -77,6 +86,14 @@ struct MainTabView: View {
                     coordinator.showPlayer(for: ratingKey)
                 }
             )
+        }
+    }
+
+    @ViewBuilder
+    private func moreDestination(for route: MoreRoute) -> some View {
+        switch route {
+        case .settings:
+            SettingsView()
         }
     }
 }

@@ -7,6 +7,7 @@ final class MainCoordinator: ObservableObject {
         case home
         case search
         case library
+        case more
     }
 
     enum Route: Hashable {
@@ -17,6 +18,7 @@ final class MainCoordinator: ObservableObject {
     @Published var homePath = NavigationPath()
     @Published var searchPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
+    @Published var morePath = NavigationPath()
 
     @Published var selectedRatingKey: String?
     @Published var isPresentingPlayer = false
@@ -31,6 +33,8 @@ final class MainCoordinator: ObservableObject {
                     return self.searchPath
                 case .library:
                     return self.libraryPath
+                case .more:
+                    return self.morePath
                 }
             },
             set: { newValue in
@@ -41,6 +45,8 @@ final class MainCoordinator: ObservableObject {
                     self.searchPath = newValue
                 case .library:
                     self.libraryPath = newValue
+                case .more:
+                    self.morePath = newValue
                 }
             }
         )
@@ -56,6 +62,8 @@ final class MainCoordinator: ObservableObject {
             searchPath.append(route)
         case .library:
             libraryPath.append(route)
+        case .more:
+            break
         }
     }
 
