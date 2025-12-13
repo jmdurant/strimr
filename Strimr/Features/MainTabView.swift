@@ -84,7 +84,8 @@ struct MainTabView: View {
                 ),
                 onPlay: { ratingKey in
                     coordinator.showPlayer(for: ratingKey)
-                }
+                },
+                onSelectMedia: coordinator.showMediaDetail
             )
         }
     }

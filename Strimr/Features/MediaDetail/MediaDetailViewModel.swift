@@ -16,11 +16,14 @@ final class MediaDetailViewModel {
     var seasons: [MediaItem] = []
     var episodes: [MediaItem] = []
     var cast: [CastMember] = []
+    var relatedHubs: [Hub] = []
     var selectedSeasonId: String?
     var isLoadingSeasons = false
     var isLoadingEpisodes = false
+    var isLoadingRelatedHubs = false
     var seasonsErrorMessage: String?
     var episodesErrorMessage: String?
+    var relatedHubsErrorMessage: String?
     private var updatingWatchStatusIds: Set<String> = []
     var watchActionErrorMessage: String?
 
@@ -32,11 +35,13 @@ final class MediaDetailViewModel {
 
     func loadDetails() async {
         cast = []
+        relatedHubs = []
         guard let metadataRepository = try? MetadataRepository(context: context) else {
             errorMessage = "Select a server to load details."
             if media.type == .show {
                 seasonsErrorMessage = "Select a server to load seasons."
             }
+            relatedHubsErrorMessage = "Select a server to load related content."
             return
         }
 
@@ -63,7 +68,9 @@ final class MediaDetailViewModel {
         }
 
         isLoading = false
+        async let relatedHubsTask = loadRelatedHubs()
         await loadSeasonsIfNeeded(forceReload: true)
+        await relatedHubsTask
     }
 
     func loadSeasonsIfNeeded(forceReload: Bool = false) async {
@@ -405,6 +412,25 @@ final class MediaDetailViewModel {
             return response.mediaContainer.metadata?.first?.ratingKey
         } catch {
             return nil
+        }
+    }
+
+    func loadRelatedHubs() async {
+        guard let hubRepository = try? HubRepository(context: context) else {
+            relatedHubsErrorMessage = "Select a server to load related content."
+            return
+        }
+
+        isLoadingRelatedHubs = true
+        relatedHubsErrorMessage = nil
+        defer { isLoadingRelatedHubs = false }
+
+        do {
+            let response = try await hubRepository.getRelatedMediaHubs(ratingKey: media.metadataRatingKey)
+            relatedHubs = response.mediaContainer.hub.map(Hub.init)
+        } catch {
+            relatedHubs = []
+            relatedHubsErrorMessage = error.localizedDescription
         }
     }
 }

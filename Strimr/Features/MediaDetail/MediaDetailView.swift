@@ -6,10 +6,16 @@ struct MediaDetailView: View {
     @State private var isSummaryExpanded = false
     private let heroHeight: CGFloat = 320
     private let onPlay: (String) -> Void
+    private let onSelectMedia: (MediaItem) -> Void
 
-    init(viewModel: MediaDetailViewModel, onPlay: @escaping (String) -> Void = { _ in }) {
+    init(
+        viewModel: MediaDetailViewModel,
+        onPlay: @escaping (String) -> Void = { _ in },
+        onSelectMedia: @escaping (MediaItem) -> Void = { _ in }
+    ) {
         _viewModel = State(initialValue: viewModel)
         self.onPlay = onPlay
+        self.onSelectMedia = onSelectMedia
     }
 
     var body: some View {
@@ -32,6 +38,11 @@ struct MediaDetailView: View {
                 }
 
                 CastSection(viewModel: bindableViewModel)
+
+                RelatedHubsSection(
+                    viewModel: bindableViewModel,
+                    onSelectMedia: onSelectMedia
+                )
             }
         }
         .ignoresSafeArea(edges: .top)
