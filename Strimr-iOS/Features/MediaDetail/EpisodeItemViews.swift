@@ -10,9 +10,6 @@ struct EpisodeCardView: View {
     let isUpdatingWatchStatus: Bool
     let onToggleWatch: (() -> Void)?
     let onPlay: (() -> Void)?
-    #if os(macOS)
-        @State private var isHovering = false
-    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -67,26 +64,8 @@ struct EpisodeCardView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        #if os(tvOS) || os(macOS)
-            .padding(12)
-        #else
-            .padding(.vertical, 12)
-        #endif
-            .frame(width: cardWidth)
-        #if os(tvOS)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
-            .focusable(true)
-            .shadow(color: .black.opacity(0.2), radius: 10, y: 6)
-        #elseif os(macOS)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.primary.opacity(0.05))
-            )
-            .shadow(color: .black.opacity(isHovering ? 0.12 : 0.06), radius: isHovering ? 8 : 5, y: isHovering ? 4 : 2)
-            .onHover { isHovering = $0 }
-        #else
-            // iOS: leave flat, image/overlays carry hierarchy
-        #endif
+        .padding(.vertical, 12)
+        .frame(width: cardWidth)
         .contentShape(Rectangle())
         .onTapGesture {
             onPlay?()

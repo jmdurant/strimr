@@ -39,6 +39,20 @@
 			);
 			target = E98A13B82ED8CBAD002F98B2 /* Strimr-iOS */;
 		};
+		E9C449042EF3193800D2895B /* Exceptions for "Strimr-tvOS" folder in "Strimr-iOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Features/Auth/SignInTVView.swift,
+			);
+			target = E98A13B82ED8CBAD002F98B2 /* Strimr-iOS */;
+		};
+		E9C449052EF3193800D2895B /* Exceptions for "Strimr-tvOS" folder in "Strimr-tvOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Features/Auth/SignInTVView.swift,
+			);
+			target = E9C448F22EF3034900D2895B /* Strimr-tvOS */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,7 +66,16 @@
 		};
 		E9C448F42EF3034900D2895B /* Strimr-tvOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E9C449042EF3193800D2895B /* Exceptions for "Strimr-tvOS" folder in "Strimr-iOS" target */,
+				E9C449052EF3193800D2895B /* Exceptions for "Strimr-tvOS" folder in "Strimr-tvOS" target */,
+			);
 			path = "Strimr-tvOS";
+			sourceTree = "<group>";
+		};
+		E9C449012EF30A9500D2895B /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -81,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */,
+				E9C449012EF30A9500D2895B /* Shared */,
 				E98A13BB2ED8CBAD002F98B2 /* Strimr-iOS */,
 				E9C448F42EF3034900D2895B /* Strimr-tvOS */,
 				E9C448FE2EF3063500D2895B /* Frameworks */,
@@ -122,6 +146,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E98A13BB2ED8CBAD002F98B2 /* Strimr-iOS */,
+				E9C449012EF30A9500D2895B /* Shared */,
 			);
 			name = "Strimr-iOS";
 			packageProductDependencies = (

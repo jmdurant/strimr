@@ -60,52 +60,24 @@ struct SeasonEpisodesSection: View {
 
     @ViewBuilder
     private var seasonPickerControl: some View {
-        #if os(tvOS)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(viewModel.seasons, id: \.id) { season in
-                        let isSelected = season.id == (viewModel.selectedSeasonId ?? viewModel.seasons.first?.id)
-                        Button {
-                            Task {
-                                await viewModel.selectSeason(id: season.id)
-                            }
-                        } label: {
-                            Text(season.title)
-                                .font(.callout)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .frame(minWidth: 140)
-                                .background(isSelected ? Color.brandSecondary : Color.white.opacity(0.18))
-                                .foregroundStyle(isSelected ? .brandSecondaryForeground : .primary)
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .focusable(true)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-        #else
-            Picker("media.detail.season", selection: Binding(
-                get: { viewModel.selectedSeasonId ?? viewModel.seasons.first?.id ?? "" },
-                set: { seasonId in
-                    guard !seasonId.isEmpty else { return }
-                    Task {
-                        await viewModel.selectSeason(id: seasonId)
-                    }
-                }
-            )) {
-                ForEach(viewModel.seasons, id: \.id) { season in
-                    Text(season.title)
-                        .tag(season.id)
+        Picker("media.detail.season", selection: Binding(
+            get: { viewModel.selectedSeasonId ?? viewModel.seasons.first?.id ?? "" },
+            set: { seasonId in
+                guard !seasonId.isEmpty else { return }
+                Task {
+                    await viewModel.selectSeason(id: seasonId)
                 }
             }
-            .pickerStyle(.menu)
-            .tint(.brandSecondaryForeground)
-            .background(.brandSecondary)
-            .cornerRadius(12)
-        #endif
+        )) {
+            ForEach(viewModel.seasons, id: \.id) { season in
+                Text(season.title)
+                    .tag(season.id)
+            }
+        }
+        .pickerStyle(.menu)
+        .tint(.brandSecondaryForeground)
+        .background(.brandSecondary)
+        .cornerRadius(12)
     }
 
     @ViewBuilder

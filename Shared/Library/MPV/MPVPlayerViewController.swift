@@ -64,11 +64,7 @@ final class MPVPlayerViewController: UIViewController {
         }
 
         // https://mpv.io/manual/stable/#options
-        #if DEBUG
-            checkError(mpv_request_log_messages(mpv, "debug"))
-        #else
-            checkError(mpv_request_log_messages(mpv, "no"))
-        #endif
+        checkError(mpv_request_log_messages(mpv, "no"))
         checkError(mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &metalLayer))
         checkError(mpv_set_option_string(mpv, "subs-match-os-language", "yes"))
         checkError(mpv_set_option_string(mpv, "subs-fallback", "yes"))

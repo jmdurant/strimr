@@ -1479,7 +1479,6 @@
       }
     },
     "signIn.tv.codeLabel %@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1496,7 +1495,6 @@
       }
     },
     "signIn.tv.subtitle" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
