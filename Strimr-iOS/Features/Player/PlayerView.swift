@@ -340,8 +340,6 @@ struct PlayerView: View {
            let preferredSubtitleIndex = viewModel.preferredSubtitleStreamFFIndex,
            let track = subtitleTracks.first(where: { $0.ffIndex == preferredSubtitleIndex })
         {
-            debugPrint(preferredSubtitleIndex)
-
             selectedSubtitleTrackID = track.id
             coordinator.selectSubtitleTrack(id: track.id)
             appliedPreferredSubtitle = true

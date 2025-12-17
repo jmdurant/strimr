@@ -116,7 +116,7 @@ final class MPVPlayerViewController: UIViewController {
         _ url: URL
     ) {
         var args = [url.absoluteString]
-        var options = [String]()
+        let options = [String]()
 
         args.append("replace")
 
