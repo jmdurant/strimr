@@ -200,25 +200,21 @@ struct ProfileSwitcherTVView: View {
     }
 
     private func pinEntrySheet(for user: PlexHomeUser) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             Text("auth.profile.pin.title")
                 .font(.title2.bold())
             Text("auth.profile.pin.prompt \(user.title)")
                 .foregroundStyle(.secondary)
 
-            TextField("auth.profile.pin.placeholder", text: $pinInput)
-                .keyboardType(.numberPad)
-                .textContentType(.oneTimeCode)
-                .padding()
-                .background(Color.white.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            pinDisplay
+
+            keypad
 
             HStack(spacing: 16) {
                 Button("common.actions.cancel", role: .cancel) {
                     resetPinPrompt()
                 }
                 .frame(maxWidth: .infinity)
-
                 Button {
                     let enteredPin = pinInput
                     Task { await viewModel.switchToUser(user, pin: enteredPin) }
@@ -236,6 +232,82 @@ struct ProfileSwitcherTVView: View {
             Spacer()
         }
         .padding(40)
+    }
+
+    private var pinDisplay: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<4, id: \.self) { index in
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 70, height: 70)
+
+                    if index < pinInput.count {
+                        Text("•")
+                            .font(.title.bold())
+                    }
+                }
+            }
+        }
+    }
+
+    private var keypad: some View {
+        VStack(spacing: 14) {
+            keypadRow(["1", "2", "3"])
+            keypadRow(["4", "5", "6"])
+            keypadRow(["7", "8", "9"])
+            HStack(spacing: 16) {
+                Spacer()
+                keypadDigitButton("0")
+                keypadDeleteButton()
+            }
+        }
+    }
+
+    private func keypadRow(_ digits: [String]) -> some View {
+        HStack(spacing: 16) {
+            ForEach(digits, id: \.self) { digit in
+                keypadDigitButton(digit)
+            }
+        }
+    }
+
+    private func keypadDigitButton(_ digit: String) -> some View {
+        Button {
+            appendDigit(digit)
+        } label: {
+            Text(digit)
+                .font(.title2.bold())
+                .frame(width: 96, height: 72)
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.roundedRectangle(radius: 14))
+        .controlSize(.large)
+    }
+
+    private func keypadDeleteButton() -> some View {
+        Button {
+            deleteDigit()
+        } label: {
+            Image(systemName: "delete.left")
+                .font(.title3.bold())
+                .frame(width: 96, height: 72)
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.brandPrimary)
+        .buttonBorderShape(.roundedRectangle(radius: 14))
+        .controlSize(.large)
+        .disabled(pinInput.isEmpty)
+    }
+
+    private func appendDigit(_ digit: String) {
+        guard pinInput.count < 4 else { return }
+        pinInput.append(contentsOf: digit)
+    }
+
+    private func deleteDigit() {
+        guard !pinInput.isEmpty else { return }
+        pinInput.removeLast()
     }
 
     private func requiresPin(for user: PlexHomeUser) -> Bool {
