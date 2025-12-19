@@ -8,21 +8,23 @@ struct MediaHeroView: View {
     @State private var imageURL: URL?
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            heroImage
+        GeometryReader { proxy in
+            ZStack(alignment: .topLeading) {
+                MediaBackdropGradient(colors: MediaBackdropGradient.colors(for: media))
+                    .ignoresSafeArea()
+                
+                heroImage
+                    .frame(height: (proxy.size.height
+                                    + proxy.safeAreaInsets.top
+                                    + proxy.safeAreaInsets.bottom) * 0.66)
+                    .clipped()
+                    .mask(heroMask)
+                    .ignoresSafeArea()
 
-            LinearGradient(
-                colors: [
-                    Color.black.opacity(0.0),
-                    Color.black.opacity(0.65)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            heroContent
+                heroContent
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .task(id: media.id) {
             await loadImage()
         }
@@ -78,7 +80,6 @@ struct MediaHeroView: View {
                     .lineLimit(3)
             }
         }
-        .padding(24)
     }
 
     private var placeholder: some View {
@@ -96,6 +97,18 @@ struct MediaHeroView: View {
         }
     }
 
+    private var heroMask: some View {
+        LinearGradient(
+            colors: [
+                .white,
+                .white,
+                .clear,
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
     private func loadImage() async {
         let path = media.grandparentArtPath
             ?? media.artPath
@@ -111,8 +124,8 @@ struct MediaHeroView: View {
             let imageRepository = try ImageRepository(context: plexApiContext)
             imageURL = imageRepository.transcodeImageURL(
                 path: path,
-                width: 1280,
-                height: 720,
+                width: 3840,
+                height: 2160,
                 minSize: 1,
                 upscale: 1
             )
@@ -120,43 +133,4 @@ struct MediaHeroView: View {
             imageURL = nil
         }
     }
-}
-
-#Preview {
-    let sample = MediaItem(
-        id: "sample",
-        summary: nil,
-        title: "Title",
-        type: .show,
-        parentRatingKey: nil,
-        grandparentRatingKey: nil,
-        genres: ["Sci-Fi"],
-        year: 2024,
-        duration: nil,
-        rating: nil,
-        contentRating: nil,
-        studio: nil,
-        tagline: nil,
-        thumbPath: nil,
-        artPath: nil,
-        ultraBlurColors: nil,
-        viewOffset: nil,
-        viewCount: nil,
-        childCount: 2,
-        leafCount: nil,
-        viewedLeafCount: nil,
-        grandparentTitle: nil,
-        parentTitle: nil,
-        parentIndex: nil,
-        index: nil,
-        grandparentThumbPath: nil,
-        grandparentArtPath: nil,
-        parentThumbPath: nil
-    )
-
-    return MediaHeroView(media: sample)
-        .environment(PlexAPIContext())
-        .frame(width: 900, height: 420)
-        .padding()
-        .background(Color("Background"))
 }

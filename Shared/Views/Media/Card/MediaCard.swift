@@ -2,6 +2,10 @@ import SwiftUI
 
 struct MediaCard: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+#if os(tvOS)
+    @Environment(MediaFocusModel.self) private var focusModel
+    @FocusState private var focusedMedia: MediaItem?
+#endif
 
     enum Layout {
         case landscape
@@ -70,5 +74,14 @@ struct MediaCard: View {
             }
         }
         .buttonStyle(.plain)
+#if os(tvOS)
+        .focusable()
+        .focused($focusedMedia, equals: media)
+        .onChange(of: focusedMedia) { _, newValue in
+            if newValue == media {
+                focusModel.focusedMedia = media
+            }
+        }
+#endif
     }
 }

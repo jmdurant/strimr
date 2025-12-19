@@ -43,8 +43,10 @@
 		E9C449F82EF322DE00D2895B /* Exceptions for "Shared" folder in "Strimr-tvOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Extensions/Color+Hex.swift",
 				Features/Auth/ProfileSelection/ProfileSwitcherViewModel.swift,
 				Features/Auth/ServerSelection/ServerSelectionViewModel.swift,
+				Features/Home/HomeViewModel.swift,
 				Library/MPV/MetalLayer.swift,
 				Library/MPV/MPVPlayerDelegate.swift,
 				Library/MPV/MPVPlayerView.swift,
@@ -78,6 +80,15 @@
 				Session/SessionManager.swift,
 				Session/SettingsManager.swift,
 				Storage/Keychain.swift,
+				Views/Media/Card/LandscapeMediaCard.swift,
+				Views/Media/Card/MediaCard.swift,
+				Views/Media/Card/PortraitMediaCard.swift,
+				Views/Media/MediaBackdropGradient.swift,
+				Views/Media/MediaCarousel.swift,
+				Views/Media/MediaHubSection.swift,
+				Views/Media/MediaImageView.swift,
+				Views/Media/MediaImageViewModel.swift,
+				Views/Media/WatchStatusBadge.swift,
 			);
 			target = E9C448F22EF3034900D2895B /* Strimr-tvOS */;
 		};

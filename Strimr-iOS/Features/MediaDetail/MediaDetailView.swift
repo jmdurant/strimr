@@ -54,20 +54,8 @@ struct MediaDetailView: View {
     }
 
     private func gradientBackground(for viewModel: MediaDetailViewModel) -> some View {
-        let colors = viewModel.backdropGradient
-        return Group {
-            if colors.count >= 2 {
-                LinearGradient(
-                    gradient: Gradient(colors: colors),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-            } else {
-                Color("Background")
-                    .ignoresSafeArea()
-            }
-        }
+        MediaBackdropGradient(colors: viewModel.backdropGradient)
+            .ignoresSafeArea()
     }
 }
 

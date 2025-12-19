@@ -2,13 +2,13 @@ import SwiftUI
 
 struct MainTabTVView: View {
     @Environment(SessionManager.self) private var sessionManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
 
     var body: some View {
         TabView {
             NavigationStack {
-                TVSectionPlaceholder(
-                    title: "tabs.home",
-                    subtitle: "Home experience is coming to Apple TV."
+                HomeTVView(
+                    viewModel: HomeViewModel(context: plexApiContext)
                 )
             }
             .tabItem { Label("tabs.home", systemImage: "house.fill") }
