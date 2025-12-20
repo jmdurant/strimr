@@ -160,7 +160,7 @@ struct ProfileSwitcherTVView: View {
         LinearGradient(
             colors: [
                 Color.red.opacity(0.85),
-                Color.red.opacity(0.5)
+                Color.red.opacity(0.5),
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -236,7 +236,7 @@ struct ProfileSwitcherTVView: View {
 
     private var pinDisplay: some View {
         HStack(spacing: 12) {
-            ForEach(0..<4, id: \.self) { index in
+            ForEach(0 ..< 4, id: \.self) { index in
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(Color.white.opacity(0.1))

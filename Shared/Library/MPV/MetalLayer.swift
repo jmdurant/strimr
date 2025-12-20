@@ -15,21 +15,21 @@ class MetalLayer: CAMetalLayer {
     }
 
     #if !os(tvOS)
-    // Hack for fix [target-colorspace-hint] option:
-    // Update wantsExtendedDynamicRangeContent need run in main thread to activate screen EDR mode, other thread can't activate
-    override var wantsExtendedDynamicRangeContent: Bool {
-        get {
-            return super.wantsExtendedDynamicRangeContent
-        }
-        set {
-            if Thread.isMainThread {
-                super.wantsExtendedDynamicRangeContent = newValue
-            } else {
-                DispatchQueue.main.sync {
+        // Hack for fix [target-colorspace-hint] option:
+        // Update wantsExtendedDynamicRangeContent need run in main thread to activate screen EDR mode, other thread can't activate
+        override var wantsExtendedDynamicRangeContent: Bool {
+            get {
+                return super.wantsExtendedDynamicRangeContent
+            }
+            set {
+                if Thread.isMainThread {
                     super.wantsExtendedDynamicRangeContent = newValue
+                } else {
+                    DispatchQueue.main.sync {
+                        super.wantsExtendedDynamicRangeContent = newValue
+                    }
                 }
             }
         }
-    }
     #endif
 }

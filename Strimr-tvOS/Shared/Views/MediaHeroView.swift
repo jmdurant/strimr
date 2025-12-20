@@ -12,18 +12,17 @@ struct MediaHeroView: View {
             ZStack {
                 MediaBackdropGradient(colors: MediaBackdropGradient.colors(for: media))
                     .ignoresSafeArea()
-                
+
                 heroImage
                     .frame(
                         width: (proxy.size.width + proxy.safeAreaInsets.leading + proxy.safeAreaInsets.trailing) * 0.66,
-                        height: (proxy.size.height + proxy.safeAreaInsets.top + proxy.safeAreaInsets.bottom) * 0.66,
+                        height: (proxy.size.height + proxy.safeAreaInsets.top + proxy.safeAreaInsets.bottom) * 0.66
                     )
                     .clipped()
                     .overlay(Color.black.opacity(0.2))
                     .mask(heroMask)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .ignoresSafeArea()
-                
 
                 heroContent
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -103,13 +102,21 @@ struct MediaHeroView: View {
 
     private var heroMask: some View {
         LinearGradient(
-            colors: [.black, .black, .clear],
+            stops: [
+                .init(color: .black, location: 0.0),
+                .init(color: .black, location: 0.25),
+                .init(color: .clear, location: 1.0),
+            ],
             startPoint: .top,
             endPoint: .bottom
         )
         .mask(
             LinearGradient(
-                colors: [.black, .black, .clear],
+                stops: [
+                    .init(color: .black, location: 0.0),
+                    .init(color: .black, location: 0.25),
+                    .init(color: .clear, location: 1.0),
+                ],
                 startPoint: .trailing,
                 endPoint: .leading
             )

@@ -2,10 +2,10 @@ import SwiftUI
 
 struct MediaCard: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
-#if os(tvOS)
-    @Environment(MediaFocusModel.self) private var focusModel
-    @FocusState private var isFocused: Bool
-#endif
+    #if os(tvOS)
+        @Environment(MediaFocusModel.self) private var focusModel
+        @FocusState private var isFocused: Bool
+    #endif
 
     enum Layout {
         case landscape
@@ -59,39 +59,39 @@ struct MediaCard: View {
                 }
 
                 #if !os(tvOS)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(media.primaryLabel)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text(media.secondaryLabel ?? "")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    Text(media.tertiaryLabel ?? "")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(media.primaryLabel)
+                            .font(.headline)
+                            .lineLimit(1)
+                        Text(media.secondaryLabel ?? "")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                        Text(media.tertiaryLabel ?? "")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 #endif
             }
         }
         .buttonStyle(.plain)
-#if os(tvOS)
-        .focusable()
-        .focused($isFocused)
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(
-                    isFocused ? Color.brandSecondary : .clear,
-                    lineWidth: 4
-                )
-        }
-        .animation(.easeOut(duration: 0.15), value: isFocused)
-        .onChange(of: isFocused) { _, focused in
-            if focused {
-                focusModel.focusedMedia = media
+        #if os(tvOS)
+            .focusable()
+            .focused($isFocused)
+            .overlay {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(
+                        isFocused ? Color.brandSecondary : .clear,
+                        lineWidth: 4
+                    )
             }
-        }
-#endif
+            .animation(.easeOut(duration: 0.15), value: isFocused)
+            .onChange(of: isFocused) { _, focused in
+                if focused {
+                    focusModel.focusedMedia = media
+                }
+            }
+        #endif
     }
 }

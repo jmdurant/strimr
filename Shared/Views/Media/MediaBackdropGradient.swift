@@ -24,7 +24,7 @@ struct MediaBackdropGradient: View {
                     startRadius: 0,
                     endRadius: max(geo.size.width, geo.size.height) * 0.75
                 )
-                
+
                 // Bottom Right
                 RadialGradient(
                     gradient: Gradient(colors: [colors[2], .clear]),
@@ -32,7 +32,7 @@ struct MediaBackdropGradient: View {
                     startRadius: 0,
                     endRadius: max(geo.size.width, geo.size.height) * 0.75
                 )
-                
+
                 // Bottom Left
                 RadialGradient(
                     gradient: Gradient(colors: [colors[3], .clear]),
