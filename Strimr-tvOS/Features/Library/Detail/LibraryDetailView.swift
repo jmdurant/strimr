@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LibraryDetailView: View {
+    @Environment(PlexAPIContext.self) private var plexApiContext
     let library: Library
     let onSelectMedia: (MediaItem) -> Void
 
@@ -19,27 +20,35 @@ struct LibraryDetailView: View {
             Color("Background")
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                Picker("library.detail.tabPicker", selection: $selectedTab) {
-                    ForEach(LibraryDetailTab.allCases) { tab in
-                        Text(tab.title).tag(tab)
-                    }
+            if selectedTab == .recommended {
+                ZStack(alignment: .top) {
+                    LibraryTVRecommendedView(
+                        viewModel: LibraryRecommendedViewModel(
+                            library: library,
+                            context: plexApiContext
+                        ),
+                        onSelectMedia: onSelectMedia
+                    )
+                    pickerView
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 48)
-                .padding(.top, 24)
-
-                Group {
-                    switch selectedTab {
-                    case .recommended:
-                        LibraryRecommendedView(onSelectMedia: onSelectMedia)
-                    case .browse:
-                        LibraryBrowseView(onSelectMedia: onSelectMedia)
-                    }
+            } else {
+                VStack(spacing: 0) {
+                    pickerView
+                    LibraryBrowseView(onSelectMedia: onSelectMedia)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
+    }
+
+    private var pickerView: some View {
+        Picker("library.detail.tabPicker", selection: $selectedTab) {
+            ForEach(LibraryDetailTab.allCases) { tab in
+                Text(tab.title).tag(tab)
+            }
+        }
+        .pickerStyle(.menu)
+        .padding(.horizontal, 48)
     }
 }
 

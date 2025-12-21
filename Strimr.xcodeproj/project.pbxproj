@@ -48,6 +48,7 @@
 				Features/Auth/ProfileSelection/ProfileSwitcherViewModel.swift,
 				Features/Auth/ServerSelection/ServerSelectionViewModel.swift,
 				Features/Home/HomeViewModel.swift,
+				Features/Library/LibraryRecommendedViewModel.swift,
 				Features/Library/LibraryViewModel.swift,
 				Features/Search/SearchResultCard.swift,
 				Features/Search/SearchViewModel.swift,
