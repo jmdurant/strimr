@@ -64,22 +64,19 @@ struct MediaHeroView: View {
                 .font(.title2.bold())
                 .lineLimit(2)
 
-            if let secondary = media.secondaryLabel {
+            if let secondary = media.secondaryLabel, media.type != .movie {
                 Text(secondary)
                     .font(.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.brandSecondary)
             }
 
-            if let tertiary = media.tertiaryLabel {
-                Text(tertiary)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+            metadataLine
+            genresLine
 
             if let summary = media.summary, !summary.isEmpty {
                 Text(summary)
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.brandSecondary)
                     .lineLimit(3)
             }
         }
@@ -121,6 +118,61 @@ struct MediaHeroView: View {
                 endPoint: .leading
             )
         )
+    }
+
+    @ViewBuilder
+    private var metadataLine: some View {
+        let items = metadataItems
+        if !items.isEmpty {
+            HStack(spacing: 16) {
+                ForEach(items.indices, id: \.self) { index in
+                    Text(items[index])
+                }
+            }
+            .font(.subheadline)
+            .foregroundStyle(.brandSecondary)
+        }
+    }
+
+    @ViewBuilder
+    private var genresLine: some View {
+        let genres = media.genres
+        if !genres.isEmpty {
+            HStack(spacing: 12) {
+                ForEach(genres, id: \.self) { genre in
+                    Text(genre)
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.brandSecondary)
+            .lineLimit(1)
+        }
+    }
+
+    private var metadataItems: [String] {
+        var items: [String] = []
+        if let tertiary = media.tertiaryLabel {
+            items.append(tertiary)
+        }
+        if let year = yearText {
+            items.append(year)
+        }
+        if let runtime = runtimeText {
+            items.append(runtime)
+        }
+        if let contentRating = media.contentRating {
+            items.append(contentRating)
+        }
+        return items
+    }
+
+    private var runtimeText: String? {
+        guard let duration = media.duration else { return nil }
+        return duration.mediaDurationText()
+    }
+
+    private var yearText: String? {
+        media.year.map(String.init)
     }
 
     private func loadImage() async {

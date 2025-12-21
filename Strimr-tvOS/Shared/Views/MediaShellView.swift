@@ -17,7 +17,7 @@ struct MediaShellView<Content: View>: View {
                 MediaHeroView(media: focusModel.focusedMedia ?? media)
 
                 content
-                    .frame(height: proxy.size.height * 0.66)
+                    .frame(height: proxy.size.height * 0.60)
             }
         }
     }

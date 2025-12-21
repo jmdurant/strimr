@@ -146,7 +146,7 @@ final class MediaDetailViewModel {
 
     var runtimeText: String? {
         guard let duration = media.duration else { return nil }
-        return formatDuration(duration)
+        return duration.mediaDurationText()
     }
 
     var yearText: String? {
@@ -167,7 +167,7 @@ final class MediaDetailViewModel {
 
     func runtimeText(for item: MediaItem) -> String? {
         guard let duration = item.duration else { return nil }
-        return formatDuration(duration)
+        return duration.mediaDurationText()
     }
 
     func castImageURL(for member: CastMember, width: Int = 200, height: Int = 260) -> URL? {
@@ -305,22 +305,12 @@ final class MediaDetailViewModel {
         let remaining = max(0, duration - viewOffset)
         guard remaining > 0 else { return nil }
 
-        return String(localized: "media.detail.timeLeft \(formatDuration(remaining))")
+        return String(localized: "media.detail.timeLeft \(remaining.mediaDurationText())")
     }
 
     private func seasonEpisodeLabel(for item: MediaItem) -> String? {
         guard let season = item.parentIndex, let episode = item.index else { return nil }
         return String(localized: "media.detail.seasonEpisode \(season) \(episode)")
-    }
-
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let minutes = Int(duration / 60)
-        let hours = minutes / 60
-        let remainingMinutes = minutes % 60
-        if hours > 0 {
-            return String(localized: "media.detail.duration.hoursMinutes \(hours) \(remainingMinutes)")
-        }
-        return String(localized: "media.detail.duration.minutes \(remainingMinutes)")
     }
 
     private func fetchSeasons() async {
