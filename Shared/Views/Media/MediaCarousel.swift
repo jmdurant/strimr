@@ -21,6 +21,7 @@ struct MediaCarousel: View {
             }
             .padding(.horizontal, 2)
         }
+        .focusSection()
     }
 
     @ViewBuilder

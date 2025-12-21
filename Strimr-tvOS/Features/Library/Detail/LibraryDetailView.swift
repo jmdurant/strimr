@@ -21,7 +21,7 @@ struct LibraryDetailView: View {
                 .ignoresSafeArea()
 
             if selectedTab == .recommended {
-                ZStack(alignment: .top) {
+                ZStack(alignment: .topTrailing) {
                     LibraryTVRecommendedView(
                         viewModel: LibraryRecommendedViewModel(
                             library: library,
@@ -48,7 +48,6 @@ struct LibraryDetailView: View {
             }
         }
         .pickerStyle(.menu)
-        .padding(.horizontal, 48)
     }
 }
 
