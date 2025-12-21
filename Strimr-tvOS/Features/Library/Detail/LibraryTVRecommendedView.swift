@@ -4,6 +4,7 @@ struct LibraryTVRecommendedView: View {
     @Environment(MediaFocusModel.self) private var focusModel
 
     @State var viewModel: LibraryRecommendedViewModel
+    @Binding var heroMedia: MediaItem?
     let onSelectMedia: (MediaItem) -> Void
 
     private let landscapeHubIdentifiers: [String] = [
@@ -12,29 +13,41 @@ struct LibraryTVRecommendedView: View {
 
     init(
         viewModel: LibraryRecommendedViewModel,
+        heroMedia: Binding<MediaItem?>,
         onSelectMedia: @escaping (MediaItem) -> Void = { _ in }
     ) {
         _viewModel = State(initialValue: viewModel)
+        _heroMedia = heroMedia
         self.onSelectMedia = onSelectMedia
     }
 
     var body: some View {
-        Group {
-            if let heroMedia {
-                MediaShellView(media: heroMedia) {
-                    recommendedContent
+        GeometryReader { proxy in
+            ZStack(alignment: .bottom) {
+                if let heroMedia {
+                    MediaHeroContentView(media: heroMedia)
+                        .frame(
+                            maxWidth: .infinity,
+                            maxHeight: .infinity,
+                            alignment: .topLeading
+                        )
                 }
-            } else {
-                emptyState
+
+                recommendedContent
+                    .frame(height: proxy.size.height * 0.60)
             }
         }
         .task {
             await viewModel.load()
         }
-        .onChange(of: heroMedia?.id) { _, _ in
-            updateInitialFocus()
+        .onChange(of: viewModel.hubs.count) { _, _ in
+            updateHeroMedia()
+        }
+        .onChange(of: focusModel.focusedMedia?.id) { _, _ in
+            updateHeroMedia()
         }
         .onAppear {
+            updateHeroMedia()
             updateInitialFocus()
         }
     }
@@ -67,20 +80,6 @@ struct LibraryTVRecommendedView: View {
         }
     }
 
-    private var emptyState: some View {
-        VStack(spacing: 16) {
-            if viewModel.isLoading {
-                ProgressView("library.recommended.loading")
-            } else if let errorMessage = viewModel.errorMessage {
-                Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
-            } else {
-                Text("common.empty.nothingToShow")
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
     @ViewBuilder
     private func carousel(for hub: Hub) -> some View {
         if shouldUseLandscape(for: hub) {
@@ -103,7 +102,7 @@ struct LibraryTVRecommendedView: View {
         return landscapeHubIdentifiers.contains { identifier.contains($0) }
     }
 
-    private var heroMedia: MediaItem? {
+    private var defaultHeroMedia: MediaItem? {
         for hub in viewModel.hubs where hub.hasItems {
             if let item = hub.items.first {
                 return item
@@ -113,8 +112,23 @@ struct LibraryTVRecommendedView: View {
         return nil
     }
 
+    private func updateHeroMedia() {
+        if let focused = focusModel.focusedMedia {
+            if heroMedia?.id != focused.id {
+                heroMedia = focused
+            }
+            return
+        }
+
+        if heroMedia == nil {
+            heroMedia = defaultHeroMedia
+        }
+    }
+
     private func updateInitialFocus() {
-        guard focusModel.focusedMedia == nil, let heroMedia else { return }
-        focusModel.focusedMedia = heroMedia
+        guard focusModel.focusedMedia == nil else { return }
+        if let initial = heroMedia ?? defaultHeroMedia {
+            focusModel.focusedMedia = initial
+        }
     }
 }

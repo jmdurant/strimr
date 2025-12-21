@@ -40,7 +40,6 @@ struct MainTabTVView: View {
             }
             .tabItem { Label("tabs.more", systemImage: "ellipsis.circle") }
         }
-        .tabViewStyle(.sidebarAdaptable)
     }
 
     private var moreView: some View {

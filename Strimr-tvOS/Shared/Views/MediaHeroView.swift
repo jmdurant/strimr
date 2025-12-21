@@ -1,6 +1,18 @@
 import SwiftUI
 
 struct MediaHeroView: View {
+    let media: MediaItem
+
+    var body: some View {
+        ZStack {
+            MediaHeroBackgroundView(media: media)
+            MediaHeroContentView(media: media)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+    }
+}
+
+struct MediaHeroBackgroundView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
 
     let media: MediaItem
@@ -23,9 +35,6 @@ struct MediaHeroView: View {
                     .mask(heroMask)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .ignoresSafeArea()
-
-                heroContent
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
         .task(id: media.id) {
@@ -56,30 +65,6 @@ struct MediaHeroView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var heroContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(media.primaryLabel)
-                .font(.title2.bold())
-                .lineLimit(2)
-
-            if let secondary = media.secondaryLabel, media.type != .movie {
-                Text(secondary)
-                    .font(.headline)
-                    .foregroundStyle(.brandSecondary)
-            }
-
-            metadataLine
-            genresLine
-
-            if let summary = media.summary, !summary.isEmpty {
-                Text(summary)
-                    .font(.callout)
-                    .foregroundStyle(.brandSecondary)
-                    .lineLimit(3)
-            }
-        }
     }
 
     private var placeholder: some View {
@@ -118,6 +103,63 @@ struct MediaHeroView: View {
                 endPoint: .leading
             )
         )
+    }
+
+    private func loadImage() async {
+        let path = media.grandparentArtPath
+            ?? media.artPath
+            ?? media.grandparentThumbPath
+            ?? media.parentThumbPath
+            ?? media.thumbPath
+        guard let path else {
+            imageURL = nil
+            return
+        }
+
+        do {
+            let imageRepository = try ImageRepository(context: plexApiContext)
+            imageURL = imageRepository.transcodeImageURL(
+                path: path,
+                width: 3840,
+                height: 2160,
+                minSize: 1,
+                upscale: 1
+            )
+        } catch {
+            imageURL = nil
+        }
+    }
+}
+
+struct MediaHeroContentView: View {
+    let media: MediaItem
+
+    var body: some View {
+        heroContent
+    }
+
+    private var heroContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(media.primaryLabel)
+                .font(.title2.bold())
+                .lineLimit(2)
+
+            if let secondary = media.secondaryLabel, media.type != .movie {
+                Text(secondary)
+                    .font(.headline)
+                    .foregroundStyle(.brandSecondary)
+            }
+
+            metadataLine
+            genresLine
+
+            if let summary = media.summary, !summary.isEmpty {
+                Text(summary)
+                    .font(.callout)
+                    .foregroundStyle(.brandSecondary)
+                    .lineLimit(3)
+            }
+        }
     }
 
     @ViewBuilder
@@ -173,30 +215,5 @@ struct MediaHeroView: View {
 
     private var yearText: String? {
         media.year.map(String.init)
-    }
-
-    private func loadImage() async {
-        let path = media.grandparentArtPath
-            ?? media.artPath
-            ?? media.grandparentThumbPath
-            ?? media.parentThumbPath
-            ?? media.thumbPath
-        guard let path else {
-            imageURL = nil
-            return
-        }
-
-        do {
-            let imageRepository = try ImageRepository(context: plexApiContext)
-            imageURL = imageRepository.transcodeImageURL(
-                path: path,
-                width: 3840,
-                height: 2160,
-                minSize: 1,
-                upscale: 1
-            )
-        } catch {
-            imageURL = nil
-        }
     }
 }
