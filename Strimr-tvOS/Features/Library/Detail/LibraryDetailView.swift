@@ -22,7 +22,7 @@ struct LibraryDetailView: View {
             Color("Background")
                 .ignoresSafeArea()
 
-            if let heroMedia = viewModel.heroMedia {
+            if selectedTab == .recommended, let heroMedia = viewModel.heroMedia {
                 MediaHeroBackgroundView(media: heroMedia)
             }
 
@@ -48,7 +48,13 @@ struct LibraryDetailView: View {
                     onSelectMedia: onSelectMedia
                 )
             case .browse:
-                LibraryBrowseView(onSelectMedia: onSelectMedia)
+                LibraryBrowseView(
+                    viewModel: LibraryBrowseViewModel(
+                        library: library,
+                        context: plexApiContext
+                    ),
+                    onSelectMedia: onSelectMedia
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -71,10 +77,8 @@ struct LibraryDetailView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: tab.systemImageName)
-                    .font(.title3)
                 if isSidebarFocused {
                     Text(tab.title)
-                        .font(.headline)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)

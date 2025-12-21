@@ -60,4 +60,8 @@ final class SectionRepository {
     func getSectionsItemsMetaInfo(sectionId: Int, filter: String) async throws -> PlexDirectoryMediaContainer {
         try await network.request(path: "/library/sections/\(sectionId)/\(filter)")
     }
+
+    func getSectionFirstCharacters(sectionId: Int) async throws -> PlexFirstCharacterMediaContainer {
+        try await network.request(path: "/library/sections/\(sectionId)/firstCharacter")
+    }
 }

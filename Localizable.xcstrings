@@ -2,10 +2,10 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld" : {
-
+      "shouldTranslate" : false
     },
     "•" : {
-
+      "shouldTranslate" : false
     },
     "auth.profile.empty" : {
       "localizations" : {
@@ -451,6 +451,12 @@
             "state" : "translated",
             "value" : "Browse"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer"
+          }
         }
       }
     },
@@ -460,6 +466,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recommended"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommendé"
           }
         }
       }

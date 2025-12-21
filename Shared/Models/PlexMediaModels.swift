@@ -445,3 +445,27 @@ struct PlexDirectoryMediaContainer: Codable, Equatable {
         case mediaContainer = "MediaContainer"
     }
 }
+
+struct PlexFirstCharacterMediaContainer: Codable, Equatable {
+    struct MediaContainer: Codable, Equatable {
+        let size: Int?
+        let directory: [PlexFirstCharacterDirectory]?
+
+        private enum CodingKeys: String, CodingKey {
+            case size
+            case directory = "Directory"
+        }
+    }
+
+    let mediaContainer: MediaContainer
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+struct PlexFirstCharacterDirectory: Codable, Equatable {
+    let size: Int?
+    let key: String?
+    let title: String?
+}
