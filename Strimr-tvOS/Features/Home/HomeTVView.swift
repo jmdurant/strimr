@@ -21,8 +21,13 @@ struct HomeTVView: View {
                 .ignoresSafeArea()
 
             if let heroMedia {
-                MediaShellView(media: heroMedia) {
-                    homeContent
+                GeometryReader { proxy in
+                    ZStack(alignment: .bottom) {
+                        MediaHeroView(media: focusModel.focusedMedia ?? heroMedia)
+
+                        homeContent
+                            .frame(height: proxy.size.height * 0.60)
+                    }
                 }
             } else {
                 emptyState

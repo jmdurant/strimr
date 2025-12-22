@@ -21,7 +21,9 @@ struct MediaCarousel: View {
             }
             .padding(.horizontal, 2)
         }
+        #if os(tvOS)
         .focusSection()
+        #endif
     }
 
     @ViewBuilder
