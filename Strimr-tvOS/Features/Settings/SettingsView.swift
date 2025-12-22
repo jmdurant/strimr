@@ -18,15 +18,16 @@ struct SettingsView: View {
                         Text("settings.playback.seconds \(seconds)").tag(seconds)
                     }
                 }
+                .pickerStyle(.navigationLink)
 
                 Picker("settings.playback.fastForward", selection: viewModel.fastForwardBinding) {
                     ForEach(viewModel.seekOptions, id: \.self) { seconds in
                         Text("settings.playback.seconds \(seconds)").tag(seconds)
                     }
                 }
+                .pickerStyle(.navigationLink)
             }
         }
-        .listStyle(.insetGrouped)
         .navigationTitle("settings.title")
     }
 }

@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct MainTabTVView: View {
-    @Environment(SessionManager.self) private var sessionManager
     @Environment(PlexAPIContext.self) private var plexApiContext
     @StateObject private var coordinator = MainCoordinator()
     @State private var selectedMedia: MediaItem?
@@ -47,7 +46,13 @@ struct MainTabTVView: View {
             .tag(MainCoordinator.Tab.library)
 
             NavigationStack {
-                moreView
+                MoreTVView()
+                    .navigationDestination(for: MoreTVRoute.self) { route in
+                        switch route {
+                        case .settings:
+                            SettingsView()
+                        }
+                    }
             }
             .tabItem { Label("tabs.more", systemImage: "ellipsis.circle") }
             .tag(MainCoordinator.Tab.more)
@@ -57,52 +62,6 @@ struct MainTabTVView: View {
                 viewModel: MediaDetailViewModel(media: media, context: plexApiContext),
                 onSelectMedia: showMediaDetail
             )
-        }
-    }
-
-    private var moreView: some View {
-        ZStack {
-            Color("Background").ignoresSafeArea()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    Text("tabs.more")
-                        .font(.largeTitle.bold())
-                    Text("Manage your session while we finish the tvOS experience.")
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom, 8)
-
-                    Button {
-                        Task { await sessionManager.requestProfileSelection() }
-                    } label: {
-                        Label("common.actions.switchProfile", systemImage: "person.2.fill")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Button {
-                        Task { await sessionManager.requestServerSelection() }
-                    } label: {
-                        Label("serverSelection.title", systemImage: "server.rack")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Button {
-                        Task { await sessionManager.signOut() }
-                    } label: {
-                        Label("common.actions.signOut", systemImage: "rectangle.portrait.and.arrow.right")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Spacer()
-                }
-                .padding(48)
-            }
         }
     }
 
