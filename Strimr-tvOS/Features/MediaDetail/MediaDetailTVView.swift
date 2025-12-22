@@ -20,27 +20,25 @@ struct MediaDetailTVView: View {
     var body: some View {
         @Bindable var bindableViewModel = viewModel
 
-        ZStack {
-            MediaHeroBackgroundView(media: bindableViewModel.media)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    MediaHeroContentView(media: focusedMedia ?? bindableViewModel.media)
-                        .frame(maxWidth: 800, alignment: .leading)
-
-                    playButton
-
-                    if bindableViewModel.media.type == .show {
-                        seasonsSection
+        GeometryReader { proxy in
+            ZStack {
+                MediaHeroBackgroundView(media: bindableViewModel.media)
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 32) {
+                        MediaHeroContentView(media: focusedMedia ?? bindableViewModel.media)
+                            .frame(maxWidth: proxy.size.width * 0.60, alignment: .leading)
+                        
+                        playButton
+                        
+                        if bindableViewModel.media.type == .show {
+                            seasonsSection
+                        }
+                        
+                        CastSection(viewModel: bindableViewModel)
+                        RelatedHubsSection(viewModel: bindableViewModel, onSelectMedia: onSelectMedia)
                     }
-
-                    CastSection(viewModel: bindableViewModel)
-                    RelatedHubsSection(viewModel: bindableViewModel, onSelectMedia: onSelectMedia)
                 }
-                .padding(.top, 64)
-                .padding(.leading, 72)
-                .padding(.trailing, 32)
-                .padding(.bottom, 40)
             }
         }
         .task {
@@ -115,6 +113,11 @@ struct MediaDetailTVView: View {
                             },
                             onFocus: {
                                 focusedMedia = season
+                            },
+                            onBlur: {
+                                if focusedMedia?.id == season.id {
+                                    focusedMedia = nil
+                                }
                             }
                         )
                     }
@@ -173,35 +176,39 @@ private struct SeasonPillButton: View {
     let isSelected: Bool
     let onSelect: () -> Void
     let onFocus: () -> Void
+    let onBlur: () -> Void
 
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        Button(action: onSelect) {
+        VStack {
             Text(title)
                 .font(.headline)
                 .fontWeight(.semibold)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 10)
-                .foregroundStyle(isFocused || isSelected ? Color.brandPrimary : Color.primary)
+                .foregroundStyle(.brandSecondary)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(isSelected ? Color.brandPrimary.opacity(0.2) : Color.gray.opacity(0.12))
+                        .fill(isSelected ? Color.brandSecondary.opacity(0.5) : Color.gray.opacity(0.12))
                 )
                 .overlay {
                     Capsule(style: .continuous)
                         .stroke(isFocused ? Color.brandSecondary : Color.gray.opacity(0.25), lineWidth: isFocused ? 3 : 1)
                 }
         }
-        .buttonStyle(.plain)
         .focusable()
         .focused($isFocused)
         .animation(.easeOut(duration: 0.15), value: isFocused)
         .onChange(of: isFocused) { _, focused in
             if focused {
                 onFocus()
+            } else {
+                onBlur()
             }
         }
+        .onPlayPauseCommand(perform: onSelect)
+        .onTapGesture(perform: onSelect)
     }
 }
 

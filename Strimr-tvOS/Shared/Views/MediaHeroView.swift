@@ -1,16 +1,5 @@
 import SwiftUI
-
-struct MediaHeroView: View {
-    let media: MediaItem
-
-    var body: some View {
-        ZStack {
-            MediaHeroBackgroundView(media: media)
-            MediaHeroContentView(media: media)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        }
-    }
-}
+import UIKit
 
 struct MediaHeroBackgroundView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
@@ -133,6 +122,7 @@ struct MediaHeroBackgroundView: View {
 
 struct MediaHeroContentView: View {
     let media: MediaItem
+    private let summaryLineLimit = 3
 
     var body: some View {
         heroContent
@@ -144,7 +134,7 @@ struct MediaHeroContentView: View {
                 .font(.title2.bold())
                 .lineLimit(2)
 
-            if let secondary = media.secondaryLabel, media.type != .movie {
+            if let secondary = media.secondaryLabel, media.type != .movie, media.type != .show {
                 Text(secondary)
                     .font(.headline)
                     .foregroundStyle(.brandSecondary)
@@ -157,9 +147,14 @@ struct MediaHeroContentView: View {
                 Text(summary)
                     .font(.callout)
                     .foregroundStyle(.brandSecondary)
-                    .lineLimit(3)
+                    .lineLimit(summaryLineLimit)
+                    .frame(minHeight: summaryLineHeight * CGFloat(summaryLineLimit), alignment: .top)
             }
         }
+    }
+    
+    private var summaryLineHeight: CGFloat {
+        UIFont.preferredFont(forTextStyle: .callout).lineHeight
     }
 
     @ViewBuilder

@@ -176,6 +176,12 @@
             "state" : "translated",
             "value" : "Pause"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
         }
       }
     },
@@ -185,6 +191,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Play"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture"
           }
         }
       }
@@ -205,6 +217,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resume"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
           }
         }
       }
@@ -734,6 +752,12 @@
             "state" : "translated",
             "value" : "S%1$lld - E%2$lld"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%1$lld - E%2$lld"
+          }
         }
       }
     },
@@ -753,6 +777,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ left"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ restant"
           }
         }
       }
@@ -1372,6 +1402,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Playback"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecteur vidéo"
           }
         }
       }

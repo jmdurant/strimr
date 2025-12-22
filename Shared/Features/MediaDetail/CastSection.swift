@@ -64,6 +64,9 @@ struct CastCarousel: View {
 struct CastCard: View {
     let member: CastMember
     let imageURL: URL?
+    #if os(tvOS)
+        @FocusState private var isFocused: Bool
+    #endif
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -83,6 +86,17 @@ struct CastCard: View {
             }
         }
         .frame(width: 140, alignment: .leading)
+        #if os(tvOS)
+        .focusable()
+        .focused($isFocused)
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(
+                    isFocused ? Color.brandSecondary : .clear,
+                    lineWidth: 4
+                )
+        }
+        #endif
     }
 
     @ViewBuilder

@@ -23,11 +23,11 @@ struct LibraryTVRecommendedView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: .topLeading) {
                 if let heroMedia {
                     MediaHeroContentView(media: heroMedia)
                         .frame(
-                            maxWidth: .infinity,
+                            maxWidth: proxy.size.width * 0.60,
                             maxHeight: .infinity,
                             alignment: .topLeading
                         )
@@ -35,6 +35,7 @@ struct LibraryTVRecommendedView: View {
 
                 recommendedContent
                     .frame(height: proxy.size.height * 0.60)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
             }
         }
         .task {

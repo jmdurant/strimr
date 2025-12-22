@@ -23,7 +23,11 @@ struct HomeTVView: View {
             if let heroMedia {
                 GeometryReader { proxy in
                     ZStack(alignment: .bottom) {
-                        MediaHeroView(media: focusModel.focusedMedia ?? heroMedia)
+                        ZStack(alignment: .topLeading) {
+                            MediaHeroBackgroundView(media: focusModel.focusedMedia ?? heroMedia)
+                            MediaHeroContentView(media: focusModel.focusedMedia ?? heroMedia)
+                                .frame(maxWidth: proxy.size.width * 0.60, maxHeight: .infinity, alignment: .topLeading)
+                        }
 
                         homeContent
                             .frame(height: proxy.size.height * 0.60)
