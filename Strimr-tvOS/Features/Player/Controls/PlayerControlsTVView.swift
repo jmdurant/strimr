@@ -20,6 +20,7 @@ struct PlayerControlsTVView: View {
     var skipMarkerTitle: String?
     var onSkipMarker: (() -> Void)?
     var onUserInteraction: () -> Void
+    @FocusState private var focusedControl: FocusTarget?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -85,6 +86,7 @@ struct PlayerControlsTVView: View {
                     )
 
                     PlayPauseButton(isPaused: isPaused, action: onPlayPause)
+                        .focused($focusedControl, equals: .playPause)
 
                     PlayerIconButton(
                         systemName: iconName(prefix: "goforward", seconds: seekForwardSeconds),
@@ -99,6 +101,9 @@ struct PlayerControlsTVView: View {
         .background {
             PlayerControlsTVBackground()
         }
+        .onAppear {
+            focusedControl = .playPause
+        }
         .onMoveCommand { _ in
             onUserInteraction()
         }
@@ -109,6 +114,10 @@ struct PlayerControlsTVView: View {
         guard supported.contains(seconds) else { return prefix }
         return "\(prefix).\(seconds)"
     }
+}
+
+private enum FocusTarget: Hashable {
+    case playPause
 }
 
 private struct PlayerControlsTVBackground: View {
