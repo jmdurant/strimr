@@ -43,21 +43,22 @@ struct PlayerTimelineView: View {
                 }
             }
 
+#if os(tvOS)
+            PlayerTimelineScrubberTVView(
+                position: $position,
+                upperBound: sliderUpperBound,
+                duration: duration,
+                bufferedProgress: bufferedProgress,
+                onEditingChanged: onEditingChanged
+            )
+#else
             ZStack {
                 bufferTrack
-#if os(tvOS)
-                PlayerTimelineScrubberTVView(
-                    position: $position,
-                    upperBound: sliderUpperBound,
-                    duration: duration,
-                    onEditingChanged: onEditingChanged
-                )
-#else
                 Slider(value: sliderBinding, in: 0 ... sliderUpperBound, onEditingChanged: onEditingChanged)
                     .tint(.white)
                     .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 8)
-#endif
             }
+#endif
 
             HStack {
                 Text(elapsedText)
@@ -92,11 +93,7 @@ struct PlayerTimelineView: View {
                     .fill(Color.white.opacity(0.65))
                     .frame(width: bufferWidth)
             }
-            #if os(tvOS)
-            .frame(height: 10)
-            #else
             .frame(height: 4)
-            #endif
             .frame(maxHeight: .infinity, alignment: .center)
             .allowsHitTesting(false)
         }
