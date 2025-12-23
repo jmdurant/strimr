@@ -29,10 +29,12 @@ struct PlayerTimelineScrubberTVView: View {
             ZStack(alignment: .leading) {
                 Capsule()
                     .fill(Color.white.opacity(0.35))
+                    .frame(height: 8, alignment: .center)
                 
                 Capsule()
                     .fill(Color.white)
                     .frame(width: progressWidth)
+                    .frame(height: 8, alignment: .center)
 
                 Circle()
                     .fill(Color.white)
@@ -44,17 +46,12 @@ struct PlayerTimelineScrubberTVView: View {
                     .shadow(color: .black.opacity(0.45), radius: 10, x: 0, y: 6)
                     .offset(x: max(0, thumbX - (isFocused ? 9 : 7)))
             }
-            .frame(height: 8, alignment: .center)
             .animation(.easeInOut(duration: 0.15), value: isFocused)
             .allowsHitTesting(false)
         }
-        .frame(height: 8)
         .contentShape(Rectangle())
         .focusable()
         .focused($isFocused)
-        .onChange(of: isFocused) { _, newValue in
-            onEditingChanged(newValue)
-        }
         .onMoveCommand { direction in
             guard isFocused else { return }
 
