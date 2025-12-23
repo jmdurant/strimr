@@ -19,6 +19,7 @@ struct PlayerControlsTVView: View {
     var onScrubbingChanged: (Bool) -> Void
     var skipMarkerTitle: String?
     var onSkipMarker: (() -> Void)?
+    var onUserInteraction: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -62,15 +63,13 @@ struct PlayerControlsTVView: View {
             )
 
             ZStack {
-                HStack(spacing: 16) {
+                HStack(spacing: 32) {
                     PlayerTextButton(
-                        titleKey: "player.settings.audio",
                         systemImage: "speaker.wave.2",
                         action: onShowAudioSettings
                     )
 
                     PlayerTextButton(
-                        titleKey: "player.settings.subtitles",
                         systemImage: "captions.bubble",
                         action: onShowSubtitleSettings
                     )
@@ -99,6 +98,9 @@ struct PlayerControlsTVView: View {
         .padding(.vertical, 28)
         .background {
             PlayerControlsTVBackground()
+        }
+        .onMoveCommand { _ in
+            onUserInteraction()
         }
     }
 
@@ -140,17 +142,12 @@ private struct PlayerControlsTVBackground: View {
 }
 
 private struct PlayerTextButton: View {
-    var titleKey: LocalizedStringKey
     var systemImage: String
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: systemImage)
-                Text(titleKey)
-                    .font(.callout.weight(.semibold))
-            }
+            Image(systemName: systemImage)
             .foregroundStyle(.white)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)

@@ -66,13 +66,11 @@ struct PlayerTVView: View {
                 }
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    showControls(temporarily: true)
-                }
 
             if !controlsVisible {
                 Color.clear
                     .contentShape(Rectangle())
+                    .focusable()
                     .onMoveCommand { direction in
                         handleMoveCommand(direction)
                     }
@@ -103,7 +101,8 @@ struct PlayerTVView: View {
                     skipMarkerTitle: skipTitle,
                     onSkipMarker: activeMarker.map { marker in
                         { skipMarker(to: marker) }
-                    }
+                    },
+                    onUserInteraction: { showControls(temporarily: true) }
                 )
                 .transition(.opacity)
             }
@@ -201,13 +200,13 @@ struct PlayerTVView: View {
     private func showAudioSettings() {
         refreshTracks()
         activeSettingsSheet = .audio
-        hideControlsWorkItem?.cancel()
+        showControls(temporarily: true)
     }
 
     private func showSubtitleSettings() {
         refreshTracks()
         activeSettingsSheet = .subtitle
-        hideControlsWorkItem?.cancel()
+        showControls(temporarily: true)
     }
 
     private func refreshTracks() {
