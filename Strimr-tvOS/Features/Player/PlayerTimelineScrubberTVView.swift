@@ -8,8 +8,11 @@ struct PlayerTimelineScrubberTVView: View {
     var onEditingChanged: (Bool) -> Void
 
     @State private var consecutiveMoves = 0
+    @State private var isScrubbing = false
+    @State private var commitWorkItem: DispatchWorkItem?
     @FocusState private var isFocused: Bool
 
+    private let scrubCommitDelay: TimeInterval = 0.4
 
     private var playbackProgress: Double {
         guard upperBound > 0 else { return 0 }
@@ -65,6 +68,7 @@ struct PlayerTimelineScrubberTVView: View {
         .onMoveCommand { direction in
             guard isFocused else { return }
 
+            startScrubbingIfNeeded()
             consecutiveMoves += 1
             let multiplier = min(Double(consecutiveMoves), 5)
             let delta = scrubStep * multiplier
@@ -77,12 +81,44 @@ struct PlayerTimelineScrubberTVView: View {
             default:
                 break
             }
+
+            scheduleCommit()
         }
         .onChange(of: isFocused) { _, focused in
             if !focused {
-                consecutiveMoves = 0
+                finishScrubbingIfNeeded()
             }
         }
+        .onDisappear {
+            commitWorkItem?.cancel()
+        }
         .accessibilityHidden(true)
+    }
+
+    private func startScrubbingIfNeeded() {
+        guard !isScrubbing else { return }
+        isScrubbing = true
+        onEditingChanged(true)
+    }
+
+    private func scheduleCommit() {
+        commitWorkItem?.cancel()
+        let workItem = DispatchWorkItem {
+            isScrubbing = false
+            consecutiveMoves = 0
+            onEditingChanged(false)
+        }
+        commitWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + scrubCommitDelay, execute: workItem)
+    }
+
+    private func finishScrubbingIfNeeded() {
+        consecutiveMoves = 0
+        commitWorkItem?.cancel()
+        commitWorkItem = nil
+
+        guard isScrubbing else { return }
+        isScrubbing = false
+        onEditingChanged(false)
     }
 }

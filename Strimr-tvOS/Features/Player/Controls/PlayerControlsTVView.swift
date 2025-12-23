@@ -63,13 +63,13 @@ struct PlayerControlsTVView: View {
             )
 
             ZStack {
-                HStack(spacing: 32) {
-                    PlayerTextButton(
+                HStack(spacing: 36) {
+                    PlayerSettingButton(
                         systemImage: "speaker.wave.2",
                         action: onShowAudioSettings
                     )
 
-                    PlayerTextButton(
+                    PlayerSettingButton(
                         systemImage: "captions.bubble",
                         action: onShowSubtitleSettings
                     )
@@ -141,7 +141,7 @@ private struct PlayerControlsTVBackground: View {
     }
 }
 
-private struct PlayerTextButton: View {
+private struct PlayerSettingButton: View {
     var systemImage: String
     var action: () -> Void
 
