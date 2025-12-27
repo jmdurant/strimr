@@ -19,6 +19,7 @@ struct PlayerTrackSelectionView: View {
                     ) {
                         onSelect(nil)
                     }
+                    .padding(.horizontal, 24)
                 }
 
                 if tracks.isEmpty {
@@ -27,25 +28,22 @@ struct PlayerTrackSelectionView: View {
                             .foregroundStyle(.secondary)
                     }
                 } else {
-                    ForEach(tracks) { track in
-                        TrackSelectionRow(
-                            title: track.title,
-                            subtitle: track.subtitle,
-                            isSelected: selectedTrackID == track.id
-                        ) {
-                            onSelect(track.track.id)
+                    VStack {
+                        ForEach(tracks) { track in
+                            TrackSelectionRow(
+                                title: track.title,
+                                subtitle: track.subtitle,
+                                isSelected: selectedTrackID == track.id
+                            ) {
+                                onSelect(track.track.id)
+                            }
                         }
                     }
+                    .padding(.horizontal, 24)
                 }
             }
             .listStyle(.grouped)
             .navigationTitle(titleKey)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("common.actions.done", action: onClose)
-                        .fontWeight(.semibold)
-                }
-            }
         }
     }
 }

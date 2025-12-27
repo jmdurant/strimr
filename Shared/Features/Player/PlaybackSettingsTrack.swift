@@ -64,5 +64,6 @@ struct TrackSelectionRow: View {
             }
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 }
