@@ -10,7 +10,11 @@ struct PlayerWrapper: View {
             Color.black.ignoresSafeArea()
 
             if landscapeReady {
-                PlayerView(viewModel: viewModel, initialPlayer: settingsManager.playback.player)
+                PlayerView(
+                    viewModel: viewModel,
+                    initialPlayer: settingsManager.playback.player,
+                    options: PlayerOptions(subtitleScale: settingsManager.playback.subtitleScale)
+                )
                     .transition(.opacity)
             } else {
                 ProgressView()

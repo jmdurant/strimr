@@ -8,10 +8,23 @@ import MobileVLCKit
 #endif
 
 final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
-    private let mediaPlayer = VLCMediaPlayer()
+    private let options: PlayerOptions
+    private lazy var mediaPlayer: VLCMediaPlayer = {
+        let scaledValue = Int(round(Double(options.subtitleScale) * 0.5))
+        return VLCMediaPlayer(options: ["--sub-text-scale=\(scaledValue)"])
+    }()
     var playDelegate: VLCPlayerDelegate?
     var playUrl: URL?
     private var lastReportedTimeSeconds = -1.0
+
+    init(options: PlayerOptions) {
+        self.options = options
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     deinit {
         mediaPlayer.stop()

@@ -36,10 +36,10 @@ struct PlayerTVView: View {
         Double(settingsManager.playback.seekForwardSeconds)
     }
 
-    init(viewModel: PlayerViewModel, initialPlayer: PlaybackPlayer, onExit: @escaping () -> Void) {
+    init(viewModel: PlayerViewModel, initialPlayer: PlaybackPlayer, options: PlayerOptions, onExit: @escaping () -> Void) {
         _viewModel = State(initialValue: viewModel)
         activePlayer = initialPlayer
-        _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer))
+        _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer, options: options))
         self.onExit = onExit
     }
 

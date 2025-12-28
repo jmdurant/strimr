@@ -44,6 +44,11 @@ final class SettingsManager {
         persist()
     }
 
+    func setSubtitleScale(_ scale: Int) {
+        settings.playback.subtitleScale = scale
+        persist()
+    }
+
     func updatePlayback(_ transform: (inout PlaybackSettings) -> Void) {
         transform(&settings.playback)
         persist()

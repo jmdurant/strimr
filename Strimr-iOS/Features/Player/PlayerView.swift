@@ -32,10 +32,10 @@ struct PlayerView: View {
         Double(settingsManager.playback.seekForwardSeconds)
     }
 
-    init(viewModel: PlayerViewModel, initialPlayer: PlaybackPlayer) {
+    init(viewModel: PlayerViewModel, initialPlayer: PlaybackPlayer, options: PlayerOptions) {
         _viewModel = State(initialValue: viewModel)
         activePlayer = initialPlayer
-        _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer))
+        _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer, options: options))
     }
 
     var body: some View {

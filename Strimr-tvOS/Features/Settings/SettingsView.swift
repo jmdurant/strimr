@@ -33,6 +33,13 @@ struct SettingsView: View {
                     }
                 }
                 .pickerStyle(.navigationLink)
+
+                Picker("settings.playback.subtitleScale", selection: viewModel.subtitleScaleBinding) {
+                    ForEach(viewModel.subtitleScaleOptions, id: \.self) { scale in
+                        Text("settings.playback.scale \(scale)").tag(scale)
+                    }
+                }
+                .pickerStyle(.navigationLink)
             }
         }
         .navigationTitle("settings.title")

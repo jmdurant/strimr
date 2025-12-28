@@ -2,12 +2,16 @@ import Foundation
 import SwiftUI
 
 enum PlayerFactory {
-    static func makeCoordinator(for selection: PlaybackPlayer) -> any PlayerCoordinating {
+    static func makeCoordinator(for selection: PlaybackPlayer, options: PlayerOptions) -> any PlayerCoordinating {
         switch selection {
         case .mpv:
-            return MPVPlayerView.Coordinator()
+            let coordinator = MPVPlayerView.Coordinator()
+            coordinator.options = options
+            return coordinator
         case .vlc:
-            return VLCPlayerView.Coordinator()
+            let coordinator = VLCPlayerView.Coordinator()
+            coordinator.options = options
+            return coordinator
         }
     }
 

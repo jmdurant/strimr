@@ -5,7 +5,7 @@ struct MPVPlayerView: UIViewControllerRepresentable {
     var coordinator: Coordinator
 
     func makeUIViewController(context: Context) -> some UIViewController {
-        let mpv = MPVPlayerViewController()
+        let mpv = MPVPlayerViewController(options: coordinator.options)
         mpv.playDelegate = coordinator
         mpv.playUrl = coordinator.playUrl
 
@@ -40,6 +40,7 @@ struct MPVPlayerView: UIViewControllerRepresentable {
         weak var player: MPVPlayerViewController?
 
         @ObservationIgnored var playUrl: URL?
+        @ObservationIgnored var options = PlayerOptions()
         @ObservationIgnored var onPropertyChange: ((MPVPlayerViewController, PlayerProperty, Any?) -> Void)?
         @ObservationIgnored var onPlaybackEnded: (() -> Void)?
 

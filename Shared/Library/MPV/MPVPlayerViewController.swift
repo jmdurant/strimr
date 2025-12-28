@@ -10,6 +10,7 @@ final class MPVPlayerViewController: UIViewController {
     var mpv: OpaquePointer?
     var playDelegate: MPVPlayerDelegate?
     lazy var queue = DispatchQueue(label: "mpv", qos: .userInitiated)
+    private let options: PlayerOptions
 
     var playUrl: URL?
     var hdrAvailable: Bool = false
@@ -25,6 +26,15 @@ final class MPVPlayerViewController: UIViewController {
                 checkError(mpv_set_option_string(mpv, "target-colorspace-hint", "no"))
             }
         }
+    }
+
+    init(options: PlayerOptions) {
+        self.options = options
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     deinit {
@@ -71,6 +81,9 @@ final class MPVPlayerViewController: UIViewController {
         checkError(mpv_set_option_string(mpv, "gpu-context", "moltenvk"))
         checkError(mpv_set_option_string(mpv, "hwdec", "videotoolbox"))
         checkError(mpv_set_option_string(mpv, "video-rotate", "no"))
+        let subtitleScale = Double(options.subtitleScale) / 100.0
+        let scaleString = String(format: "%.2f", locale: Locale(identifier: "en_US_POSIX"), subtitleScale)
+        checkError(mpv_set_option_string(mpv, "sub-scale", scaleString))
 
 //        checkError(mpv_set_option_string(mpv, "target-colorspace-hint", "yes")) // HDR passthrough
 //        checkError(mpv_set_option_string(mpv, "tone-mapping-visualize", "yes"))  // only for debugging purposes

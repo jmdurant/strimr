@@ -30,6 +30,12 @@ struct SettingsView: View {
                         Text(player.localizationKey).tag(player)
                     }
                 }
+
+                Picker("settings.playback.subtitleScale", selection: viewModel.subtitleScaleBinding) {
+                    ForEach(viewModel.subtitleScaleOptions, id: \.self) { scale in
+                        Text("settings.playback.scale \(scale)").tag(scale)
+                    }
+                }
             }
         }
         .listStyle(.insetGrouped)

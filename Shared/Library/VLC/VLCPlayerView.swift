@@ -5,7 +5,7 @@ struct VLCPlayerView: UIViewControllerRepresentable {
     var coordinator: Coordinator
 
     func makeUIViewController(context: Context) -> some UIViewController {
-        let vlc = VLCPlayerViewController()
+        let vlc = VLCPlayerViewController(options: coordinator.options)
         vlc.playDelegate = coordinator
         vlc.playUrl = coordinator.playUrl
 
@@ -40,6 +40,7 @@ struct VLCPlayerView: UIViewControllerRepresentable {
         weak var player: VLCPlayerViewController?
 
         @ObservationIgnored var playUrl: URL?
+        @ObservationIgnored var options = PlayerOptions()
         @ObservationIgnored var onPropertyChange: ((VLCPlayerViewController, PlayerProperty, Any?) -> Void)?
         @ObservationIgnored var onPlaybackEnded: (() -> Void)?
 

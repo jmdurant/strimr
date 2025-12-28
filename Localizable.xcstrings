@@ -1419,12 +1419,44 @@
         }
       }
     },
+    "settings.playback.scale %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %"
+          }
+        }
+      }
+    },
     "settings.playback.seconds %lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld seconds"
+          }
+        }
+      }
+    },
+    "settings.playback.subtitleScale" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subtitle scale"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taille des sous-titres"
           }
         }
       }

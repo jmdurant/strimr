@@ -9,6 +9,7 @@ struct PlayerTVWrapper: View {
         PlayerTVView(
             viewModel: viewModel,
             initialPlayer: settingsManager.playback.player,
+            options: PlayerOptions(subtitleScale: settingsManager.playback.subtitleScale),
             onExit: onExit
         )
     }
