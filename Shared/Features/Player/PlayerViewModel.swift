@@ -80,27 +80,27 @@ final class PlayerViewModel {
     }
 
     func handlePropertyChange(
-        name: String,
+        property: PlayerProperty,
         data: Any?,
         isScrubbing: Bool
     ) {
         let previousState = playbackState
         var stateChanged = false
 
-        switch name {
-        case MPVProperty.pause:
+        switch property {
+        case .pause:
             isPaused = (data as? Bool) ?? false
             stateChanged = previousState != playbackState
-        case MPVProperty.pausedForCache:
+        case .pausedForCache:
             isBuffering = (data as? Bool) ?? false
             stateChanged = previousState != playbackState
-        case MPVProperty.timePos:
+        case .timePos:
             guard !isScrubbing else { return }
             position = data as? Double ?? 0.0
             reportTimeline(state: playbackState)
-        case MPVProperty.duration:
+        case .duration:
             duration = data as? Double
-        case MPVProperty.demuxerCacheDuration:
+        case .demuxerCacheDuration:
             bufferedAhead = data as? Double ?? 0.0
         default:
             break
@@ -227,7 +227,7 @@ final class PlayerViewModel {
         markers.first { predicate($0) && $0.contains(time: position) }
     }
 
-    func persistStreamSelection(for track: MPVTrack) async {
+    func persistStreamSelection(for track: PlayerTrack) async {
         guard
             let ffIndex = track.ffIndex,
             let stream = streamsByFFIndex[ffIndex],

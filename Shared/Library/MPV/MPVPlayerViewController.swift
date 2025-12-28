@@ -161,7 +161,7 @@ final class MPVPlayerViewController: UIViewController {
         setTrackProperty("sid", trackID: id)
     }
 
-    func trackList() -> [MPVTrack] {
+    func trackList() -> [PlayerTrack] {
         guard let mpv else { return [] }
 
         var node = mpv_node()
@@ -170,7 +170,7 @@ final class MPVPlayerViewController: UIViewController {
 
         guard node.format == MPV_FORMAT_NODE_ARRAY, let list = node.u.list?.pointee else { return [] }
 
-        var tracks: [MPVTrack] = []
+        var tracks: [PlayerTrack] = []
         for index in 0 ..< Int(list.num) {
             let entry = list.values[index]
             guard entry.format == MPV_FORMAT_NODE_MAP, let map = entry.u.list?.pointee else { continue }
@@ -178,13 +178,13 @@ final class MPVPlayerViewController: UIViewController {
 
             guard
                 let typeString = values["type"] as? String,
-                let type = MPVTrack.TrackType(rawValue: typeString),
+                let type = PlayerTrack.TrackType(rawValue: typeString),
                 let id = values["id"] as? Int
             else {
                 continue
             }
 
-            let track = MPVTrack(
+            let track = PlayerTrack(
                 id: id,
                 ffIndex: values["ff-index"] as? Int,
                 type: type,
@@ -291,35 +291,37 @@ final class MPVPlayerViewController: UIViewController {
                 switch event!.pointee.event_id {
                 case MPV_EVENT_PROPERTY_CHANGE:
                     let dataOpaquePtr = OpaquePointer(event!.pointee.data)
-                    if let property = UnsafePointer<mpv_event_property>(dataOpaquePtr)?.pointee {
-                        let propertyName = String(cString: property.name)
-                        switch propertyName {
-                        case MPVProperty.videoParamsSigPeak:
-                            if let sigPeak = UnsafePointer<Double>(OpaquePointer(property.data))?.pointee {
+                    if let eventProperty = UnsafePointer<mpv_event_property>(dataOpaquePtr)?.pointee {
+                        let propertyName = String(cString: eventProperty.name)
+                        guard let playerProperty = PlayerProperty(rawValue: propertyName) else { break }
+                        switch playerProperty {
+                        case .videoParamsSigPeak:
+                            if let sigPeak = UnsafePointer<Double>(OpaquePointer(eventProperty.data))?.pointee {
                                 DispatchQueue.main.async {
                                     let maxEDRRange = self.view.window?.screen.potentialEDRHeadroom ?? 1.0
                                     // display screen support HDR and current playing HDR video
                                     self.hdrAvailable = maxEDRRange > 1.0 && sigPeak > 1.0
-                                    self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: sigPeak)
+                                    self.playDelegate?.propertyChange(mpv: mpv, property: playerProperty, data: sigPeak)
                                 }
                             }
-                        case MPVProperty.pause:
-                            let pausedValue = UnsafePointer<Int64>(OpaquePointer(property.data))?.pointee ?? 0
+                        case .pause:
+                            let pausedValue = UnsafePointer<Int64>(OpaquePointer(eventProperty.data))?.pointee ?? 0
                             let isPaused = pausedValue > 0
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: isPaused)
+                                self.playDelegate?.propertyChange(mpv: mpv, property: playerProperty, data: isPaused)
                             }
-                        case MPVProperty.pausedForCache:
-                            let buffering = UnsafePointer<Bool>(OpaquePointer(property.data))?.pointee ?? true
+                        case .pausedForCache:
+                            let buffering = UnsafePointer<Bool>(OpaquePointer(eventProperty.data))?.pointee ?? true
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: buffering)
+                                self.playDelegate?.propertyChange(mpv: mpv, property: playerProperty, data: buffering)
                             }
-                        case MPVProperty.timePos, MPVProperty.duration, MPVProperty.demuxerCacheDuration:
-                            let value = UnsafePointer<Double>(OpaquePointer(property.data))?.pointee
+                        case .timePos, .duration, .demuxerCacheDuration:
+                            let value = UnsafePointer<Double>(OpaquePointer(eventProperty.data))?.pointee
                             DispatchQueue.main.async {
-                                self.playDelegate?.propertyChange(mpv: mpv, propertyName: propertyName, data: value)
+                                self.playDelegate?.propertyChange(mpv: mpv, property: playerProperty, data: value)
                             }
-                        default: break
+                        default:
+                            break
                         }
                     }
                 case MPV_EVENT_END_FILE:

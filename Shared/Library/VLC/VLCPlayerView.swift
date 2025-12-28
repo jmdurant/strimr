@@ -1,16 +1,16 @@
 import Foundation
 import SwiftUI
 
-struct MPVPlayerView: UIViewControllerRepresentable {
+struct VLCPlayerView: UIViewControllerRepresentable {
     var coordinator: Coordinator
 
     func makeUIViewController(context: Context) -> some UIViewController {
-        let mpv = MPVPlayerViewController()
-        mpv.playDelegate = coordinator
-        mpv.playUrl = coordinator.playUrl
+        let vlc = VLCPlayerViewController()
+        vlc.playDelegate = coordinator
+        vlc.playUrl = coordinator.playUrl
 
-        context.coordinator.player = mpv
-        return mpv
+        context.coordinator.player = vlc
+        return vlc
     }
 
     func updateUIViewController(_: UIViewControllerType, context _: Context) {}
@@ -24,7 +24,7 @@ struct MPVPlayerView: UIViewControllerRepresentable {
         return self
     }
 
-    func onPropertyChange(_ handler: @escaping (MPVPlayerViewController, PlayerProperty, Any?) -> Void) -> Self {
+    func onPropertyChange(_ handler: @escaping (VLCPlayerViewController, PlayerProperty, Any?) -> Void) -> Self {
         coordinator.onPropertyChange = handler
         return self
     }
@@ -36,11 +36,11 @@ struct MPVPlayerView: UIViewControllerRepresentable {
 
     @MainActor
     @Observable
-    final class Coordinator: MPVPlayerDelegate, PlayerCoordinating {
-        weak var player: MPVPlayerViewController?
+    final class Coordinator: VLCPlayerDelegate, PlayerCoordinating {
+        weak var player: VLCPlayerViewController?
 
         @ObservationIgnored var playUrl: URL?
-        @ObservationIgnored var onPropertyChange: ((MPVPlayerViewController, PlayerProperty, Any?) -> Void)?
+        @ObservationIgnored var onPropertyChange: ((VLCPlayerViewController, PlayerProperty, Any?) -> Void)?
         @ObservationIgnored var onPlaybackEnded: (() -> Void)?
 
         func play(_ url: URL) {
@@ -83,9 +83,7 @@ struct MPVPlayerView: UIViewControllerRepresentable {
             player?.destruct()
         }
 
-        func propertyChange(mpv _: OpaquePointer, property: PlayerProperty, data: Any?) {
-            guard let player else { return }
-
+        func propertyChange(player: VLCPlayerViewController, property: PlayerProperty, data: Any?) {
             onPropertyChange?(player, property, data)
         }
 

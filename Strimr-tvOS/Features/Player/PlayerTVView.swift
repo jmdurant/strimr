@@ -10,8 +10,8 @@ struct PlayerTVView: View {
     @State private var hideControlsWorkItem: DispatchWorkItem?
     @State private var isScrubbing = false
     @State private var supportsHDR = false
-    @State private var audioTracks: [MPVTrack] = []
-    @State private var subtitleTracks: [MPVTrack] = []
+    @State private var audioTracks: [PlayerTrack] = []
+    @State private var subtitleTracks: [PlayerTrack] = []
     @State private var settingsAudioTracks: [PlaybackSettingsTrack] = []
     @State private var settingsSubtitleTracks: [PlaybackSettingsTrack] = []
     @State private var selectedAudioTrackID: Int?
@@ -50,12 +50,12 @@ struct PlayerTVView: View {
             MPVPlayerView(coordinator: coordinator)
                 .onPropertyChange { player, propertyName, data in
                     bindableViewModel.handlePropertyChange(
-                        name: propertyName,
+                        property: propertyName,
                         data: data,
                         isScrubbing: isScrubbing
                     )
 
-                    if propertyName == MPVProperty.videoParamsSigPeak {
+                    if propertyName == .videoParamsSigPeak {
                         let supportsHdr = (data as? Double ?? 1.0) > 1.0
                         supportsHDR = supportsHdr
                         player.hdrEnabled = supportsHdr
@@ -125,7 +125,7 @@ struct PlayerTVView: View {
             viewModel.handleStop()
             hideControlsWorkItem?.cancel()
             seekFeedbackWorkItem?.cancel()
-            coordinator.player?.destruct()
+            coordinator.destruct()
         }
         .onPlayPauseCommand {
             togglePlayPause()
@@ -354,7 +354,7 @@ struct PlayerTVView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + controlsHideDelay, execute: workItem)
     }
 
-    private func applyPreferredTracksIfNeeded(audioTracks: [MPVTrack], subtitleTracks: [MPVTrack]) {
+    private func applyPreferredTracksIfNeeded(audioTracks: [PlayerTrack], subtitleTracks: [PlayerTrack]) {
         if !appliedPreferredAudio,
            let preferredAudioIndex = viewModel.preferredAudioStreamFFIndex,
            let track = audioTracks.first(where: { $0.ffIndex == preferredAudioIndex })

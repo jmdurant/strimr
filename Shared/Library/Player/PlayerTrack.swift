@@ -1,6 +1,6 @@
 import Foundation
 
-struct MPVTrack: Identifiable, Hashable {
+struct PlayerTrack: Identifiable, Hashable {
     enum TrackType: String {
         case audio
         case subtitle = "sub"

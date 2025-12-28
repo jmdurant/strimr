@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PlaybackSettingsTrack: Identifiable, Hashable {
-    let track: MPVTrack
+    let track: PlayerTrack
     let plexStream: PlexPartStream?
 
     var id: Int { track.id }

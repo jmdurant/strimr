@@ -42,7 +42,7 @@ struct PlayerTrackSelectionView: View {
                     .padding(.horizontal, 24)
                 }
             }
-            .listStyle(.grouped)
+            .listStyle(.automatic)
             .navigationTitle(titleKey)
         }
     }

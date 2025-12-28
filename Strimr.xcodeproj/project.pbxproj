@@ -8,18 +8,33 @@
 
 /* Begin PBXBuildFile section */
 		E97F3FC32ED9E12000CA6E05 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */; };
-		E9C449002EF3063500D2895B /* MPVKit-GPL in Frameworks */ = {isa = PBXBuildFile; productRef = E9C448FF2EF3063500D2895B /* MPVKit-GPL */; };
+		E98AE52D2F008D9D0062F372 /* MobileVLCKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */; };
+		E98AE52E2F008D9D0062F372 /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E98AE9B02F009FE30062F372 /* TVVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E9C449002EF3063500D2895B /* MPVKit-GPL in Frameworks */ = {isa = PBXBuildFile; productRef = E9C448FF2EF3063500D2895B /* MPVKit-GPL */; settings = {ATTRIBUTES = (Required, ); }; };
 		E9E487BB2EE4E664009184C1 /* MPVKit-GPL in Frameworks */ = {isa = PBXBuildFile; productRef = E9E487BA2EE4E664009184C1 /* MPVKit-GPL */; };
 		E9E4DB4F2EF4534E0035147A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E98AE9B12F009FE30062F372 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E98AE9B02F009FE30062F372 /* TVVLCKit.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E997DC632EE0AAE000462F89 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				E98AE52E2F008D9D0062F372 /* MobileVLCKit.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -29,6 +44,8 @@
 /* Begin PBXFileReference section */
 		E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		E98A13B92ED8CBAD002F98B2 /* Strimr-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/Build/MobileVLCKit.xcframework; sourceTree = "<group>"; };
+		E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TVVLCKit.xcframework; path = Carthage/Build/TVVLCKit.xcframework; sourceTree = "<group>"; };
 		E9C448F32EF3034900D2895B /* Strimr-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -67,7 +84,12 @@
 				Library/MPV/MPVPlayerView.swift,
 				Library/MPV/MPVPlayerViewController.swift,
 				Library/MPV/MPVProperty.swift,
-				Library/MPV/MPVTrack.swift,
+				Library/Player/PlayerCoordinating.swift,
+				Library/Player/PlayerProperty.swift,
+				Library/Player/PlayerTrack.swift,
+				Library/VLC/VLCPlayerDelegate.swift,
+				Library/VLC/VLCPlayerView.swift,
+				Library/VLC/VLCPlayerViewController.swift,
 				Models/AppSettings.swift,
 				Models/Hub.swift,
 				"Models/Hub+Mapping.swift",
@@ -149,6 +171,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E98AE52D2F008D9D0062F372 /* MobileVLCKit.xcframework in Frameworks */,
 				E9E487BB2EE4E664009184C1 /* MPVKit-GPL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -188,6 +211,8 @@
 		E9C448FE2EF3063500D2895B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */,
+				E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -227,6 +252,7 @@
 				E9C448EF2EF3034900D2895B /* Sources */,
 				E9C448F02EF3034900D2895B /* Frameworks */,
 				E9C448F12EF3034900D2895B /* Resources */,
+				E98AE9B12F009FE30062F372 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
