@@ -1,8 +1,8 @@
 import Foundation
 
 enum PlaybackPlayer: String, Codable, CaseIterable, Identifiable {
-    case mpv
     case vlc
+    case mpv
 
     var id: String { rawValue }
 
