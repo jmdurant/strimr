@@ -105,15 +105,3 @@ struct MainTabView: View {
         }
     }
 }
-
-#Preview {
-    let context = PlexAPIContext()
-    let session = SessionManager(context: context)
-
-    return MainTabView(
-        homeViewModel: HomeViewModel(context: context),
-        libraryViewModel: LibraryViewModel(context: context)
-    )
-    .environment(context)
-    .environment(session)
-}
