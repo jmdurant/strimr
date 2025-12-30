@@ -3,11 +3,12 @@ import SwiftUI
 
 @MainActor
 final class MainCoordinator: ObservableObject {
-    enum Tab {
+    enum Tab: Hashable {
         case home
         case search
         case library
         case more
+        case libraryDetail(String)
     }
 
     enum Route: Hashable {
@@ -19,6 +20,7 @@ final class MainCoordinator: ObservableObject {
     @Published var searchPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
     @Published var morePath = NavigationPath()
+    @Published private var libraryDetailPaths: [String: NavigationPath] = [:]
 
     @Published var selectedRatingKey: String?
     @Published var isPresentingPlayer = false
@@ -35,6 +37,8 @@ final class MainCoordinator: ObservableObject {
                     return self.libraryPath
                 case .more:
                     return self.morePath
+                case let .libraryDetail(libraryId):
+                    return self.libraryDetailPaths[libraryId] ?? NavigationPath()
                 }
             },
             set: { newValue in
@@ -47,6 +51,8 @@ final class MainCoordinator: ObservableObject {
                     self.libraryPath = newValue
                 case .more:
                     self.morePath = newValue
+                case let .libraryDetail(libraryId):
+                    self.libraryDetailPaths[libraryId] = newValue
                 }
             }
         )
@@ -64,6 +70,10 @@ final class MainCoordinator: ObservableObject {
             libraryPath.append(route)
         case .more:
             break
+        case let .libraryDetail(libraryId):
+            var path = libraryDetailPaths[libraryId] ?? NavigationPath()
+            path.append(route)
+            libraryDetailPaths[libraryId] = path
         }
     }
 

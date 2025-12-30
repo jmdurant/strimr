@@ -47,6 +47,11 @@ struct SettingsView: View {
                 settingsManager: settingsManager,
                 libraryStore: libraryStore
             )
+
+            NavigationLibrariesSectionView(
+                settingsManager: settingsManager,
+                libraryStore: libraryStore
+            )
         }
         .navigationTitle("settings.title")
     }

@@ -10,6 +10,7 @@ struct PlaybackSettings: Codable, Equatable {
 
 struct InterfaceSettings: Codable, Equatable {
     var hiddenLibraryIds: [String] = []
+    var navigationLibraryIds: [String] = []
 }
 
 struct AppSettings: Codable, Equatable {

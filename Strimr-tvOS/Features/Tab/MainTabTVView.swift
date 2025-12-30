@@ -57,6 +57,20 @@ struct MainTabTVView: View {
                 }
             }
 
+            ForEach(navigationLibraries) { library in
+                Tab(library.title, systemImage: library.iconName, value: MainCoordinator.Tab.libraryDetail(library.id)) {
+                    NavigationStack(path: coordinator.pathBinding(for: .libraryDetail(library.id))) {
+                        LibraryDetailView(
+                            library: library,
+                            onSelectMedia: coordinator.showMediaDetail
+                        )
+                        .navigationDestination(for: MainCoordinator.Route.self) { route in
+                            destination(for: route)
+                        }
+                    }
+                }
+            }
+
             Tab("tabs.more", systemImage: "ellipsis.circle", value: MainCoordinator.Tab.more) {
                 NavigationStack(path: coordinator.pathBinding(for: .more)) {
                     MoreTVView()
@@ -68,6 +82,9 @@ struct MainTabTVView: View {
                         }
                 }
             }
+        }
+        .task {
+            try? await libraryStore.loadLibraries()
         }
         .fullScreenCover(isPresented: $coordinator.isPresentingPlayer, onDismiss: coordinator.resetPlayer) {
             if let ratingKey = coordinator.selectedRatingKey {
@@ -91,5 +108,10 @@ struct MainTabTVView: View {
                 onSelectMedia: coordinator.showMediaDetail
             )
         }
+    }
+
+    private var navigationLibraries: [Library] {
+        let libraryById = Dictionary(uniqueKeysWithValues: libraryStore.libraries.map { ($0.id, $0) })
+        return settingsManager.interface.navigationLibraryIds.compactMap { libraryById[$0] }
     }
 }

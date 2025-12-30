@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
+    @Environment(LibraryStore.self) private var libraryStore
     @StateObject private var coordinator = MainCoordinator()
     @State private var homeViewModel: HomeViewModel
     @State private var libraryViewModel: LibraryViewModel
@@ -54,13 +56,35 @@ struct MainTabView: View {
                     }
                 }
             }
+
+            ForEach(navigationLibraries) { library in
+                Tab(library.title, systemImage: library.iconName, value: MainCoordinator.Tab.libraryDetail(library.id)) {
+                    NavigationStack(path: coordinator.pathBinding(for: .libraryDetail(library.id))) {
+                        LibraryDetailView(
+                            library: library,
+                            onSelectMedia: coordinator.showMediaDetail
+                        )
+                        .navigationDestination(for: MainCoordinator.Route.self) {
+                            destination(for: $0)
+                        }
+                    }
+                }
+            }
         }
         .tint(.brandPrimary)
+        .task {
+            try? await libraryStore.loadLibraries()
+        }
         .fullScreenCover(isPresented: $coordinator.isPresentingPlayer, onDismiss: coordinator.resetPlayer) {
             if let ratingKey = coordinator.selectedRatingKey {
                 PlayerWrapper(viewModel: PlayerViewModel(ratingKey: ratingKey, context: plexApiContext))
             }
         }
+    }
+
+    private var navigationLibraries: [Library] {
+        let libraryById = Dictionary(uniqueKeysWithValues: libraryStore.libraries.map { ($0.id, $0) })
+        return settingsManager.interface.navigationLibraryIds.compactMap { libraryById[$0] }
     }
 
     @ViewBuilder

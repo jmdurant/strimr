@@ -1509,6 +1509,22 @@
         }
       }
     },
+    "settings.interface.navigationLibraries" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libraries in the navigation bar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèques dans la barre de navigation"
+          }
+        }
+      }
+    },
     "settings.interface.title" : {
       "localizations" : {
         "en" : {

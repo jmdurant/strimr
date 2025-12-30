@@ -43,8 +43,14 @@ struct SettingsView: View {
                 settingsManager: settingsManager,
                 libraryStore: libraryStore
             )
+
+            NavigationLibrariesSectionView(
+                settingsManager: settingsManager,
+                libraryStore: libraryStore
+            )
         }
         .listStyle(.insetGrouped)
+        .environment(\.editMode, .constant(.active))
         .navigationTitle("settings.title")
     }
 }
