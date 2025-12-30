@@ -12,7 +12,7 @@ final class HubRepository {
 
         var queryItems: [URLQueryItem] {
             [
-                URLQueryItem.makeArray("sectionIds", sectionIds),
+                URLQueryItem.makeArray("contentDirectoryID", sectionIds),
                 URLQueryItem.make("count", count),
                 URLQueryItem.makeArray("excludeFields", excludeFields),
                 URLQueryItem.makeBoolFlag("excludeContinueWatching", excludeContinueWatching),

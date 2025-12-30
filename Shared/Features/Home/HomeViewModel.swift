@@ -10,10 +10,14 @@ final class HomeViewModel {
     var errorMessage: String?
 
     @ObservationIgnored private let context: PlexAPIContext
+    @ObservationIgnored private let settingsManager: SettingsManager
+    @ObservationIgnored private let libraryStore: LibraryStore
     @ObservationIgnored private var loadTask: Task<Void, Never>?
 
-    init(context: PlexAPIContext) {
+    init(context: PlexAPIContext, settingsManager: SettingsManager, libraryStore: LibraryStore) {
         self.context = context
+        self.settingsManager = settingsManager
+        self.libraryStore = libraryStore
     }
 
     var hasContent: Bool {
@@ -49,8 +53,21 @@ final class HomeViewModel {
         }
 
         do {
-            async let continueResponse = hubRepository.getContinueWatchingHub()
-            async let promotedResponse = hubRepository.getPromotedHub()
+            let hiddenLibraryIds = settingsManager.interface.hiddenLibraryIds
+            var hubParams: HubRepository.HubParams?
+            if !hiddenLibraryIds.isEmpty {
+                if libraryStore.libraries.isEmpty {
+                    try? await libraryStore.loadLibraries()
+                }
+
+                let visibleSectionIds = libraryStore.libraries
+                    .filter { !hiddenLibraryIds.contains($0.id) }
+                    .compactMap(\.sectionId)
+                hubParams = HubRepository.HubParams(sectionIds: visibleSectionIds)
+            }
+
+            async let continueResponse = hubRepository.getContinueWatchingHub(params: hubParams)
+            async let promotedResponse = hubRepository.getPromotedHub(params: hubParams)
 
             let continueHub = try await continueResponse.mediaContainer.hub.first
             let promotedHubs = try await promotedResponse.mediaContainer.hub

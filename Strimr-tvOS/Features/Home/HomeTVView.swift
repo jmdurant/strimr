@@ -131,7 +131,13 @@ struct HomeTVView: View {
 #Preview {
     let context = PlexAPIContext()
     return NavigationStack {
-        HomeTVView(viewModel: HomeViewModel(context: context))
+        HomeTVView(
+            viewModel: HomeViewModel(
+                context: context,
+                settingsManager: SettingsManager(),
+                libraryStore: LibraryStore(context: context)
+            )
+        )
     }
     .environment(context)
     .environment(MediaFocusModel())
