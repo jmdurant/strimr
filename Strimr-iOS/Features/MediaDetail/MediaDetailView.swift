@@ -7,15 +7,18 @@ struct MediaDetailView: View {
     @State private var isSummaryExpanded = false
     private let heroHeight: CGFloat = 320
     private let onPlay: (String) -> Void
+    private let onPlayFromStart: (String) -> Void
     private let onSelectMedia: (MediaItem) -> Void
 
     init(
         viewModel: MediaDetailViewModel,
         onPlay: @escaping (String) -> Void = { _ in },
+        onPlayFromStart: @escaping (String) -> Void = { _ in },
         onSelectMedia: @escaping (MediaItem) -> Void = { _ in }
     ) {
         _viewModel = State(initialValue: viewModel)
         self.onPlay = onPlay
+        self.onPlayFromStart = onPlayFromStart
         self.onSelectMedia = onSelectMedia
     }
 
@@ -28,7 +31,8 @@ struct MediaDetailView: View {
                     viewModel: bindableViewModel,
                     isSummaryExpanded: $isSummaryExpanded,
                     heroHeight: heroHeight,
-                    onPlay: onPlay
+                    onPlay: onPlay,
+                    onPlayFromStart: onPlayFromStart
                 )
 
                 if bindableViewModel.media.type == .show {

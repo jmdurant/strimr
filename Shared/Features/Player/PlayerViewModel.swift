@@ -30,6 +30,7 @@ final class PlayerViewModel {
     @ObservationIgnored private var lastTimelineState: PlaybackRepository.PlaybackState?
     @ObservationIgnored private let ratingKey: String
     @ObservationIgnored private let context: PlexAPIContext
+    @ObservationIgnored private let shouldResumeFromOffsetFlag: Bool
     @ObservationIgnored private var activePartId: Int?
     @ObservationIgnored private var streamsByFFIndex: [Int: PlexPartStream] = [:]
 
@@ -38,9 +39,14 @@ final class PlayerViewModel {
         return streamsByFFIndex[ffIndex]
     }
 
-    init(ratingKey: String, context: PlexAPIContext) {
+    init(ratingKey: String, context: PlexAPIContext, shouldResumeFromOffset: Bool = true) {
         self.ratingKey = ratingKey
         self.context = context
+        shouldResumeFromOffsetFlag = shouldResumeFromOffset
+    }
+
+    var shouldResumeFromOffset: Bool {
+        shouldResumeFromOffsetFlag
     }
 
     func load() async {

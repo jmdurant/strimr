@@ -6,15 +6,18 @@ struct MediaDetailTVView: View {
     @State var viewModel: MediaDetailViewModel
     @State private var focusedMedia: MediaItem?
     private let onPlay: (String) -> Void
+    private let onPlayFromStart: (String) -> Void
     private let onSelectMedia: (MediaItem) -> Void
 
     init(
         viewModel: MediaDetailViewModel,
         onPlay: @escaping (String) -> Void = { _ in },
+        onPlayFromStart: @escaping (String) -> Void = { _ in },
         onSelectMedia: @escaping (MediaItem) -> Void = { _ in }
     ) {
         _viewModel = State(initialValue: viewModel)
         self.onPlay = onPlay
+        self.onPlayFromStart = onPlayFromStart
         self.onSelectMedia = onSelectMedia
     }
 
@@ -30,7 +33,7 @@ struct MediaDetailTVView: View {
                         MediaHeroContentView(media: focusedMedia ?? bindableViewModel.media)
                             .frame(maxWidth: proxy.size.width * 0.60, alignment: .leading)
 
-                        playButton
+                        playButtonsRow
 
                         if bindableViewModel.media.type == .show {
                             seasonsSection
@@ -84,6 +87,27 @@ struct MediaDetailTVView: View {
         .controlSize(.large)
         .tint(.brandSecondary)
         .foregroundStyle(.brandSecondaryForeground)
+    }
+
+    private var playButtonsRow: some View {
+        HStack(spacing: 16) {
+            playButton
+
+            if viewModel.shouldShowPlayFromStartButton {
+                playFromStartButton
+            }
+        }
+    }
+
+    private var playFromStartButton: some View {
+        Button(action: handlePlayFromStart) {
+            Image(systemName: "arrow.counterclockwise")
+                .font(.title2.weight(.semibold))
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .tint(.secondary)
+        .accessibilityLabel(Text("media.detail.playFromStart"))
     }
 
     private var seasonsSection: some View {
@@ -173,6 +197,13 @@ struct MediaDetailTVView: View {
         Task {
             guard let ratingKey = await viewModel.playbackRatingKey() else { return }
             onPlay(ratingKey)
+        }
+    }
+
+    private func handlePlayFromStart() {
+        Task {
+            guard let ratingKey = await viewModel.playbackRatingKey() else { return }
+            onPlayFromStart(ratingKey)
         }
     }
 }

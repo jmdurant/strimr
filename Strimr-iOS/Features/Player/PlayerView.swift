@@ -276,6 +276,7 @@ struct PlayerView: View {
     }
 
     private func applyResumeOffsetIfNeeded() {
+        guard viewModel.shouldResumeFromOffset else { return }
         guard !appliedResumeOffset, let offset = viewModel.resumePosition, offset > 0 else { return }
         appliedResumeOffset = true
 

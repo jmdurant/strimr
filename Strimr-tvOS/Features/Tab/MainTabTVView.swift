@@ -90,7 +90,11 @@ struct MainTabTVView: View {
         .fullScreenCover(isPresented: $coordinator.isPresentingPlayer, onDismiss: coordinator.resetPlayer) {
             if let ratingKey = coordinator.selectedRatingKey {
                 PlayerTVWrapper(
-                    viewModel: PlayerViewModel(ratingKey: ratingKey, context: plexApiContext),
+                    viewModel: PlayerViewModel(
+                        ratingKey: ratingKey,
+                        context: plexApiContext,
+                        shouldResumeFromOffset: coordinator.shouldResumeFromOffset
+                    ),
                     onExit: coordinator.resetPlayer
                 )
             }
@@ -105,6 +109,9 @@ struct MainTabTVView: View {
                 viewModel: MediaDetailViewModel(media: media, context: plexApiContext),
                 onPlay: { ratingKey in
                     coordinator.showPlayer(for: ratingKey)
+                },
+                onPlayFromStart: { ratingKey in
+                    coordinator.showPlayer(for: ratingKey, shouldResumeFromOffset: false)
                 },
                 onSelectMedia: coordinator.showMediaDetail
             )

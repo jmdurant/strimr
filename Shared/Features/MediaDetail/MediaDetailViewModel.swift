@@ -222,6 +222,17 @@ final class MediaDetailViewModel {
         }
     }
 
+    var shouldShowPlayFromStartButton: Bool {
+        switch media.type {
+        case .movie:
+            return hasProgress(for: media)
+        case .show:
+            return hasProgress(for: onDeckItem)
+        case .season, .episode:
+            return hasProgress(for: media)
+        }
+    }
+
     var primaryActionRatingKey: String? {
         switch media.type {
         case .movie:

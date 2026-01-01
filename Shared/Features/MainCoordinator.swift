@@ -24,6 +24,7 @@ final class MainCoordinator: ObservableObject {
 
     @Published var selectedRatingKey: String?
     @Published var isPresentingPlayer = false
+    @Published var shouldResumeFromOffset = true
 
     func pathBinding(for tab: Tab) -> Binding<NavigationPath> {
         Binding(
@@ -77,13 +78,15 @@ final class MainCoordinator: ObservableObject {
         }
     }
 
-    func showPlayer(for ratingKey: String) {
+    func showPlayer(for ratingKey: String, shouldResumeFromOffset: Bool = true) {
         selectedRatingKey = ratingKey
+        self.shouldResumeFromOffset = shouldResumeFromOffset
         isPresentingPlayer = true
     }
 
     func resetPlayer() {
         selectedRatingKey = nil
         isPresentingPlayer = false
+        shouldResumeFromOffset = true
     }
 }

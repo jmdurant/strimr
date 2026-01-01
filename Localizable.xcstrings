@@ -748,6 +748,16 @@
         }
       }
     },
+    "media.detail.playFromStart" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play from start"
+          }
+        }
+      }
+    },
     "media.detail.season" : {
       "localizations" : {
         "en" : {
@@ -1369,6 +1379,70 @@
         }
       }
     },
+    "settings.interface.displayedLibraries" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Displayed libraries"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèques affichées"
+          }
+        }
+      }
+    },
+    "settings.interface.displayedLibraries.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No libraries available"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune bibliothèque disponible"
+          }
+        }
+      }
+    },
+    "settings.interface.navigationLibraries" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libraries in the navigation bar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliothèques dans la barre de navigation"
+          }
+        }
+      }
+    },
+    "settings.interface.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interface"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interface"
+          }
+        }
+      }
+    },
     "settings.playback.autoPlayNext" : {
       "localizations" : {
         "en" : {
@@ -1473,70 +1547,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Taille des sous-titres"
-          }
-        }
-      }
-    },
-    "settings.interface.displayedLibraries" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Displayed libraries"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliothèques affichées"
-          }
-        }
-      }
-    },
-    "settings.interface.displayedLibraries.empty" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No libraries available"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune bibliothèque disponible"
-          }
-        }
-      }
-    },
-    "settings.interface.navigationLibraries" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Libraries in the navigation bar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bibliothèques dans la barre de navigation"
-          }
-        }
-      }
-    },
-    "settings.interface.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interface"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interface"
           }
         }
       }

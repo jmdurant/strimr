@@ -6,6 +6,7 @@ struct MediaDetailHeaderSection: View {
     @Binding var isSummaryExpanded: Bool
     let heroHeight: CGFloat
     let onPlay: (String) -> Void
+    let onPlayFromStart: (String) -> Void
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -15,7 +16,7 @@ struct MediaDetailHeaderSection: View {
                 Spacer().frame(height: heroHeight - 40)
 
                 headerSection
-                playButton
+                playButtonsRow
                 secondaryButtonsRow
                 badgesSection
 
@@ -210,6 +211,16 @@ struct MediaDetailHeaderSection: View {
         .frame(maxWidth: .infinity, alignment: .center)
     }
 
+    private var playButtonsRow: some View {
+        HStack(spacing: 12) {
+            playButton
+
+            if viewModel.shouldShowPlayFromStartButton {
+                playFromStartButton
+            }
+        }
+    }
+
     private var playButton: some View {
         Button(action: handlePlay) {
             HStack(spacing: 12) {
@@ -230,6 +241,17 @@ struct MediaDetailHeaderSection: View {
         .controlSize(.large)
         .tint(.brandSecondary)
         .foregroundStyle(.brandSecondaryForeground)
+    }
+
+    private var playFromStartButton: some View {
+        Button(action: handlePlayFromStart) {
+            Image(systemName: "arrow.counterclockwise")
+                .font(.title2.weight(.semibold))
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .tint(.brandSecondary)
+        .accessibilityLabel(Text("media.detail.playFromStart"))
     }
 
     private var watchToggleButton: some View {
@@ -265,6 +287,13 @@ struct MediaDetailHeaderSection: View {
         Task {
             guard let ratingKey = await viewModel.playbackRatingKey() else { return }
             onPlay(ratingKey)
+        }
+    }
+
+    private func handlePlayFromStart() {
+        Task {
+            guard let ratingKey = await viewModel.playbackRatingKey() else { return }
+            onPlayFromStart(ratingKey)
         }
     }
 }
