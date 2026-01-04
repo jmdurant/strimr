@@ -1479,6 +1479,26 @@
         }
       }
     },
+    "settings.playback.player.externalWarning.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "External player warning"
+          }
+        }
+      }
+    },
+    "settings.playback.player.externalWarning.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Using an external player can prevent resume progress and Plex watch state from syncing. Infuse may require a subscription."
+          }
+        }
+      }
+    },
     "settings.playback.player.mpv" : {
       "localizations" : {
         "en" : {
@@ -1494,7 +1514,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Infuse"
+            "value" : "Infuse (external)"
           }
         }
       }

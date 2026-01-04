@@ -4,9 +4,22 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(SettingsManager.self) private var settingsManager
     @Environment(LibraryStore.self) private var libraryStore
+    @State private var showingExternalPlayerWarning = false
 
     private var viewModel: SettingsViewModel {
         SettingsViewModel(settingsManager: settingsManager)
+    }
+
+    private var playerSelectionBinding: Binding<PlaybackPlayer> {
+        Binding(
+            get: { viewModel.playerBinding.wrappedValue },
+            set: { newValue in
+                viewModel.playerBinding.wrappedValue = newValue
+                if newValue == .infuse {
+                    showingExternalPlayerWarning = true
+                }
+            }
+        )
     }
 
     var body: some View {
@@ -26,7 +39,7 @@ struct SettingsView: View {
                     }
                 }
 
-                Picker("settings.playback.player", selection: viewModel.playerBinding) {
+                Picker("settings.playback.player", selection: playerSelectionBinding) {
                     ForEach(viewModel.playerOptions) { player in
                         Text(player.localizationKey).tag(player)
                     }
@@ -52,5 +65,10 @@ struct SettingsView: View {
         .listStyle(.insetGrouped)
         .environment(\.editMode, .constant(.active))
         .navigationTitle("settings.title")
+        .alert("settings.playback.player.externalWarning.title", isPresented: $showingExternalPlayerWarning) {
+            Button("common.actions.done", role: .cancel) {}
+        } message: {
+            Text("settings.playback.player.externalWarning.message")
+        }
     }
 }
