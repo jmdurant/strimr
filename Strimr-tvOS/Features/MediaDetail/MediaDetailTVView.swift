@@ -33,7 +33,7 @@ struct MediaDetailTVView: View {
                         MediaHeroContentView(media: focusedMedia ?? bindableViewModel.media)
                             .frame(maxWidth: proxy.size.width * 0.60, alignment: .leading)
 
-                        playButtonsRow
+                        buttonsRow
 
                         if bindableViewModel.media.type == .show {
                             seasonsSection
@@ -89,15 +89,18 @@ struct MediaDetailTVView: View {
         .foregroundStyle(.brandSecondaryForeground)
     }
 
-    private var playButtonsRow: some View {
+    private var buttonsRow: some View {
         HStack(spacing: 16) {
             playButton
 
             if viewModel.shouldShowPlayFromStartButton {
                 playFromStartButton
             }
+            
+            watchToggleButton
         }
     }
+
 
     private var playFromStartButton: some View {
         Button(action: handlePlayFromStart) {
@@ -105,9 +108,29 @@ struct MediaDetailTVView: View {
                 .font(.title2.weight(.semibold))
         }
         .buttonStyle(.bordered)
-        .controlSize(.large)
+        .controlSize(.regular)
         .tint(.secondary)
         .accessibilityLabel(Text("media.detail.playFromStart"))
+    }
+
+    private var watchToggleButton: some View {
+        Button {
+            Task {
+                await viewModel.toggleWatchStatus()
+            }
+        } label: {
+            if viewModel.isUpdatingWatchStatus {
+                ProgressView()
+                    .tint(.brandSecondaryForeground)
+            } else {
+                Image(systemName: viewModel.watchActionIcon)
+                    .font(.title2.weight(.semibold))
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.regular)
+        .tint(.secondary)
+        .disabled(viewModel.isLoading || viewModel.isUpdatingWatchStatus)
     }
 
     private var seasonsSection: some View {
