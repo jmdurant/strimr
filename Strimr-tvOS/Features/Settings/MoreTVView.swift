@@ -45,7 +45,7 @@ struct MoreTVView: View {
                     Button {
                         Task { await sessionManager.signOut() }
                     } label: {
-                        Label("common.actions.signOut", systemImage: "rectangle.portrait.and.arrow.right")
+                        Label("common.actions.logOut", systemImage: "rectangle.portrait.and.arrow.right")
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding()
                     }

@@ -14,6 +14,12 @@
             "state" : "translated",
             "value" : "No profiles available."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun profil disponible."
+          }
         }
       }
     },
@@ -23,6 +29,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unable to load profiles. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les profils. Veuillez réessayer."
           }
         }
       }
@@ -34,6 +46,12 @@
             "state" : "translated",
             "value" : "Enter the PIN for this profile."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le code PIN pour ce profil."
+          }
         }
       }
     },
@@ -43,6 +61,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unable to switch profile. Check the PIN and try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de changer de profil. Vérifiez le code PIN et réessayez."
           }
         }
       }
@@ -54,6 +78,12 @@
             "state" : "translated",
             "value" : "Choose a profile to continue"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un profil pour continuer"
+          }
         }
       }
     },
@@ -63,6 +93,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Who's watching?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui regarde ?"
           }
         }
       }
@@ -74,12 +110,24 @@
             "state" : "translated",
             "value" : "Loading profiles..."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des profils…"
+          }
         }
       }
     },
     "auth.profile.pin.placeholder" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "PIN"
@@ -94,6 +142,12 @@
             "state" : "translated",
             "value" : "Enter the 4-digit PIN for %@."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisissez le code PIN à 4 chiffres pour %@."
+          }
         }
       }
     },
@@ -103,6 +157,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PIN Required"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code PIN requis"
           }
         }
       }
@@ -114,6 +174,12 @@
             "state" : "translated",
             "value" : "Enter PIN"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisir le code PIN"
+          }
         }
       }
     },
@@ -123,6 +189,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select Profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionner un profil"
           }
         }
       }
@@ -149,6 +221,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé"
           }
         }
       }
@@ -208,6 +286,12 @@
             "state" : "translated",
             "value" : "Read more"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En savoir plus"
+          }
         }
       }
     },
@@ -250,11 +334,14 @@
             "state" : "translated",
             "value" : "Show less"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher moins"
+          }
         }
       }
-    },
-    "common.actions.signOut" : {
-
     },
     "common.actions.switchProfile" : {
       "localizations" : {
@@ -279,6 +366,12 @@
             "state" : "translated",
             "value" : "Switch Server"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer de serveur"
+          }
         }
       }
     },
@@ -288,6 +381,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nothing to show yet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à afficher pour le moment."
           }
         }
       }
@@ -299,6 +398,12 @@
             "state" : "translated",
             "value" : "Try again later."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayez plus tard."
+          }
         }
       }
     },
@@ -308,6 +413,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Missing library identifier."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identifiant de bibliothèque manquant."
           }
         }
       }
@@ -319,6 +430,12 @@
             "state" : "translated",
             "value" : "Select a server to browse."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour parcourir."
+          }
         }
       }
     },
@@ -328,6 +445,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select a server to load content."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger le contenu."
           }
         }
       }
@@ -339,6 +462,12 @@
             "state" : "translated",
             "value" : "Select a server to load details."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger les détails."
+          }
         }
       }
     },
@@ -348,6 +477,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select a server to load episodes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger les épisodes."
           }
         }
       }
@@ -359,6 +494,12 @@
             "state" : "translated",
             "value" : "Select a server to load libraries."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger les bibliothèques."
+          }
         }
       }
     },
@@ -368,6 +509,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select a server to load recommendations."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger les recommandations."
           }
         }
       }
@@ -379,6 +526,12 @@
             "state" : "translated",
             "value" : "Select a server to load related content."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger le contenu associé."
+          }
         }
       }
     },
@@ -388,6 +541,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select a server to load seasons."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour charger les saisons."
           }
         }
       }
@@ -399,6 +558,12 @@
             "state" : "translated",
             "value" : "Select a server to play media."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour lire le média."
+          }
         }
       }
     },
@@ -408,6 +573,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select a server to search your library."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour rechercher dans votre bibliothèque."
           }
         }
       }
@@ -419,6 +590,12 @@
             "state" : "translated",
             "value" : "Select a server to update watch status."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez un serveur pour mettre à jour l'état de lecture."
+          }
         }
       }
     },
@@ -428,6 +605,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading home"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de l'accueil"
           }
         }
       }
@@ -439,6 +622,12 @@
             "state" : "translated",
             "value" : "Nothing to browse yet."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à parcourir pour le moment."
+          }
         }
       }
     },
@@ -449,6 +638,12 @@
             "state" : "translated",
             "value" : "No items"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun élément"
+          }
         }
       }
     },
@@ -458,6 +653,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading library"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la bibliothèque"
           }
         }
       }
@@ -501,6 +702,12 @@
             "state" : "translated",
             "value" : "Library tab"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onglet bibliothèque"
+          }
         }
       }
     },
@@ -510,6 +717,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add a Plex server or pull to refresh."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez un serveur Plex ou tirez pour actualiser."
           }
         }
       }
@@ -521,6 +734,12 @@
             "state" : "translated",
             "value" : "No libraries yet"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune bibliothèque pour le moment"
+          }
         }
       }
     },
@@ -530,6 +749,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Try refreshing to load your Plex libraries."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayez d'actualiser pour charger vos bibliothèques Plex."
           }
         }
       }
@@ -557,6 +782,12 @@
             "state" : "translated",
             "value" : "Loading libraries"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des bibliothèques"
+          }
         }
       }
     },
@@ -566,6 +797,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading recommendations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des recommandations"
           }
         }
       }
@@ -593,6 +830,12 @@
             "state" : "translated",
             "value" : "No cast information available."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune information sur la distribution."
+          }
         }
       }
     },
@@ -602,6 +845,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading cast…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la distribution…"
           }
         }
       }
@@ -613,6 +862,12 @@
             "state" : "translated",
             "value" : "No photo"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune photo"
+          }
         }
       }
     },
@@ -622,6 +877,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cast"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distribution"
           }
         }
       }
@@ -665,12 +926,24 @@
             "state" : "translated",
             "value" : "Episode %lld"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisode %lld"
+          }
         }
       }
     },
     "media.detail.genres" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genres"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Genres"
@@ -685,6 +958,12 @@
             "state" : "translated",
             "value" : "Loading episodes…"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des épisodes…"
+          }
         }
       }
     },
@@ -694,6 +973,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading related content…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement du contenu associé…"
           }
         }
       }
@@ -705,6 +990,12 @@
             "state" : "translated",
             "value" : "Loading seasons…"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des saisons…"
+          }
         }
       }
     },
@@ -714,6 +1005,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No episodes for this season."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun épisode pour cette saison."
           }
         }
       }
@@ -725,6 +1022,12 @@
             "state" : "translated",
             "value" : "No related content found."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun contenu associé trouvé."
+          }
         }
       }
     },
@@ -734,6 +1037,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No seasons available."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune saison disponible."
           }
         }
       }
@@ -745,6 +1054,12 @@
             "state" : "translated",
             "value" : "No seasons available yet."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune saison disponible pour le moment."
+          }
         }
       }
     },
@@ -755,6 +1070,12 @@
             "state" : "translated",
             "value" : "Play from start"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire depuis le début"
+          }
         }
       }
     },
@@ -764,6 +1085,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Season"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saison"
           }
         }
       }
@@ -787,6 +1114,12 @@
     "media.detail.studio" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Studio"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Studio"
@@ -817,6 +1150,12 @@
             "state" : "translated",
             "value" : "Updating details"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à jour des détails"
+          }
         }
       }
     },
@@ -827,6 +1166,12 @@
             "state" : "translated",
             "value" : "Mark as unwatched"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer comme non regardé"
+          }
         }
       }
     },
@@ -836,6 +1181,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mark as watched"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer comme regardé"
           }
         }
       }
@@ -866,13 +1217,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld episode"
+                  "value" : "%lld épisode"
                 }
               },
               "other" : {
                 "stringUnit" : {
-                  "state" : "new",
-                  "value" : "%lld episodes"
+                  "state" : "translated",
+                  "value" : "%lld épisodes"
                 }
               }
             }
@@ -943,6 +1294,12 @@
             "state" : "translated",
             "value" : "No artwork"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune illustration"
+          }
         }
       }
     },
@@ -953,12 +1310,24 @@
             "state" : "translated",
             "value" : "You will need to sign in again."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous devrez vous reconnecter."
+          }
         }
       }
     },
     "player.badge.hdr" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HDR"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "HDR"
@@ -973,6 +1342,12 @@
             "state" : "translated",
             "value" : "Rewind %lld seconds"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reculer de %lld secondes"
+          }
         }
       }
     },
@@ -983,12 +1358,24 @@
             "state" : "translated",
             "value" : "Skip forward %lld seconds"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avancer de %lld secondes"
+          }
         }
       }
     },
     "player.settings.audio" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Audio"
@@ -1003,6 +1390,12 @@
             "state" : "translated",
             "value" : "No audio tracks available"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune piste audio disponible"
+          }
         }
       }
     },
@@ -1012,6 +1405,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Subtitles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sous-titres"
           }
         }
       }
@@ -1023,6 +1422,12 @@
             "state" : "translated",
             "value" : "Off"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivés"
+          }
         }
       }
     },
@@ -1032,6 +1437,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Disable subtitles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactiver les sous-titres"
           }
         }
       }
@@ -1043,6 +1454,12 @@
             "state" : "translated",
             "value" : "Skip credits"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer le générique"
+          }
         }
       }
     },
@@ -1053,12 +1470,24 @@
             "state" : "translated",
             "value" : "Skip intro"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer l'intro"
+          }
         }
       }
     },
     "player.status.buffering" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buffering"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buffering"
@@ -1073,6 +1502,12 @@
             "state" : "translated",
             "value" : "EPISODE"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ÉPISODE"
+          }
         }
       }
     },
@@ -1082,6 +1517,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MOVIE"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FILM"
           }
         }
       }
@@ -1093,6 +1534,12 @@
             "state" : "translated",
             "value" : "SEASON"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SAISON"
+          }
         }
       }
     },
@@ -1102,6 +1549,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SHOW"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SÉRIE"
           }
         }
       }
@@ -1113,6 +1566,12 @@
             "state" : "translated",
             "value" : "Find movies, shows, and episodes across your Plex libraries."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouvez des films, séries et épisodes dans vos bibliothèques Plex."
+          }
         }
       }
     },
@@ -1122,6 +1581,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search your library"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans votre bibliothèque"
           }
         }
       }
@@ -1133,6 +1598,12 @@
             "state" : "translated",
             "value" : "Episode"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisode"
+          }
         }
       }
     },
@@ -1142,6 +1613,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Movie"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Film"
           }
         }
       }
@@ -1153,6 +1630,12 @@
             "state" : "translated",
             "value" : "TV Show"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série TV"
+          }
         }
       }
     },
@@ -1162,6 +1645,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Episodes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épisodes"
           }
         }
       }
@@ -1173,6 +1662,12 @@
             "state" : "translated",
             "value" : "Movies"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Films"
+          }
         }
       }
     },
@@ -1182,6 +1677,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TV Shows"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries TV"
           }
         }
       }
@@ -1193,6 +1694,12 @@
             "state" : "translated",
             "value" : "Searching…"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche…"
+          }
         }
       }
     },
@@ -1202,6 +1709,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Try a different query or adjust the filters."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayez une autre requête ou ajustez les filtres."
           }
         }
       }
@@ -1213,6 +1726,12 @@
             "state" : "translated",
             "value" : "No matches"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
         }
       }
     },
@@ -1222,6 +1741,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search movies, shows, episodes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher des films, séries, épisodes"
           }
         }
       }
@@ -1450,6 +1975,12 @@
             "state" : "translated",
             "value" : "Play next episode automatically"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire automatiquement l'épisode suivant"
+          }
         }
       }
     },
@@ -1459,6 +1990,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fast forward"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avance rapide"
           }
         }
       }
@@ -1479,16 +2016,6 @@
         }
       }
     },
-    "settings.playback.player.externalWarning.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "External player warning"
-          }
-        }
-      }
-    },
     "settings.playback.player.externalWarning.message" : {
       "localizations" : {
         "en" : {
@@ -1496,15 +2023,27 @@
             "state" : "translated",
             "value" : "Using an external player can prevent resume progress and Plex watch state from syncing. Infuse may require a subscription."
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'utilisation d'un lecteur externe peut empêcher la reprise et la synchronisation de l'état de lecture Plex. Infuse peut nécessiter un abonnement."
+          }
         }
       }
     },
-    "settings.playback.player.mpv" : {
+    "settings.playback.player.externalWarning.title" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MPV"
+            "value" : "External player warning"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avertissement lecteur externe"
           }
         }
       }
@@ -1516,12 +2055,40 @@
             "state" : "translated",
             "value" : "Infuse (external)"
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Infuse (externe)"
+          }
+        }
+      }
+    },
+    "settings.playback.player.mpv" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MPV"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MPV"
+          }
         }
       }
     },
     "settings.playback.player.vlc" : {
       "localizations" : {
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VLC"
+          }
+        },
+        "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "VLC"
@@ -1535,6 +2102,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rewind"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reculer"
           }
         }
       }
@@ -1561,6 +2134,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld seconds"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld secondes"
           }
         }
       }
