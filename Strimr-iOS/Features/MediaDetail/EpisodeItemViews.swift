@@ -33,6 +33,7 @@ struct EpisodeCardView: View {
                         runtime: runtime,
                         progress: progress
                     )
+                    .overlay { playOverlay }
 
                     detailStack
                 }
@@ -45,6 +46,7 @@ struct EpisodeCardView: View {
                         runtime: runtime,
                         progress: progress
                     )
+                    .overlay { playOverlay }
 
                     detailStack
                 }
@@ -104,5 +106,13 @@ struct EpisodeCardView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var playOverlay: some View {
+        Image(systemName: "play.fill")
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(12)
+            .background(Color.black.opacity(0.50), in: Circle())
     }
 }
