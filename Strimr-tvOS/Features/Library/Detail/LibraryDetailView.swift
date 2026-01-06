@@ -94,6 +94,7 @@ struct LibraryDetailView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .foregroundStyle(selectedTab == tab ? .brandPrimary : .secondary)
             .background(isFocused ? Color.white.opacity(0.2) : Color.clear)
             .clipShape(Capsule())
         }
