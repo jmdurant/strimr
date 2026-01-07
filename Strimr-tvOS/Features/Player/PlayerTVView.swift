@@ -25,6 +25,8 @@ struct PlayerTVView: View {
     @State private var activeSettingsSheet: TrackSettingsSheet?
     @State private var seekFeedback: SeekFeedback?
     @State private var seekFeedbackWorkItem: DispatchWorkItem?
+    @State private var showingTerminationAlert = false
+    @State private var terminationAlertMessage = ""
 
     private let controlsHideDelay: TimeInterval = 3.0
     private let seekFeedbackDelay: TimeInterval = 1.2
@@ -165,6 +167,12 @@ struct PlayerTVView: View {
             guard !isScrubbing else { return }
             timelinePosition = newValue
         }
+        .onChange(of: bindableViewModel.terminationMessage) { _, newValue in
+            guard let newValue else { return }
+            terminationAlertMessage = newValue
+            showingTerminationAlert = true
+            playerCoordinator.pause()
+        }
         .sheet(item: $activeSettingsSheet) { sheet in
             PlayerTrackSelectionView(
                 titleKey: sheet.titleKey,
@@ -181,6 +189,13 @@ struct PlayerTVView: View {
                 },
                 onClose: { activeSettingsSheet = nil }
             )
+        }
+        .alert("player.termination.title", isPresented: $showingTerminationAlert) {
+            Button("player.termination.dismiss") {
+                dismissPlayer()
+            }
+        } message: {
+            Text(terminationAlertMessage)
         }
     }
 

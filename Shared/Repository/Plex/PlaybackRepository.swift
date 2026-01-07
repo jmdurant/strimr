@@ -53,15 +53,19 @@ final class PlaybackRepository {
         ratingKey: String,
         state: PlaybackState,
         time: Int,
-        duration: Int
-    ) async throws {
-        try await network.send(
+        duration: Int,
+        sessionIdentifier: String
+    ) async throws -> PlexTimelineResponse {
+        try await network.request(
             path: "/:/timeline",
             queryItems: [
                 URLQueryItem(name: "ratingKey", value: ratingKey),
                 URLQueryItem(name: "state", value: state.rawValue),
                 URLQueryItem(name: "time", value: String(time)),
                 URLQueryItem(name: "duration", value: String(duration)),
+            ],
+            headers: [
+                "X-Plex-Session-Identifier": sessionIdentifier,
             ]
         )
     }

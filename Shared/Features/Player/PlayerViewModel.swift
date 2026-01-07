@@ -33,6 +33,9 @@ final class PlayerViewModel {
     @ObservationIgnored private let shouldResumeFromOffsetFlag: Bool
     @ObservationIgnored private var activePartId: Int?
     @ObservationIgnored private var streamsByFFIndex: [Int: PlexPartStream] = [:]
+    @ObservationIgnored private let sessionIdentifier = UUID().uuidString
+    @ObservationIgnored private var didReceiveTermination = false
+    var terminationMessage: String?
 
     func plexStream(forFFIndex ffIndex: Int?) -> PlexPartStream? {
         guard let ffIndex else { return nil }
@@ -126,11 +129,12 @@ final class PlayerViewModel {
 
         do {
             let repository = try PlaybackRepository(context: context)
-            try await repository.updateTimeline(
+            let response = try await repository.updateTimeline(
                 ratingKey: ratingKey,
                 state: .stopped,
                 time: currentDuration,
-                duration: currentDuration
+                duration: currentDuration,
+                sessionIdentifier: sessionIdentifier
             )
         } catch {
             debugPrint("Failed to mark playback as finished:", error)
@@ -164,6 +168,7 @@ final class PlayerViewModel {
         state: PlaybackRepository.PlaybackState,
         force: Bool = false
     ) {
+        guard !didReceiveTermination else { return }
         let now = Date()
         let stateChanged = lastTimelineState != state
         let shouldSend = force || stateChanged || lastTimelineSentAt.map { now.timeIntervalSince($0) >= timelineInterval } ?? true
@@ -184,12 +189,14 @@ final class PlayerViewModel {
 
         do {
             let repository = try PlaybackRepository(context: context)
-            try await repository.updateTimeline(
+            let response = try await repository.updateTimeline(
                 ratingKey: ratingKey,
                 state: state,
                 time: currentTime,
-                duration: currentDuration
+                duration: currentDuration,
+                sessionIdentifier: sessionIdentifier
             )
+            handleTerminationIfNeeded(response)
         } catch {
             debugPrint("Failed to update timeline:", error)
         }
@@ -231,6 +238,40 @@ final class PlayerViewModel {
 
     private func activeMarker(where predicate: (PlexMarker) -> Bool) -> PlexMarker? {
         markers.first { predicate($0) && $0.contains(time: position) }
+    }
+
+    private func handleTerminationIfNeeded(_ response: PlexTimelineResponse) {
+        guard
+            !didReceiveTermination,
+            let terminationText = response.mediaContainer.terminationText,
+            !terminationText.isEmpty
+        else {
+            return
+        }
+
+        didReceiveTermination = true
+        terminationMessage = terminationText
+        Task {
+            await sendStoppedAfterTermination()
+        }
+    }
+
+    private func sendStoppedAfterTermination() async {
+        let currentTime = max(0, Int(position * 1000))
+        let currentDuration = max(0, Int((duration ?? 0) * 1000))
+
+        do {
+            let repository = try PlaybackRepository(context: context)
+            _ = try await repository.updateTimeline(
+                ratingKey: ratingKey,
+                state: .stopped,
+                time: currentTime,
+                duration: currentDuration,
+                sessionIdentifier: sessionIdentifier
+            )
+        } catch {
+            debugPrint("Failed to report termination stop:", error)
+        }
     }
 
     func persistStreamSelection(for track: PlayerTrack) async {

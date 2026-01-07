@@ -23,6 +23,8 @@ struct PlayerView: View {
     @State private var appliedResumeOffset = false
     @State private var awaitingMediaLoad = false
     @State private var timelinePosition = 0.0
+    @State private var showingTerminationAlert = false
+    @State private var terminationAlertMessage = ""
 
     private let controlsHideDelay: TimeInterval = 3.0
     private var seekBackwardInterval: Double {
@@ -147,6 +149,12 @@ struct PlayerView: View {
             guard !isScrubbing else { return }
             timelinePosition = newValue
         }
+        .onChange(of: bindableViewModel.terminationMessage) { _, newValue in
+            guard let newValue else { return }
+            terminationAlertMessage = newValue
+            showingTerminationAlert = true
+            playerCoordinator.pause()
+        }
         .sheet(isPresented: $showingSettings) {
             PlaybackSettingsView(
                 audioTracks: settingsAudioTracks,
@@ -159,6 +167,13 @@ struct PlayerView: View {
             )
             .presentationDetents([.medium])
             .presentationBackground(.ultraThinMaterial)
+        }
+        .alert("player.termination.title", isPresented: $showingTerminationAlert) {
+            Button("player.termination.dismiss") {
+                dismissPlayer()
+            }
+        } message: {
+            Text(terminationAlertMessage)
         }
     }
 

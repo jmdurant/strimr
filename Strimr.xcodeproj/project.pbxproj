@@ -108,6 +108,7 @@
 				Models/PlexCloudModels.swift,
 				Models/PlexDiscoverModels.swift,
 				Models/PlexMediaModels.swift,
+				Models/PlexTimelineModels.swift,
 				Networking/Plex/PlexAPI.swift,
 				Networking/Plex/PlexAPIContext.swift,
 				Networking/Plex/PlexCloudNetworkClient.swift,
