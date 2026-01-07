@@ -52,9 +52,6 @@ struct SignInTVView: View {
                                 .progressViewStyle(.circular)
                         }
 
-                        Text("signIn.tv.codeLabel \(pin.code)")
-                            .font(.title2.monospacedDigit())
-                            .fontWeight(.bold)
                     }
                 } else if viewModel.isAuthenticating {
                     ProgressView("signIn.button.waiting")

@@ -1527,22 +1527,6 @@
         }
       }
     },
-    "player.termination.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Playback stopped"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lecture arrêtée"
-          }
-        }
-      }
-    },
     "player.termination.dismiss" : {
       "localizations" : {
         "en" : {
@@ -1555,6 +1539,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "player.termination.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playback stopped"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture arrêtée"
           }
         }
       }
@@ -2371,22 +2371,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Se connecter avec Plex"
-          }
-        }
-      }
-    },
-    "signIn.tv.codeLabel %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Code: %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Code : %@"
           }
         }
       }
