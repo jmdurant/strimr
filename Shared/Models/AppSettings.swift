@@ -4,7 +4,7 @@ struct PlaybackSettings: Codable, Equatable {
     var autoPlayNextEpisode = true
     var seekBackwardSeconds = 10
     var seekForwardSeconds = 10
-    var player = PlaybackPlayer.vlc
+    var player = PlaybackPlayer.mpv
     var subtitleScale = 100
 }
 
