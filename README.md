@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">Strimr</h1>
 
-Strimr is a third-party Plex client designed to improve the Plex experience with Swift-powered performance and a fully native UI that feels at home on iPhone, iPad, and Apple TV.
+Strimr is a third-party Plex client built in Swift with a native interface for iPhone, iPad, and Apple TV.
 
 ## Key Features
 - Server selection
