@@ -6,6 +6,16 @@ final class PlexServerNetworkClient {
     private var baseURL: URL
     private var language: String
     private var clientIdentifier: String?
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    private let platform: String = {
+        #if os(tvOS)
+        return "tvOS"
+        #elseif os(iOS)
+        return "iOS"
+        #else
+        return "Unknown"
+        #endif
+    }()
 
     init(authToken: String, baseURL: URL, clientIdentifier: String? = nil, language: String = "en") {
         self.authToken = authToken
@@ -75,6 +85,11 @@ final class PlexServerNetworkClient {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue(platform, forHTTPHeaderField: "X-Plex-Platform")
+        if let appVersion {
+            request.setValue(appVersion, forHTTPHeaderField: "X-Plex-Version")
+        }
         request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
         request.setValue(language, forHTTPHeaderField: "X-Plex-Language")
         if let clientIdentifier = clientIdentifier {

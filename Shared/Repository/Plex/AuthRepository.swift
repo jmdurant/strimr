@@ -14,7 +14,6 @@ final class AuthRepository {
             path: "/pins",
             method: "POST",
             queryItems: [URLQueryItem(name: "strong", value: "true")],
-            headers: ["X-Plex-Product": "Strimr"]
         )
     }
 

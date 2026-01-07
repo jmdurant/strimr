@@ -7,6 +7,16 @@ final class PlexCloudNetworkClient {
     private let discoverBaseURL = URL(string: "https://discover.provider.plex.tv")!
     private var authToken: String?
     private var clientIdentifier: String
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    private let platform: String = {
+        #if os(tvOS)
+        return "tvOS"
+        #elseif os(iOS)
+        return "iOS"
+        #else
+        return "Unknown"
+        #endif
+    }()
 
     init(authToken: String?, clientIdentifier: String, useDiscoverBaseURL: Bool = false) {
         self.authToken = authToken
@@ -78,6 +88,11 @@ final class PlexCloudNetworkClient {
         request.httpMethod = method
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue(platform, forHTTPHeaderField: "X-Plex-Platform")
+        if let appVersion {
+            request.setValue(appVersion, forHTTPHeaderField: "X-Plex-Version")
+        }
         request.setValue(clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
         if let authToken {
             request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
