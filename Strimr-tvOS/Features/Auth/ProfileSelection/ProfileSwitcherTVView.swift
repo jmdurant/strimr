@@ -200,7 +200,7 @@ struct ProfileSwitcherTVView: View {
     }
 
     private func pinEntrySheet(for user: PlexHomeUser) -> some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("auth.profile.pin.title")
                 .font(.title2.bold())
             Text("auth.profile.pin.prompt \(user.title)")
@@ -215,6 +215,7 @@ struct ProfileSwitcherTVView: View {
                     resetPinPrompt()
                 }
                 .frame(maxWidth: .infinity)
+
                 Button {
                     let enteredPin = pinInput
                     Task { await viewModel.switchToUser(user, pin: enteredPin) }
@@ -222,16 +223,16 @@ struct ProfileSwitcherTVView: View {
                 } label: {
                     Text("common.actions.switchProfile")
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.brandPrimary)
+                .tint(.brandSecondary)
+                .foregroundStyle(.brandSecondaryForeground)
                 .disabled(pinInput.count < 4)
             }
+            .focusSection()
 
             Spacer()
         }
-        .padding(40)
+        .padding(32)
     }
 
     private var pinDisplay: some View {
@@ -251,16 +252,26 @@ struct ProfileSwitcherTVView: View {
         }
     }
 
+    private let columns = [
+        GridItem(.fixed(128), spacing: 16),
+        GridItem(.fixed(128), spacing: 16),
+        GridItem(.fixed(128), spacing: 16)
+    ]
+    
+    private let keypadButtonSize = CGSize(width: 64, height: 48)
+
     private var keypad: some View {
-        VStack(spacing: 14) {
-            keypadRow(["1", "2", "3"])
-            keypadRow(["4", "5", "6"])
-            keypadRow(["7", "8", "9"])
-            HStack(spacing: 16) {
-                Spacer()
-                keypadDigitButton("0")
-                keypadDeleteButton()
+        LazyVGrid(columns: columns) {
+            ForEach(["1","2","3","4","5","6","7","8","9"], id: \.self) {
+                keypadDigitButton($0)
             }
+
+            Color.clear
+                .frame(width: keypadButtonSize.width,
+                       height: keypadButtonSize.height)
+
+            keypadDigitButton("0")
+            keypadDeleteButton()
         }
     }
 
@@ -278,11 +289,11 @@ struct ProfileSwitcherTVView: View {
         } label: {
             Text(digit)
                 .font(.title2.bold())
-                .frame(width: 96, height: 72)
+                .frame(width: keypadButtonSize.width)
+                .padding(.vertical, 16)
         }
-        .buttonStyle(.bordered)
         .buttonBorderShape(.roundedRectangle(radius: 14))
-        .controlSize(.large)
+        .controlSize(.small)
     }
 
     private func keypadDeleteButton() -> some View {
@@ -290,13 +301,12 @@ struct ProfileSwitcherTVView: View {
             deleteDigit()
         } label: {
             Image(systemName: "delete.left")
-                .font(.title3.bold())
-                .frame(width: 96, height: 72)
+                .font(.title2.bold())
+                .frame(width: keypadButtonSize.width)
+                .padding(.vertical, 16)
         }
-        .buttonStyle(.borderedProminent)
-        .tint(.brandPrimary)
         .buttonBorderShape(.roundedRectangle(radius: 14))
-        .controlSize(.large)
+        .controlSize(.small)
         .disabled(pinInput.isEmpty)
     }
 
