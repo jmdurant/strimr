@@ -51,7 +51,6 @@ struct SignInTVView: View {
                             ProgressView("signIn.button.waiting")
                                 .progressViewStyle(.circular)
                         }
-
                     }
                 } else if viewModel.isAuthenticating {
                     ProgressView("signIn.button.waiting")

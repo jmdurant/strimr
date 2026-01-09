@@ -255,14 +255,14 @@ struct ProfileSwitcherTVView: View {
     private let columns = [
         GridItem(.fixed(128), spacing: 16),
         GridItem(.fixed(128), spacing: 16),
-        GridItem(.fixed(128), spacing: 16)
+        GridItem(.fixed(128), spacing: 16),
     ]
-    
+
     private let keypadButtonSize = CGSize(width: 64, height: 48)
 
     private var keypad: some View {
         LazyVGrid(columns: columns) {
-            ForEach(["1","2","3","4","5","6","7","8","9"], id: \.self) {
+            ForEach(["1", "2", "3", "4", "5", "6", "7", "8", "9"], id: \.self) {
                 keypadDigitButton($0)
             }
 
