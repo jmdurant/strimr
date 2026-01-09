@@ -55,11 +55,11 @@ struct PlexCloudPin: Codable, Equatable {
 }
 
 struct PlexHome: Codable, Equatable {
-    let id: Int
-    let name: String
+    let id: Int?
+    let name: String?
     let guestUserID: Int?
     let guestUserUUID: String?
-    let guestEnabled: Bool
+    let guestEnabled: Bool?
     let subscription: Bool?
     let users: [PlexHomeUser]
 
