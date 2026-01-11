@@ -9,7 +9,7 @@ final class MediaRepository {
             throw PlexAPIError.missingConnection
         }
 
-        guard let authToken = context.authTokenCloud else {
+        guard let authToken = context.authTokenServer else {
             throw PlexAPIError.missingAuthToken
         }
 
