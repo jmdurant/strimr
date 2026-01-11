@@ -129,7 +129,7 @@ final class PlayerViewModel {
 
         do {
             let repository = try PlaybackRepository(context: context)
-            let response = try await repository.updateTimeline(
+            let _ = try await repository.updateTimeline(
                 ratingKey: ratingKey,
                 state: .stopped,
                 time: currentDuration,
