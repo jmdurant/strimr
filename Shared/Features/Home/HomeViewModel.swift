@@ -71,8 +71,8 @@ final class HomeViewModel {
             async let continueResponse = hubRepository.getContinueWatchingHub(params: hubParams)
             async let promotedResponse = hubRepository.getPromotedHub(params: hubParams)
 
-            let continueHub = try await continueResponse.mediaContainer.hub.first
-            let promotedHubs = try await promotedResponse.mediaContainer.hub
+            let continueHub = try await continueResponse.mediaContainer.hub?.first
+            let promotedHubs = try await promotedResponse.mediaContainer.hub ?? []
 
             guard !Task.isCancelled else { return }
 

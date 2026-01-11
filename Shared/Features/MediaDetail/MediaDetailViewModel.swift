@@ -491,7 +491,7 @@ final class MediaDetailViewModel {
 
         do {
             let response = try await hubRepository.getRelatedMediaHubs(ratingKey: media.metadataRatingKey)
-            relatedHubs = response.mediaContainer.hub.map(Hub.init)
+            relatedHubs = (response.mediaContainer.hub ?? []).map(Hub.init)
         } catch {
             relatedHubs = []
             relatedHubsErrorMessage = error.localizedDescription

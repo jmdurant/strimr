@@ -313,7 +313,7 @@ struct PlexItem: Codable, Equatable {
 struct PlexHubMediaContainer: Codable, Equatable {
     struct MediaContainer: Codable, Equatable {
         let size: Int?
-        let hub: [PlexHub]
+        let hub: [PlexHub]?
 
         private enum CodingKeys: String, CodingKey {
             case size

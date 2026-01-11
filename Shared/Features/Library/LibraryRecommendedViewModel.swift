@@ -41,7 +41,7 @@ final class LibraryRecommendedViewModel {
 
         do {
             let response = try await hubRepository.getSectionHubs(sectionId: sectionId)
-            let plexHubs = response.mediaContainer.hub
+            let plexHubs = response.mediaContainer.hub ?? []
             hubs = plexHubs.map(Hub.init)
         } catch {
             resetState(error: error.localizedDescription)
