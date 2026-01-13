@@ -49,6 +49,7 @@ Use `swiftformat` to format the code.
 ## Submitting changes
 
 - Keep PRs focused and avoid mixing unrelated changes.
+- If a pull request is specific to iOS or tvOS, prefix the title with `(iOS)` or `(tvOS)`.
 - Add or update localization keys as needed.
 - If you add new assets, keep them in the correct target catalog: `Strimr-iOS/Assets.xcassets` or `Strimr-tvOS/Assets.xcassets`.
 - Use Conventional Commits with the scope `ios` or `tvos`.
