@@ -7,14 +7,15 @@ final class PlexAPIContext {
     private var resource: PlexCloudResource?
     private(set) var baseURLServer: URL?
     private(set) var authTokenServer: String?
+    @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
 
     @ObservationIgnored private let keychain = Keychain(service: Bundle.main.bundleIdentifier!)
     @ObservationIgnored private let clientIdKey = "strimr.plex.clientId"
     @ObservationIgnored private let connectionKeyPrefix = "strimr.plex.connection"
 
     init() {
-        Task {
-            await bootstrap()
+        bootstrapTask = Task { [weak self] in
+            await self?.bootstrap()
         }
     }
 
@@ -37,6 +38,10 @@ final class PlexAPIContext {
         return identifier
     }
 
+    func waitForBootstrap() async {
+        await bootstrapTask?.value
+    }
+
     func setAuthToken(_ token: String) {
         authTokenCloud = token
     }
@@ -52,6 +57,7 @@ final class PlexAPIContext {
     func removeServer() {
         resource = nil
         baseURLServer = nil
+        authTokenServer = nil
     }
 
     @discardableResult
@@ -106,7 +112,7 @@ final class PlexAPIContext {
     ) async throws -> Bool {
         var request = URLRequest(url: connection.uri)
         request.setValue(accessToken, forHTTPHeaderField: "X-Plex-Token")
-        request.timeoutInterval = 3
+        request.timeoutInterval = 6
 
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
@@ -123,6 +129,7 @@ final class PlexAPIContext {
         resource = nil
         authTokenCloud = nil
         baseURLServer = nil
+        authTokenServer = nil
     }
 
     private func connectionKey(for resource: PlexCloudResource) -> String {
