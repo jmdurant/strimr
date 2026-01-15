@@ -64,7 +64,8 @@ struct ProfileSwitcherView: View {
                     Text("auth.profile.pin.title")
                         .font(.headline)
 
-                    Text("auth.profile.pin.prompt \(user.title)")
+                    let userDisplayName: String = user.friendlyName ?? user.title ?? "?"
+                    Text("auth.profile.pin.prompt \(userDisplayName)")
                         .foregroundStyle(.secondary)
 
                     SecureField("auth.profile.pin.placeholder", text: $pinInput)
