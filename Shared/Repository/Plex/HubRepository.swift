@@ -52,6 +52,7 @@ final class HubRepository {
         if resolved.excludeContinueWatching == nil {
             queryItems.append(URLQueryItem(name: "excludeContinueWatching", value: "1"))
         }
+        queryItems.append(URLQueryItem(name: "includeLibraryPlaylists", value: "0"))
         return try await network.request(path: "/hubs/promoted", queryItems: queryItems)
     }
 
