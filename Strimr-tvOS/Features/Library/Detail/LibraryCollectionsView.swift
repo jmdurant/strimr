@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct LibraryBrowseView: View {
+struct LibraryCollectionsView: View {
     @State var viewModel: LibraryBrowseViewModel
     let onSelectMedia: (MediaDisplayItem) -> Void
 

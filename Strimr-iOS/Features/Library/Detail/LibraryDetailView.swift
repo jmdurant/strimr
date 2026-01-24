@@ -2,15 +2,16 @@ import SwiftUI
 
 struct LibraryDetailView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
     let library: Library
-    let onSelectMedia: (MediaItem) -> Void
+    let onSelectMedia: (MediaDisplayItem) -> Void
 
     @State private var selectedTab: LibraryDetailTab = .recommended
 
     var body: some View {
         VStack(spacing: 0) {
             Picker("library.detail.tabPicker", selection: $selectedTab) {
-                ForEach(LibraryDetailTab.allCases) { tab in
+                ForEach(availableTabs) { tab in
                     Text(tab.title).tag(tab)
                 }
             }
@@ -33,6 +34,15 @@ struct LibraryDetailView: View {
                         viewModel: LibraryBrowseViewModel(
                             library: library,
                             context: plexApiContext,
+                            settingsManager: settingsManager,
+                        ),
+                        onSelectMedia: onSelectMedia,
+                    )
+                case .collections:
+                    LibraryCollectionsView(
+                        viewModel: LibraryCollectionsViewModel(
+                            library: library,
+                            context: plexApiContext,
                         ),
                         onSelectMedia: onSelectMedia,
                     )
@@ -42,12 +52,24 @@ struct LibraryDetailView: View {
         }
         .navigationTitle(library.title)
         .toolbarTitleDisplayMode(.inline)
+        .onChange(of: settingsManager.interface.displayCollections) { _, displayCollections in
+            if !displayCollections, selectedTab == .collections {
+                selectedTab = .recommended
+            }
+        }
+    }
+
+    private var availableTabs: [LibraryDetailTab] {
+        settingsManager.interface.displayCollections
+            ? LibraryDetailTab.allCases
+            : LibraryDetailTab.allCases.filter { $0 != .collections }
     }
 }
 
 enum LibraryDetailTab: String, CaseIterable, Identifiable {
     case recommended
     case browse
+    case collections
 
     var id: String {
         rawValue
@@ -59,6 +81,8 @@ enum LibraryDetailTab: String, CaseIterable, Identifiable {
             "library.detail.tab.recommended"
         case .browse:
             "library.detail.tab.browse"
+        case .collections:
+            "library.detail.tab.collections"
         }
     }
 }

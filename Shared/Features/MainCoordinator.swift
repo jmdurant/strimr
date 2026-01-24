@@ -12,7 +12,8 @@ final class MainCoordinator: ObservableObject {
     }
 
     enum Route: Hashable {
-        case mediaDetail(MediaItem)
+        case mediaDetail(PlayableMediaItem)
+        case collectionDetail(CollectionMediaItem)
     }
 
     @Published var tab: Tab = .home
@@ -59,8 +60,42 @@ final class MainCoordinator: ObservableObject {
         )
     }
 
-    func showMediaDetail(_ media: MediaItem) {
+    func showMediaDetail(_ media: PlayableMediaItem) {
         let route = Route.mediaDetail(media)
+
+        switch tab {
+        case .home:
+            homePath.append(route)
+        case .search:
+            searchPath.append(route)
+        case .library:
+            libraryPath.append(route)
+        case .more:
+            break
+        case let .libraryDetail(libraryId):
+            var path = libraryDetailPaths[libraryId] ?? NavigationPath()
+            path.append(route)
+            libraryDetailPaths[libraryId] = path
+        }
+    }
+
+    func showMediaDetail(_ media: MediaItem) {
+        guard let playable = PlayableMediaItem(mediaItem: media) else { return }
+        showMediaDetail(playable)
+    }
+
+    func showMediaDetail(_ media: MediaDisplayItem) {
+        switch media {
+        case let .playable(item):
+            guard let playable = PlayableMediaItem(mediaItem: item) else { return }
+            showMediaDetail(playable)
+        case let .collection(collection):
+            showCollectionDetail(collection)
+        }
+    }
+
+    func showCollectionDetail(_ collection: CollectionMediaItem) {
+        let route = Route.collectionDetail(collection)
 
         switch tab {
         case .home:

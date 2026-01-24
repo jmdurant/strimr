@@ -3,7 +3,7 @@ import Observation
 
 @MainActor
 @Observable
-final class LibraryBrowseViewModel {
+final class LibraryCollectionsViewModel {
     let library: Library
     var items: [MediaDisplayItem] = []
     var isLoading = false
@@ -12,12 +12,10 @@ final class LibraryBrowseViewModel {
     private var reachedEnd = false
 
     @ObservationIgnored private let context: PlexAPIContext
-    @ObservationIgnored private let settingsManager: SettingsManager
 
-    init(library: Library, context: PlexAPIContext, settingsManager: SettingsManager) {
+    init(library: Library, context: PlexAPIContext) {
         self.library = library
         self.context = context
-        self.settingsManager = settingsManager
     }
 
     func load() async {
@@ -53,10 +51,9 @@ final class LibraryBrowseViewModel {
 
         do {
             let start = reset ? 0 : items.count
-            let includeCollections = settingsManager.interface.displayCollections ? true : nil
-            let response = try await sectionRepository.getSectionsItems(
+            let response = try await sectionRepository.getSectionCollections(
                 sectionId: sectionId,
-                params: SectionRepository.SectionItemsParams(includeCollections: includeCollections),
+                includeCollections: true,
                 pagination: PlexPagination(start: start, size: 20),
             )
 

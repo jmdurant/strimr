@@ -4,6 +4,11 @@ import Observation
 @MainActor
 @Observable
 final class LibraryBrowseViewModel {
+    enum Mode: Hashable {
+        case all
+        case collections
+    }
+
     struct SectionCharacter: Identifiable, Hashable {
         let id: String
         let title: String
@@ -12,7 +17,8 @@ final class LibraryBrowseViewModel {
     }
 
     let library: Library
-    var itemsByIndex: [Int: MediaItem] = [:]
+    let mode: Mode
+    var itemsByIndex: [Int: MediaDisplayItem] = [:]
     var totalItemCount = 0
     var sectionCharacters: [SectionCharacter] = []
     var isLoading = false
@@ -21,11 +27,19 @@ final class LibraryBrowseViewModel {
     private var loadingPageStarts: Set<Int> = []
 
     @ObservationIgnored private let context: PlexAPIContext
+    @ObservationIgnored private let settingsManager: SettingsManager
     private let pageSize = 40
 
-    init(library: Library, context: PlexAPIContext) {
+    init(
+        library: Library,
+        context: PlexAPIContext,
+        settingsManager: SettingsManager,
+        mode: Mode = .all,
+    ) {
         self.library = library
         self.context = context
+        self.settingsManager = settingsManager
+        self.mode = mode
     }
 
     func load() async {
@@ -63,7 +77,11 @@ final class LibraryBrowseViewModel {
         guard let sectionRepository = try? SectionRepository(context: context) else { return }
 
         do {
-            let response = try await sectionRepository.getSectionFirstCharacters(sectionId: sectionId)
+            let response = try await sectionRepository.getSectionFirstCharacters(
+                sectionId: sectionId,
+                type: mode.characterType,
+                includeCollections: mode.includeCollections,
+            )
             let directories = response.mediaContainer.directory ?? []
             var runningIndex = 0
             var characters: [SectionCharacter] = []
@@ -111,12 +129,15 @@ final class LibraryBrowseViewModel {
         }
 
         do {
-            let response = try await sectionRepository.getSectionsItems(
+            let response = try await mode.loadItems(
+                using: sectionRepository,
                 sectionId: sectionId,
+                includeCollections: settingsManager.interface.displayCollections ? true : nil,
                 pagination: PlexPagination(start: start, size: pageSize),
             )
 
-            let newItems = (response.mediaContainer.metadata ?? []).map(MediaItem.init)
+            let newItems = (response.mediaContainer.metadata ?? [])
+                .compactMap(MediaDisplayItem.init)
             let total = response.mediaContainer.totalSize ?? (start + newItems.count)
 
             for (offset, item) in newItems.enumerated() {
@@ -137,5 +158,48 @@ final class LibraryBrowseViewModel {
         isLoading = false
         loadedPageStarts = []
         loadingPageStarts = []
+    }
+}
+
+private extension LibraryBrowseViewModel.Mode {
+    var includeCollections: Bool? {
+        switch self {
+        case .all:
+            nil
+        case .collections:
+            true
+        }
+    }
+
+    var characterType: Int? {
+        switch self {
+        case .all:
+            nil
+        case .collections:
+            18
+        }
+    }
+
+    func loadItems(
+        using repository: SectionRepository,
+        sectionId: Int,
+        includeCollections: Bool?,
+        pagination: PlexPagination,
+    ) async throws -> PlexItemMediaContainer {
+        switch self {
+        case .all:
+            let resolvedIncludeCollections = includeCollections
+            return try await repository.getSectionsItems(
+                sectionId: sectionId,
+                params: SectionRepository.SectionItemsParams(includeCollections: resolvedIncludeCollections),
+                pagination: pagination,
+            )
+        case .collections:
+            return try await repository.getSectionCollections(
+                sectionId: sectionId,
+                includeCollections: true,
+                pagination: pagination,
+            )
+        }
     }
 }

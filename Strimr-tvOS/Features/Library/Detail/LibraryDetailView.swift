@@ -2,8 +2,9 @@ import SwiftUI
 
 struct LibraryDetailView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
     let library: Library
-    let onSelectMedia: (MediaItem) -> Void
+    let onSelectMedia: (MediaDisplayItem) -> Void
 
     @State private var viewModel = LibraryDetailViewModel()
     @State private var selectedTab: LibraryDetailTab = .recommended
@@ -13,7 +14,7 @@ struct LibraryDetailView: View {
 
     init(
         library: Library,
-        onSelectMedia: @escaping (MediaItem) -> Void = { _ in },
+        onSelectMedia: @escaping (MediaDisplayItem) -> Void = { _ in },
     ) {
         self.library = library
         self.onSelectMedia = onSelectMedia
@@ -40,6 +41,11 @@ struct LibraryDetailView: View {
         .onAppear {
             contentFocused = true
         }
+        .onChange(of: settingsManager.interface.displayCollections) { _, displayCollections in
+            if !displayCollections, selectedTab == .collections {
+                selectedTab = .recommended
+            }
+        }
     }
 
     private var contentView: some View {
@@ -59,6 +65,17 @@ struct LibraryDetailView: View {
                     viewModel: LibraryBrowseViewModel(
                         library: library,
                         context: plexApiContext,
+                        settingsManager: settingsManager,
+                    ),
+                    onSelectMedia: onSelectMedia,
+                )
+            case .collections:
+                LibraryCollectionsView(
+                    viewModel: LibraryBrowseViewModel(
+                        library: library,
+                        context: plexApiContext,
+                        settingsManager: settingsManager,
+                        mode: .collections,
                     ),
                     onSelectMedia: onSelectMedia,
                 )
@@ -71,7 +88,7 @@ struct LibraryDetailView: View {
 
     private var sidebarView: some View {
         VStack {
-            ForEach(LibraryDetailTab.allCases) { tab in
+            ForEach(availableTabs) { tab in
                 sidebarButton(for: tab)
             }
         }
@@ -109,11 +126,18 @@ struct LibraryDetailView: View {
     private var sidebarWidth: CGFloat {
         isSidebarFocused ? 240 : 72
     }
+
+    private var availableTabs: [LibraryDetailTab] {
+        settingsManager.interface.displayCollections
+            ? LibraryDetailTab.allCases
+            : LibraryDetailTab.allCases.filter { $0 != .collections }
+    }
 }
 
 enum LibraryDetailTab: String, CaseIterable, Identifiable {
     case recommended
     case browse
+    case collections
 
     var id: String {
         rawValue
@@ -125,6 +149,8 @@ enum LibraryDetailTab: String, CaseIterable, Identifiable {
             "library.detail.tab.recommended"
         case .browse:
             "library.detail.tab.browse"
+        case .collections:
+            "library.detail.tab.collections"
         }
     }
 
@@ -134,6 +160,8 @@ enum LibraryDetailTab: String, CaseIterable, Identifiable {
             "sparkles"
         case .browse:
             "square.grid.2x2.fill"
+        case .collections:
+            "rectangle.stack.fill"
         }
     }
 }

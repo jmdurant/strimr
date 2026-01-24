@@ -8,6 +8,7 @@ final class SectionRepository {
         var sort: String?
         var limit: Int?
         var includeMeta: Bool?
+        var includeCollections: Bool?
 
         var queryItems: [URLQueryItem] {
             [
@@ -16,6 +17,7 @@ final class SectionRepository {
                 URLQueryItem.make("sort", sort),
                 URLQueryItem.make("limit", limit),
                 URLQueryItem.makeBoolFlag("includeMeta", includeMeta),
+                URLQueryItem.makeBoolFlag("includeCollections", includeCollections),
             ].compactMap(\.self)
         }
     }
@@ -63,7 +65,36 @@ final class SectionRepository {
         try await network.request(path: "/library/sections/\(sectionId)/\(filter)")
     }
 
-    func getSectionFirstCharacters(sectionId: Int) async throws -> PlexFirstCharacterMediaContainer {
-        try await network.request(path: "/library/sections/\(sectionId)/firstCharacter")
+    func getSectionFirstCharacters(
+        sectionId: Int,
+        type: Int? = nil,
+        includeCollections: Bool? = nil,
+    ) async throws -> PlexFirstCharacterMediaContainer {
+        let queryItems = [
+            URLQueryItem.make("type", type),
+            URLQueryItem.makeBoolFlag("includeCollections", includeCollections),
+        ].compactMap(\.self)
+
+        return try await network.request(
+            path: "/library/sections/\(sectionId)/firstCharacter",
+            queryItems: queryItems,
+        )
+    }
+
+    func getSectionCollections(
+        sectionId: Int,
+        includeCollections: Bool? = true,
+        pagination: PlexPagination? = nil,
+    ) async throws -> PlexItemMediaContainer {
+        let resolvedPagination = pagination ?? PlexPagination()
+        let queryItems = [
+            URLQueryItem.makeBoolFlag("includeCollections", includeCollections),
+        ].compactMap(\.self)
+
+        return try await network.request(
+            path: "/library/sections/\(sectionId)/collections",
+            queryItems: queryItems,
+            headers: resolvedPagination.headers,
+        )
     }
 }
