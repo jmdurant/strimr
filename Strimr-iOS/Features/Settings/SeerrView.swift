@@ -163,38 +163,38 @@ private struct SeerrAuthMethodStepView: View {
         List {
             Section("integrations.seerr.setup.method.title") {
                 VStack {
-                Button {
-                    Task {
-                        await viewModel.signInWithPlex()
+                    Button {
+                        Task {
+                            await viewModel.signInWithPlex()
+                        }
+                    } label: {
+                        Label("integrations.seerr.login.plex", systemImage: "person.fill.checkmark")
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
-                } label: {
-                    Label("integrations.seerr.login.plex", systemImage: "person.fill.checkmark")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .tint(.secondary)
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .disabled(!viewModel.isPlexAuthAvailable || viewModel.isAuthenticating)
+                    .tint(.secondary)
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .disabled(!viewModel.isPlexAuthAvailable || viewModel.isAuthenticating)
 
-                Text("integrations.seerr.login.plex.connectedAccount")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                if !viewModel.isPlexAuthAvailable {
-                    Text("integrations.seerr.login.plex.unavailable")
+                    Text("integrations.seerr.login.plex.connectedAccount")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                }
-                    
+
+                    if !viewModel.isPlexAuthAvailable {
+                        Text("integrations.seerr.login.plex.unavailable")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
                     Divider()
                         .padding(.vertical, 4)
-                    
-                Button {
-                    onSelectLocal()
-                } label: {
-                    Label("integrations.seerr.login.local", systemImage: "person.crop.circle.fill")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
+
+                    Button {
+                        onSelectLocal()
+                    } label: {
+                        Label("integrations.seerr.login.local", systemImage: "person.crop.circle.fill")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
                     .tint(.secondary)
                     .buttonStyle(.bordered)
                     .controlSize(.large)

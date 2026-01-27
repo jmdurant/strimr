@@ -12,8 +12,8 @@ struct IntegrationsView: View {
                     viewModel: SeerrViewModel(
                         store: seerrStore,
                         sessionManager: sessionManager,
-                        sessionService: SeerrSessionService()
-                    )
+                        sessionService: SeerrSessionService(),
+                    ),
                 )
             }
         }

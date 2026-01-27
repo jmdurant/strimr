@@ -65,7 +65,7 @@ final class SeerrViewModel {
     }
 
     func signOut() {
-        if let baseURL = baseURL {
+        if let baseURL {
             sessionService.signOut(baseURL: baseURL)
         }
         store.clearUser()
