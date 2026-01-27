@@ -48,10 +48,12 @@ final class SeerrNetworkClient {
     func send(
         path: String,
         method: String = "GET",
+        queryItems: [URLQueryItem]? = nil,
     ) async throws {
         try await send(
             path: path,
             method: method,
+            queryItems: queryItems,
             body: Never?.none,
         )
     }
@@ -59,11 +61,12 @@ final class SeerrNetworkClient {
     func send(
         path: String,
         method: String = "GET",
+        queryItems: [URLQueryItem]? = nil,
         body: (some Encodable)? = nil,
     ) async throws {
         let request = try buildRequest(
             path: path,
-            queryItems: nil,
+            queryItems: queryItems,
             method: method,
             body: body,
         )
