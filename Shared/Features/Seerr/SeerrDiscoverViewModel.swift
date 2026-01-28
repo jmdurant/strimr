@@ -41,15 +41,9 @@ final class SeerrDiscoverViewModel {
 
         do {
             let repository = SeerrDiscoverRepository(baseURL: baseURL)
-            async let trendingResponse = repository.getTrending(page: 1)
-            async let popularMoviesResponse = repository.discoverMovies(page: 1)
-            async let popularTVResponse = repository.discoverTV(page: 1)
-
-            let (trendingPage, moviesPage, tvPage) = try await (
-                trendingResponse,
-                popularMoviesResponse,
-                popularTVResponse
-            )
+            let trendingPage = try await repository.getTrending(page: 1)
+            let moviesPage = try await repository.discoverMovies(page: 1)
+            let tvPage = try await repository.discoverTV(page: 1)
 
             trending = trendingPage.results
             popularMovies = moviesPage.results

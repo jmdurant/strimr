@@ -14,4 +14,8 @@ final class SeerrMediaRepository {
     func getTV(id: Int) async throws -> SeerrMedia {
         try await client.request(path: "tv/\(id)")
     }
+
+    func getTVSeason(id: Int, seasonNumber: Int) async throws -> SeerrSeason {
+        try await client.request(path: "tv/\(id)/season/\(seasonNumber)")
+    }
 }

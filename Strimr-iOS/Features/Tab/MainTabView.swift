@@ -38,7 +38,7 @@ struct MainTabView: View {
                         )
                         .navigationDestination(for: SeerrMedia.self) { media in
                             SeerrMediaDetailView(
-                                viewModel: SeerrMediaDetailViewModel(media: media),
+                                viewModel: SeerrMediaDetailViewModel(media: media, store: seerrStore),
                             )
                         }
                     }

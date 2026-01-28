@@ -12,9 +12,9 @@ final class SeerrStore {
     private(set) var user: SeerrUser?
     private(set) var isHydrating = false
 
-    init(userDefaults: UserDefaults = .standard, sessionService: SeerrSessionService = SeerrSessionService()) {
+    init(userDefaults: UserDefaults = .standard, sessionService: SeerrSessionService? = nil) {
         defaults = userDefaults
-        self.sessionService = sessionService
+        self.sessionService = sessionService ?? SeerrSessionService()
         baseURLString = userDefaults.string(forKey: baseURLKey)
         Task { await hydrateCurrentUser() }
     }

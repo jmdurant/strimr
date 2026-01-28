@@ -7,7 +7,7 @@ struct SeerrDiscoverView: View {
 
     init(
         viewModel: SeerrDiscoverViewModel,
-        onSelectMedia: @escaping (SeerrMedia) -> Void = { _ in }
+        onSelectMedia: @escaping (SeerrMedia) -> Void = { _ in },
     ) {
         _viewModel = State(initialValue: viewModel)
         self.onSelectMedia = onSelectMedia

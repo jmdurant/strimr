@@ -153,7 +153,7 @@ final class MainCoordinator: ObservableObject {
             seerrDiscoverPath.append(media)
         case .home, .search, .library, .more:
             break
-        case .libraryDetail(_):
+        case .libraryDetail:
             break
         }
     }
