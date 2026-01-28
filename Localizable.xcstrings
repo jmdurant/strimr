@@ -997,6 +997,28 @@
         }
       }
     },
+    "integrations.seerr.search.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search Seerr"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans Seerr"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索 Seerr"
+          }
+        }
+      }
+    },
     "seerr.media.badge.movie" : {
       "localizations" : {
         "en" : {

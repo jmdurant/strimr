@@ -9,6 +9,9 @@ final class SeerrDiscoverViewModel {
     var trending: [SeerrMedia] = []
     var popularMovies: [SeerrMedia] = []
     var popularTV: [SeerrMedia] = []
+    var searchQuery = ""
+    var searchResults: [SeerrMedia] = []
+    var isSearching = false
     var isLoading = false
     var errorMessage: String?
 
@@ -22,6 +25,10 @@ final class SeerrDiscoverViewModel {
 
     var hasContent: Bool {
         !trending.isEmpty || !popularMovies.isEmpty || !popularTV.isEmpty
+    }
+
+    var isSearchActive: Bool {
+        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     func load() async {
@@ -52,10 +59,34 @@ final class SeerrDiscoverViewModel {
         }
     }
 
+    func search() async {
+        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let baseURL else { return }
+
+        if trimmedQuery.isEmpty {
+            searchResults = []
+            isSearching = false
+            return
+        }
+
+        isSearching = true
+        errorMessage = nil
+        defer { isSearching = false }
+
+        do {
+            let repository = SeerrDiscoverRepository(baseURL: baseURL)
+            let response = try await repository.search(query: trimmedQuery, page: 1)
+            searchResults = response.results
+        } catch {
+            errorMessage = String(localized: .init("common.errors.tryAgainLater"))
+        }
+    }
+
     func reload() async {
         trending = []
         popularMovies = []
         popularTV = []
+        searchResults = []
         await load()
     }
 

@@ -28,6 +28,15 @@ final class SeerrDiscoverRepository {
         return try await client.request(path: "discover/tv", queryItems: queryItems)
     }
 
+    func search(query: String, page: Int) async throws -> SeerrPaginatedResponse<SeerrMedia> {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let queryItems = [
+            URLQueryItem(name: "query", value: trimmedQuery),
+            URLQueryItem(name: "page", value: String(page)),
+        ]
+        return try await client.request(path: "search", queryItems: queryItems)
+    }
+
     private func paginationQueryItems(page: Int, primaryReleaseDateGte: String?) -> [URLQueryItem] {
         var items = [URLQueryItem(name: "page", value: String(page))]
 
