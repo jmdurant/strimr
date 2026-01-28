@@ -28,6 +28,12 @@ struct MainTabView: View {
                 }
             }
 
+            if settingsManager.interface.displaySeerrDiscoverTab {
+                Tab("tabs.discover", systemImage: "sparkles", value: MainCoordinator.Tab.seerrDiscover) {
+                    EmptyView()
+                }
+            }
+
             Tab("tabs.search", systemImage: "magnifyingglass", value: MainCoordinator.Tab.search, role: .search) {
                 NavigationStack(path: coordinator.pathBinding(for: .search)) {
                     SearchView(
@@ -58,19 +64,21 @@ struct MainTabView: View {
                 }
             }
 
-            ForEach(navigationLibraries) { library in
-                Tab(
-                    library.title,
-                    systemImage: library.iconName,
-                    value: MainCoordinator.Tab.libraryDetail(library.id),
-                ) {
-                    NavigationStack(path: coordinator.pathBinding(for: .libraryDetail(library.id))) {
-                        LibraryDetailView(
-                            library: library,
-                            onSelectMedia: coordinator.showMediaDetail,
-                        )
-                        .navigationDestination(for: MainCoordinator.Route.self) {
-                            destination(for: $0)
+            TabSection {
+                ForEach(navigationLibraries) { library in
+                    Tab(
+                        library.title,
+                        systemImage: library.iconName,
+                        value: MainCoordinator.Tab.libraryDetail(library.id),
+                    ) {
+                        NavigationStack(path: coordinator.pathBinding(for: .libraryDetail(library.id))) {
+                            LibraryDetailView(
+                                library: library,
+                                onSelectMedia: coordinator.showMediaDetail,
+                            )
+                            .navigationDestination(for: MainCoordinator.Route.self) {
+                                destination(for: $0)
+                            }
                         }
                     }
                 }
