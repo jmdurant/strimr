@@ -54,6 +54,10 @@ struct SeerrSeasonEpisodesSection: View {
                                 Text(episodeCountTitle(for: season))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
+                                if let status = viewModel.seasonAvailabilityStatus(for: season) {
+                                    Spacer()
+                                    SeerrAvailabilityBadgeView(status: status, showsLabel: true)
+                                }
                             }
                         },
                     )

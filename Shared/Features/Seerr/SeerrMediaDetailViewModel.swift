@@ -203,6 +203,11 @@ final class SeerrMediaDetailViewModel {
         TMDBImageService.backdropURL(path: episode.stillPath, width: width)
     }
 
+    func seasonAvailabilityStatus(for season: SeerrSeason) -> SeerrMediaStatus? {
+        guard let seasonNumber = season.seasonNumber else { return nil }
+        return media.mediaInfo?.seasons?.first { $0.seasonNumber == seasonNumber }?.status
+    }
+
     func castImageURL(for member: SeerrCastMember, width: CGFloat, height: CGFloat) -> URL? {
         TMDBImageService.profileURL(path: member.profilePath, width: width, height: height)
     }

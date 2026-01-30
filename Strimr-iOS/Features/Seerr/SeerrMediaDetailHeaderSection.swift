@@ -93,6 +93,10 @@ struct SeerrMediaDetailHeaderSection: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+
+            if let status = viewModel.media.mediaInfo?.status {
+                SeerrAvailabilityBadgeView(status: status, showsLabel: true)
+            }
         }
     }
 
