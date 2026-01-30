@@ -3,6 +3,7 @@ import SwiftUI
 
 struct SeerrSeasonEpisodesSection: View {
     @Bindable var viewModel: SeerrMediaDetailViewModel
+    @State private var expandedSeasonNumber: Int?
 
     var body: some View {
         Section {
@@ -15,70 +16,16 @@ struct SeerrSeasonEpisodesSection: View {
         VStack(alignment: .leading, spacing: 12) {
             Divider()
             VStack(alignment: .leading, spacing: 12) {
-                seasonSelector
-                episodesCountTitle
-                episodesContent
+                seasonsList
             }
             .padding(.horizontal, 8)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 8)
         .padding(.bottom, 32)
     }
 
-    private var episodesCountTitle: some View {
-        Text("media.labels.countEpisode \(viewModel.episodeCountDisplay)")
-            .font(.headline)
-            .fontWeight(.semibold)
-    }
-
     @ViewBuilder
-    private var seasonSelector: some View {
-        if let error = viewModel.seasonsErrorMessage {
-            Label(error, systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
-                .font(.subheadline)
-        } else if viewModel.isLoadingSeasons, viewModel.seasons.isEmpty {
-            HStack(spacing: 8) {
-                ProgressView()
-                Text("media.detail.loadingSeasons")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        } else if viewModel.seasons.isEmpty {
-            Text("media.detail.noSeasons")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        } else {
-            HStack(alignment: .center, spacing: 10) {
-                seasonPickerControl
-                Spacer(minLength: 0)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var seasonPickerControl: some View {
-        Picker("media.detail.season", selection: Binding(
-            get: { viewModel.selectedSeasonNumber ?? viewModel.seasons.first?.seasonNumber ?? 0 },
-            set: { seasonNumber in
-                Task {
-                    await viewModel.selectSeason(number: seasonNumber)
-                }
-            },
-        )) {
-            ForEach(viewModel.seasons, id: \.id) { season in
-                Text(viewModel.seasonTitle(for: season))
-                    .tag(season.seasonNumber ?? 0)
-            }
-        }
-        .pickerStyle(.menu)
-        .tint(.brandSecondaryForeground)
-        .background(.brandSecondary)
-        .cornerRadius(12)
-    }
-
-    @ViewBuilder
-    private var episodesContent: some View {
+    private var seasonsList: some View {
         if let error = viewModel.seasonsErrorMessage {
             Label(error, systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
@@ -88,28 +35,84 @@ struct SeerrSeasonEpisodesSection: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
         } else if viewModel.seasons.isEmpty {
-            Text("media.detail.noSeasonsYet")
+            Text("media.detail.noSeasons")
                 .foregroundStyle(.secondary)
                 .padding(.vertical, 8)
         } else {
-            VStack(alignment: .leading, spacing: 12) {
-                if let error = viewModel.episodesErrorMessage {
-                    Label(error, systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                }
-
-                if viewModel.isLoadingEpisodes, viewModel.episodes.isEmpty {
-                    ProgressView("media.detail.loadingEpisodes")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                } else if viewModel.episodes.isEmpty {
-                    Text("media.detail.noEpisodes")
-                        .foregroundStyle(.secondary)
-                } else {
-                    episodeList
+            LazyVStack(alignment: .leading, spacing: 12) {
+                ForEach(viewModel.seasons, id: \.id) { season in
+                    DisclosureGroup(
+                        isExpanded: seasonExpansionBinding(for: season),
+                        content: {
+                            episodesContent(for: season)
+                        },
+                        label: {
+                            Text(seasonTitleWithCount(for: season))
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                        },
+                    )
+                    .tint(.primary)
+                    .padding(12)
+                    .background {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(.brandSecondary.opacity(0.12))
+                    }
                 }
             }
         }
+    }
+
+    private func seasonTitleWithCount(for season: SeerrSeason) -> String {
+        let count = season.episodeCount ?? 0
+        let countTitle = String(localized: "media.labels.countEpisode \(count)")
+        return "\(viewModel.seasonTitle(for: season)) (\(countTitle))"
+    }
+
+    private func seasonExpansionBinding(for season: SeerrSeason) -> Binding<Bool> {
+        Binding(
+            get: {
+                expandedSeasonNumber == season.seasonNumber
+            },
+            set: { isExpanded in
+                if isExpanded {
+                    expandedSeasonNumber = season.seasonNumber
+                    if let seasonNumber = season.seasonNumber {
+                        Task {
+                            await viewModel.selectSeason(number: seasonNumber)
+                        }
+                    }
+                } else if expandedSeasonNumber == season.seasonNumber {
+                    expandedSeasonNumber = nil
+                }
+            },
+        )
+    }
+
+    @ViewBuilder
+    private func episodesContent(for season: SeerrSeason) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let error = viewModel.episodesErrorMessage {
+                Label(error, systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+            }
+
+            if viewModel.isLoadingEpisodes, viewModel.episodes.isEmpty {
+                ProgressView("media.detail.loadingEpisodes")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            } else if viewModel.episodes.isEmpty {
+                Text("media.detail.noEpisodes")
+                    .foregroundStyle(.secondary)
+            } else if season.seasonNumber == viewModel.selectedSeasonNumber {
+                episodeList
+            } else {
+                ProgressView("media.detail.loadingEpisodes")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+            }
+        }
+        .padding(.top, 8)
     }
 
     @ViewBuilder
