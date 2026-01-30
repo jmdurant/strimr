@@ -47,9 +47,14 @@ struct SeerrSeasonEpisodesSection: View {
                             episodesContent(for: season)
                         },
                         label: {
-                            Text(seasonTitleWithCount(for: season))
-                                .font(.headline)
-                                .fontWeight(.semibold)
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text(viewModel.seasonTitle(for: season))
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                Text(episodeCountTitle(for: season))
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
                         },
                     )
                     .tint(.primary)
@@ -63,10 +68,10 @@ struct SeerrSeasonEpisodesSection: View {
         }
     }
 
-    private func seasonTitleWithCount(for season: SeerrSeason) -> String {
+    private func episodeCountTitle(for season: SeerrSeason) -> String {
         let count = season.episodeCount ?? 0
         let countTitle = String(localized: "media.labels.countEpisode \(count)")
-        return "\(viewModel.seasonTitle(for: season)) (\(countTitle))"
+        return "(\(countTitle))"
     }
 
     private func seasonExpansionBinding(for season: SeerrSeason) -> Binding<Bool> {
