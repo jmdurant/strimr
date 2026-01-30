@@ -64,9 +64,9 @@ struct SeerrSearchCard: View {
     private var subtitle: String? {
         switch media.mediaType {
         case .movie:
-            year(from: media.releaseDate) ?? String(localized: .init("seerr.media.badge.movie"))
+            year(from: media.releaseDate)
         case .tv:
-            year(from: media.firstAirDate) ?? String(localized: .init("seerr.media.badge.series"))
+            year(from: media.firstAirDate)
         case .person, .none:
             nil
         }

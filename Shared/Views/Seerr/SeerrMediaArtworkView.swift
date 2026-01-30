@@ -33,6 +33,16 @@ struct SeerrMediaArtworkView: View {
                     .padding(8)
             }
         }
+        .overlay(alignment: .topTrailing) {
+            if let availabilityBadge {
+                Image(systemName: availabilityBadge.systemName)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .padding(6)
+                    .background(availabilityBadge.color.opacity(0.9), in: Circle())
+                    .padding(8)
+            }
+        }
         .frame(width: width, height: height)
         .clipShape(
             RoundedRectangle(cornerRadius: 14, style: .continuous),
@@ -58,6 +68,25 @@ struct SeerrMediaArtworkView: View {
             .purple
         case .person, .none:
             nil
+        }
+    }
+
+    private var availabilityBadge: (systemName: String, color: Color)? {
+        guard let status = media.mediaInfo?.status else { return nil }
+
+        switch status {
+        case .available:
+            return ("checkmark.circle.fill", .green)
+        case .partiallyAvailable:
+            return ("minus.circle.fill", .green)
+        case .processing:
+            return ("arrow.triangle.2.circlepath.circle.fill", .yellow)
+        case .pending:
+            return ("clock.fill", .yellow)
+        case .blacklisted, .deleted:
+            return ("xmark.octagon.fill", .red)
+        case .unknown:
+            return nil
         }
     }
 

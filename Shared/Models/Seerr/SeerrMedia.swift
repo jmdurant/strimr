@@ -12,6 +12,7 @@ struct SeerrMedia: Identifiable, Hashable, Decodable {
     let name: String?
     let overview: String?
     var mediaType: SeerrMediaType?
+    let mediaInfo: SeerrMediaInfo?
     let backdropPath: String?
     let posterPath: String?
     let profilePath: String?
@@ -34,6 +35,29 @@ struct SeerrMedia: Identifiable, Hashable, Decodable {
     let numberOfEpisodes: Int?
     let seasons: [SeerrSeason]?
     let createdBy: [SeerrCreatedBy]?
+}
+
+struct SeerrMediaInfo: Hashable, Decodable {
+    let status: SeerrMediaStatus?
+    let status4k: SeerrMediaStatus?
+    let seasons: [SeerrMediaSeasonInfo]?
+}
+
+enum SeerrMediaStatus: Int, Hashable, Decodable {
+    case unknown = 1
+    case pending = 2
+    case processing = 3
+    case partiallyAvailable = 4
+    case available = 5
+    case blacklisted = 6
+    case deleted = 7
+}
+
+struct SeerrMediaSeasonInfo: Identifiable, Hashable, Decodable {
+    let id: Int
+    let seasonNumber: Int?
+    let status: SeerrMediaStatus?
+    let status4k: SeerrMediaStatus?
 }
 
 struct SeerrCredits: Hashable, Decodable {
