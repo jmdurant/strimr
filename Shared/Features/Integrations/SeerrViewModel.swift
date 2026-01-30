@@ -45,6 +45,12 @@ final class SeerrViewModel {
             let baseURL = try requireBaseURL()
             let user = try await sessionService.signInWithPlex(baseURL: baseURL, authToken: authToken)
             store.setUser(user)
+            do {
+                let quota = try await sessionService.fetchUserQuota(baseURL: baseURL, userId: user.id)
+                store.setQuota(quota)
+            } catch {
+                store.setQuota(nil)
+            }
         } catch {
             presentError(error)
         }
@@ -58,6 +64,12 @@ final class SeerrViewModel {
             let baseURL = try requireBaseURL()
             let user = try await sessionService.signInWithLocal(baseURL: baseURL, email: email, password: password)
             store.setUser(user)
+            do {
+                let quota = try await sessionService.fetchUserQuota(baseURL: baseURL, userId: user.id)
+                store.setQuota(quota)
+            } catch {
+                store.setQuota(nil)
+            }
             password = ""
         } catch {
             presentError(error)
@@ -85,6 +97,10 @@ final class SeerrViewModel {
 
     var isPlexAuthAvailable: Bool {
         sessionManager.authToken != nil
+    }
+
+    var quota: SeerrUserQuota? {
+        store.quota
     }
 
     private var baseURL: URL? {

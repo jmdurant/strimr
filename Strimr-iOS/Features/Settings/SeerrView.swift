@@ -48,6 +48,18 @@ struct SeerrView: View {
                     }
                 }
 
+                Section("integrations.seerr.quota.title") {
+                    LabeledContent("integrations.seerr.quota.movies") {
+                        Text(quotaSummary(viewModel.quota?.movie))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    LabeledContent("integrations.seerr.quota.tv") {
+                        Text(quotaSummary(viewModel.quota?.tv))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section("integrations.seerr.settings.title") {
                     Toggle(
                         "integrations.seerr.settings.discoverTab",
@@ -78,6 +90,36 @@ struct SeerrView: View {
             }
         }
     }
+}
+
+private func quotaSummary(_ restriction: SeerrQuotaRestriction?) -> String {
+    guard let restriction else {
+        return String(localized: "integrations.seerr.quota.unavailable")
+    }
+
+    if restriction.limit == 0 {
+        return String(localized: "integrations.seerr.quota.unlimited")
+    }
+
+    var parts: [String] = []
+
+    if let used = restriction.used {
+        parts.append(String(localized: "integrations.seerr.quota.used \(used)"))
+    }
+
+    if let remaining = restriction.remaining {
+        parts.append(String(localized: "integrations.seerr.quota.remaining \(remaining)"))
+    }
+
+    if let limit = restriction.limit {
+        parts.append(String(localized: "integrations.seerr.quota.limit \(limit)"))
+    }
+
+    if parts.isEmpty {
+        return String(localized: "integrations.seerr.quota.unavailable")
+    }
+
+    return parts.joined(separator: " • ")
 }
 
 private enum SeerrSetupStep: Hashable {

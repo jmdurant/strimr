@@ -30,4 +30,8 @@ final class SeerrAuthRepository {
     func fetchCurrentUser() async throws -> SeerrUser {
         try await client.request(path: "auth/me")
     }
+
+    func fetchQuota(userId: Int) async throws -> SeerrUserQuota {
+        try await client.request(path: "user/\(userId)/quota")
+    }
 }

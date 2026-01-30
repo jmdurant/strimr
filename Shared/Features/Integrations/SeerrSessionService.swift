@@ -29,6 +29,11 @@ final class SeerrSessionService {
         return try await repository.fetchCurrentUser()
     }
 
+    func fetchUserQuota(baseURL: URL, userId: Int) async throws -> SeerrUserQuota {
+        let repository = SeerrAuthRepository(baseURL: baseURL)
+        return try await repository.fetchQuota(userId: userId)
+    }
+
     func signOut(baseURL: URL) {
         let cookieStorage = HTTPCookieStorage.shared
         cookieStorage.cookies(for: baseURL)?.forEach { cookieStorage.deleteCookie($0) }

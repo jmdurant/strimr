@@ -10,6 +10,7 @@ final class SeerrStore {
 
     private(set) var baseURLString: String?
     private(set) var user: SeerrUser?
+    private(set) var quota: SeerrUserQuota?
     private(set) var isHydrating = false
 
     init(userDefaults: UserDefaults = .standard, sessionService: SeerrSessionService? = nil) {
@@ -32,8 +33,13 @@ final class SeerrStore {
         self.user = user
     }
 
+    func setQuota(_ quota: SeerrUserQuota?) {
+        self.quota = quota
+    }
+
     func clearUser() {
         user = nil
+        quota = nil
     }
 
     private func hydrateCurrentUser() async {
@@ -50,6 +56,12 @@ final class SeerrStore {
         do {
             let user = try await sessionService.hydrateCurrentUser(baseURL: baseURL)
             setUser(user)
+            do {
+                let quota = try await sessionService.fetchUserQuota(baseURL: baseURL, userId: user.id)
+                setQuota(quota)
+            } catch {
+                setQuota(nil)
+            }
         } catch {
             clearUser()
         }
