@@ -79,7 +79,11 @@ final class SeerrMediaRequestViewModel {
     }
 
     var seasons: [SeerrSeason] {
-        media.seasons?.filter { $0.seasonNumber != nil } ?? []
+        let seasons = media.seasons?.filter { $0.seasonNumber != nil } ?? []
+        if store.settings?.enableSpecialEpisodes == false {
+            return seasons.filter { ($0.seasonNumber ?? -1) > 0 }
+        }
+        return seasons
     }
 
     var requestableSeasons: [SeerrSeason] {

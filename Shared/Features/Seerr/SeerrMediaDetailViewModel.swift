@@ -300,7 +300,11 @@ final class SeerrMediaDetailViewModel {
     }
 
     private func refreshFromMedia() {
-        seasons = (media.seasons ?? []).filter { $0.seasonNumber != nil }
+        if store.settings?.enableSpecialEpisodes == false {
+            seasons = (media.seasons ?? []).filter { ($0.seasonNumber ?? -1) > 0 }
+        } else {
+            seasons = (media.seasons ?? []).filter { $0.seasonNumber != nil }
+        }
         if selectedSeasonNumber == nil {
             selectedSeasonNumber = defaultSeasonNumber
         }
