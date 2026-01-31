@@ -136,7 +136,7 @@ struct SeerrMediaDetailHeaderSection: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.brandSecondary)
+            .tint(.purple)
             .disabled(viewModel.isRequestButtonDisabled)
 
             if let reasonKey = viewModel.requestButtonDisabledReasonKey {
