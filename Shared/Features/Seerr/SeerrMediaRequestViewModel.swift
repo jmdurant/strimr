@@ -161,7 +161,7 @@ final class SeerrMediaRequestViewModel {
         if requestable {
             return true
         }
-        return isEditing && selectedSeasons.contains(seasonNumber)
+        return isEditing && existingRequestSeasonNumbers.contains(seasonNumber)
     }
 
     func toggleSeason(_ seasonNumber: Int, isSelected: Bool) {
@@ -303,6 +303,14 @@ final class SeerrMediaRequestViewModel {
             SeerrMediaRequestAvailability.requestableSeasons(media: media, is4k: requestType.is4k)
                 .compactMap(\.seasonNumber)
         )
+    }
+
+    private var existingRequestSeasonNumbers: Set<Int> {
+        guard let existingRequest else { return [] }
+        if let requestSeasons = existingRequest.seasons, !requestSeasons.isEmpty {
+            return Set(requestSeasons.compactMap(\.seasonNumber))
+        }
+        return Set(seasons.compactMap(\.seasonNumber))
     }
 
     private func resetServiceSelection() {
