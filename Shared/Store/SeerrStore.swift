@@ -11,6 +11,7 @@ final class SeerrStore {
     private(set) var baseURLString: String?
     private(set) var user: SeerrUser?
     private(set) var quota: SeerrUserQuota?
+    private(set) var settings: SeerrSettings?
     private(set) var isHydrating = false
 
     init(userDefaults: UserDefaults = .standard, sessionService: SeerrSessionService? = nil) {
@@ -37,6 +38,10 @@ final class SeerrStore {
         self.quota = quota
     }
 
+    func setSettings(_ settings: SeerrSettings?) {
+        self.settings = settings
+    }
+
     func clearUser() {
         user = nil
         quota = nil
@@ -52,6 +57,13 @@ final class SeerrStore {
 
         isHydrating = true
         defer { isHydrating = false }
+
+        do {
+            let settings = try await sessionService.fetchPublicSettings(baseURL: baseURL)
+            setSettings(settings)
+        } catch {
+            setSettings(nil)
+        }
 
         do {
             let user = try await sessionService.hydrateCurrentUser(baseURL: baseURL)
