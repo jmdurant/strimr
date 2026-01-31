@@ -2,6 +2,11 @@ import Foundation
 import Observation
 import SwiftUI
 
+enum SeerrSeasonAvailabilityBadge: Hashable {
+    case media(SeerrMediaStatus)
+    case request(SeerrMediaRequestStatus)
+}
+
 @MainActor
 @Observable
 final class SeerrMediaDetailViewModel {
@@ -203,9 +208,34 @@ final class SeerrMediaDetailViewModel {
         TMDBImageService.backdropURL(path: episode.stillPath, width: width)
     }
 
-    func seasonAvailabilityStatus(for season: SeerrSeason) -> SeerrMediaStatus? {
+    func seasonAvailabilityBadge(for season: SeerrSeason) -> SeerrSeasonAvailabilityBadge? {
         guard let seasonNumber = season.seasonNumber else { return nil }
-        return media.mediaInfo?.seasons?.first { $0.seasonNumber == seasonNumber }?.status
+        // Prefer direct media info when the season availability is known.
+        if let seasonStatus = media.mediaInfo?.seasons?.first(where: { $0.seasonNumber == seasonNumber })?.status,
+           seasonStatus != .unknown {
+            return .media(seasonStatus)
+        }
+
+        // Fall back to request data for the season, ignoring declined/completed requests.
+        let matchingStatuses = media.mediaInfo?.requests?.compactMap { request -> SeerrMediaRequestStatus? in
+            guard let requestStatus = request.status, requestStatus != .declined, requestStatus != .completed else {
+                return nil
+            }
+            guard let requestSeasons = request.seasons else { return requestStatus }
+            guard requestSeasons.contains(where: { $0.seasonNumber == seasonNumber }) else { return nil }
+            if let seasonStatus = requestSeasons.first(where: { $0.seasonNumber == seasonNumber })?.status,
+               seasonStatus != .declined, seasonStatus != .completed {
+                return seasonStatus
+            }
+            return requestStatus
+        } ?? []
+
+        // Pick the highest-priority request badge we support.
+        let requestBadgePriority: [SeerrMediaRequestStatus] = [.pending, .approved]
+        if let status = requestBadgePriority.first(where: { matchingStatuses.contains($0) }) {
+            return .request(status)
+        }
+        return nil
     }
 
     func castImageURL(for member: SeerrCastMember, width: CGFloat, height: CGFloat) -> URL? {
