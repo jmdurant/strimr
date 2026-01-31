@@ -15,7 +15,10 @@ struct SeerrRequest: Identifiable, Hashable, Decodable {
     let requestedBy: SeerrUser?
     let seasons: [SeerrRequestSeasonInfo]?
     let createdAt: String?
+    let media: SeerrMediaInfo?
+    let profileName: String?
 }
+
 
 struct SeerrRequestSeasonInfo: Identifiable, Hashable, Decodable {
     let id: Int

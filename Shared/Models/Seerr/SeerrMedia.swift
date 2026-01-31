@@ -44,6 +44,8 @@ struct SeerrMediaInfo: Identifiable, Hashable, Decodable {
     let status4k: SeerrMediaStatus?
     let seasons: [SeerrMediaSeasonInfo]?
     let requests: [SeerrRequest]?
+    let tmdbId: Int?
+    let mediaType: SeerrMediaType?
 }
 
 enum SeerrMediaStatus: Int, Hashable, Decodable {

@@ -25,6 +25,22 @@ struct SeerrDiscoverView: View {
                         }
                     }
                 } else {
+                    if viewModel.shouldShowManageRequestsButton,
+                       let manageViewModel = viewModel.makePendingRequestsViewModel() {
+                        NavigationLink {
+                            SeerrPendingRequestsView(viewModel: manageViewModel)
+                        } label: {
+                            Label(
+                                String(localized: "seerr.manageRequests.action \(viewModel.pendingRequestsCount)"),
+                                systemImage: "checkmark.seal.fill"
+                            )
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.secondary)
+                    }
+
                     if !viewModel.trending.isEmpty {
                         SeerrMediaSection(title: "integrations.seerr.discover.trending") {
                             SeerrMediaCarousel(

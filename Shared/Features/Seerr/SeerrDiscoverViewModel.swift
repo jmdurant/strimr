@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class SeerrDiscoverViewModel {
     @ObservationIgnored private let store: SeerrStore
+    @ObservationIgnored private let permissionService = SeerrPermissionService()
 
     var trending: [SeerrMedia] = []
     var popularMovies: [SeerrMedia] = []
@@ -14,6 +15,7 @@ final class SeerrDiscoverViewModel {
     var isSearching = false
     var isLoading = false
     var errorMessage: String?
+    var pendingRequestsCount = 0
 
     init(store: SeerrStore) {
         self.store = store
@@ -29,6 +31,14 @@ final class SeerrDiscoverViewModel {
 
     var isSearchActive: Bool {
         !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var canManageRequests: Bool {
+        permissionService.hasPermission(.manageRequests, user: store.user)
+    }
+
+    var shouldShowManageRequestsButton: Bool {
+        canManageRequests && pendingRequestsCount > 0
     }
 
     func load() async {
@@ -51,6 +61,8 @@ final class SeerrDiscoverViewModel {
         } catch {
             errorMessage = String(localized: .init("common.errors.tryAgainLater"))
         }
+
+        await loadRequestCount()
     }
 
     func search() async {
@@ -91,8 +103,29 @@ final class SeerrDiscoverViewModel {
         await load()
     }
 
+    func makePendingRequestsViewModel() -> SeerrPendingRequestsViewModel? {
+        guard baseURL != nil else { return nil }
+        return SeerrPendingRequestsViewModel(store: store)
+    }
+
     private var baseURL: URL? {
         guard let baseURLString = store.baseURLString else { return nil }
         return URL(string: baseURLString)
+    }
+
+    private func loadRequestCount() async {
+        guard canManageRequests else {
+            pendingRequestsCount = 0
+            return
+        }
+        guard let baseURL else { return }
+
+        do {
+            let repository = SeerrRequestRepository(baseURL: baseURL)
+            let count = try await repository.getRequestCount()
+            pendingRequestsCount = count.pending
+        } catch {
+            pendingRequestsCount = 0
+        }
     }
 }

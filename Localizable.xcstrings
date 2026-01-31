@@ -3741,6 +3741,28 @@
         }
       }
     },
+    "seerr.manageRequests.profile %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil : %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置：%@"
+          }
+        }
+      }
+    },
     "seerr.manageRequests.requestedAt %@" : {
       "localizations" : {
         "en" : {

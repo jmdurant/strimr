@@ -19,6 +19,19 @@ final class SeerrRequestRepository {
         try await client.send(path: "request/\(id)", method: "DELETE")
     }
 
+    func getRequestCount() async throws -> SeerrRequestCount {
+        try await client.request(path: "request/count")
+    }
+
+    func getRequests(take: Int, skip: Int, filter: String) async throws -> SeerrRequestPageResponse {
+        let queryItems = [
+            URLQueryItem(name: "take", value: "\(take)"),
+            URLQueryItem(name: "skip", value: "\(skip)"),
+            URLQueryItem(name: "filter", value: filter),
+        ]
+        return try await client.request(path: "request", queryItems: queryItems)
+    }
+
     func updateRequestStatus(id: Int, status: SeerrMediaRequestStatus) async throws {
         let action = switch status {
         case .approved:
