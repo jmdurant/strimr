@@ -29,6 +29,7 @@ struct SeerrMedia: Identifiable, Hashable, Decodable {
     let runtime: Int?
     let keywords: [SeerrKeyword]?
     let credits: SeerrCredits?
+    let externalIds: SeerrExternalIds?
     let tagline: String?
     let status: String?
     let numberOfSeasons: Int?
@@ -37,7 +38,8 @@ struct SeerrMedia: Identifiable, Hashable, Decodable {
     let createdBy: [SeerrCreatedBy]?
 }
 
-struct SeerrMediaInfo: Hashable, Decodable {
+struct SeerrMediaInfo: Identifiable, Hashable, Decodable {
+    let id: Int
     let status: SeerrMediaStatus?
     let status4k: SeerrMediaStatus?
     let seasons: [SeerrMediaSeasonInfo]?
@@ -59,6 +61,10 @@ struct SeerrMediaSeasonInfo: Identifiable, Hashable, Decodable {
     let seasonNumber: Int?
     let status: SeerrMediaStatus?
     let status4k: SeerrMediaStatus?
+}
+
+struct SeerrExternalIds: Hashable, Decodable {
+    let tvdbId: Int?
 }
 
 struct SeerrCredits: Hashable, Decodable {
