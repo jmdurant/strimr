@@ -157,7 +157,7 @@ struct SeerrPendingRequestsTVView: View {
             } else {
                 HStack(spacing: 8) {
                     ForEach(seasonNumbers, id: \.self) { seasonNumber in
-                        Text("S\(seasonNumber)")
+                        Text(String(localized: "seerr.manageRequests.season.badge \(seasonNumber)"))
                             .font(.footnote.weight(.semibold))
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)

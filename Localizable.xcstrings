@@ -3166,9 +3166,6 @@
         }
       }
     },
-    "S%lld" : {
-
-    },
     "search.badge.collection" : {
       "localizations" : {
         "en" : {
@@ -3935,6 +3932,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部季"
+          }
+        }
+      }
+    },
+    "seerr.manageRequests.season.badge %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第%lld季"
           }
         }
       }
