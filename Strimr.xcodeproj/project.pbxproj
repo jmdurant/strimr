@@ -195,6 +195,7 @@
 				Views/Seerr/SeerrMediaCard.swift,
 				Views/Seerr/SeerrMediaCarousel.swift,
 				Views/Seerr/SeerrMediaSection.swift,
+				Views/Seerr/SeerrRelatedSection.swift,
 				Views/Seerr/SeerrSearchCard.swift,
 				Views/Seerr/SeerrSeasonAvailabilityBadgeView.swift,
 			);
