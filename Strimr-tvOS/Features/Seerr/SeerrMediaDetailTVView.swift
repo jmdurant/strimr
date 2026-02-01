@@ -2,6 +2,7 @@ import Observation
 import SwiftUI
 
 struct SeerrMediaDetailTVView: View {
+    @EnvironmentObject private var coordinator: MainCoordinator
     @State var viewModel: SeerrMediaDetailViewModel
 
     init(viewModel: SeerrMediaDetailViewModel) {
@@ -34,6 +35,18 @@ struct SeerrMediaDetailTVView: View {
                         }
 
                         SeerrCastSection(viewModel: bindableViewModel)
+
+                        SeerrRelatedSection(
+                            viewModel: bindableViewModel,
+                            section: .recommendations,
+                            onSelectMedia: coordinator.showSeerrMediaDetail
+                        )
+
+                        SeerrRelatedSection(
+                            viewModel: bindableViewModel,
+                            section: .similar,
+                            onSelectMedia: coordinator.showSeerrMediaDetail
+                        )
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 32)
@@ -42,6 +55,7 @@ struct SeerrMediaDetailTVView: View {
         }
         .task {
             await viewModel.loadDetails()
+            await viewModel.loadRelatedContent()
         }
         .toolbar(.hidden, for: .tabBar)
     }
@@ -54,6 +68,7 @@ struct SeerrMediaDetailTVView: View {
                     SeerrMediaRequestTVView(viewModel: requestViewModel) {
                         Task {
                             await viewModel.loadDetails()
+                            await viewModel.loadRelatedContent()
                         }
                     }
                 } label: {
@@ -71,6 +86,7 @@ struct SeerrMediaDetailTVView: View {
                     SeerrManageRequestsTVView(viewModel: manageViewModel) {
                         Task {
                             await viewModel.loadDetails()
+                            await viewModel.loadRelatedContent()
                         }
                     }
                 } label: {

@@ -27,6 +27,12 @@ final class SeerrMediaDetailViewModel {
     var isLoadingEpisodes = false
     var seasonsErrorMessage: String?
     var episodesErrorMessage: String?
+    var recommendations: [SeerrMedia] = []
+    var similar: [SeerrMedia] = []
+    var isLoadingRecommendations = false
+    var isLoadingSimilar = false
+    var recommendationsErrorMessage: String?
+    var similarErrorMessage: String?
 
     init(
         media: SeerrMedia,
@@ -178,6 +184,56 @@ final class SeerrMediaDetailViewModel {
             let message = errorMessage(for: error)
             errorMessage = message
             seasonsErrorMessage = message
+        }
+    }
+
+    func loadRelatedContent() async {
+        guard let baseURL else {
+            let message = String(localized: "integrations.seerr.error.invalidURL")
+            recommendationsErrorMessage = message
+            similarErrorMessage = message
+            return
+        }
+        guard media.mediaType == .movie || media.mediaType == .tv else {
+            recommendations = []
+            similar = []
+            return
+        }
+
+        let repository = SeerrMediaRepository(baseURL: baseURL)
+
+        isLoadingRecommendations = true
+        recommendationsErrorMessage = nil
+        defer { isLoadingRecommendations = false }
+
+        do {
+            switch media.mediaType {
+            case .movie:
+                recommendations = try await repository.getMovieRecommendations(id: media.id, page: 1).results
+            case .tv:
+                recommendations = try await repository.getTVRecommendations(id: media.id, page: 1).results
+            case .person, .none:
+                recommendations = []
+            }
+        } catch {
+            recommendationsErrorMessage = errorMessage(for: error)
+        }
+
+        isLoadingSimilar = true
+        similarErrorMessage = nil
+        defer { isLoadingSimilar = false }
+
+        do {
+            switch media.mediaType {
+            case .movie:
+                similar = try await repository.getMovieSimilar(id: media.id, page: 1).results
+            case .tv:
+                similar = try await repository.getTVSimilar(id: media.id, page: 1).results
+            case .person, .none:
+                similar = []
+            }
+        } catch {
+            similarErrorMessage = errorMessage(for: error)
         }
     }
 

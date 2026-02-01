@@ -2,6 +2,7 @@ import SwiftUI
 
 @MainActor
 struct SeerrMediaDetailView: View {
+    @EnvironmentObject private var coordinator: MainCoordinator
     @State var viewModel: SeerrMediaDetailViewModel
     @State private var isSummaryExpanded = false
     @State private var requestSheet: SeerrMediaRequestSheetState?
@@ -30,18 +31,32 @@ struct SeerrMediaDetailView: View {
                 }
 
                 SeerrCastSection(viewModel: bindableViewModel)
+
+                SeerrRelatedSection(
+                    viewModel: bindableViewModel,
+                    section: .recommendations,
+                    onSelectMedia: coordinator.showSeerrMediaDetail
+                )
+
+                SeerrRelatedSection(
+                    viewModel: bindableViewModel,
+                    section: .similar,
+                    onSelectMedia: coordinator.showSeerrMediaDetail
+                )
             }
         }
         .ignoresSafeArea(edges: .top)
         .toolbar(.hidden, for: .tabBar)
         .task {
             await bindableViewModel.loadDetails()
+            await bindableViewModel.loadRelatedContent()
         }
         .background(gradientBackground(for: bindableViewModel))
         .sheet(item: $requestSheet) { sheet in
             SeerrMediaRequestSheetView(viewModel: sheet.viewModel) {
                 Task {
                     await viewModel.loadDetails()
+                    await viewModel.loadRelatedContent()
                 }
             }
             .presentationDetents([.medium, .large])
@@ -51,6 +66,7 @@ struct SeerrMediaDetailView: View {
             SeerrManageRequestsSheetView(viewModel: sheet.viewModel) {
                 Task {
                     await viewModel.loadDetails()
+                    await viewModel.loadRelatedContent()
                 }
             }
             .presentationDetents([.medium, .large])
