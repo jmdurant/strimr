@@ -39,13 +39,13 @@ struct SeerrMediaDetailTVView: View {
                         SeerrRelatedSection(
                             viewModel: bindableViewModel,
                             section: .recommendations,
-                            onSelectMedia: coordinator.showSeerrMediaDetail
+                            onSelectMedia: coordinator.showSeerrMediaDetail,
                         )
 
                         SeerrRelatedSection(
                             viewModel: bindableViewModel,
                             section: .similar,
-                            onSelectMedia: coordinator.showSeerrMediaDetail
+                            onSelectMedia: coordinator.showSeerrMediaDetail,
                         )
                     }
                     .padding(.horizontal, 24)
@@ -63,7 +63,8 @@ struct SeerrMediaDetailTVView: View {
     private var actionButtons: some View {
         HStack(spacing: 16) {
             if !viewModel.isRequestButtonHidden,
-               let requestViewModel = viewModel.makeRequestViewModel() {
+               let requestViewModel = viewModel.makeRequestViewModel()
+            {
                 NavigationLink {
                     SeerrMediaRequestTVView(viewModel: requestViewModel) {
                         Task {
@@ -81,7 +82,8 @@ struct SeerrMediaDetailTVView: View {
             }
 
             if viewModel.shouldShowManageRequestsButton,
-               let manageViewModel = viewModel.makeManageRequestsViewModel() {
+               let manageViewModel = viewModel.makeManageRequestsViewModel()
+            {
                 NavigationLink {
                     SeerrManageRequestsTVView(viewModel: manageViewModel) {
                         Task {
@@ -92,7 +94,7 @@ struct SeerrMediaDetailTVView: View {
                 } label: {
                     Label(
                         String(localized: "seerr.manageRequests.short \(viewModel.pendingManageRequestsCount)"),
-                        systemImage: "checkmark.seal.fill"
+                        systemImage: "checkmark.seal.fill",
                     )
                     .frame(maxWidth: 360, alignment: .leading)
                 }
@@ -119,7 +121,7 @@ struct SeerrMediaDetailTVView: View {
         if let error = viewModel.seasonsErrorMessage {
             Label(error, systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
-        } else if (viewModel.isLoadingSeasons || viewModel.isLoading), viewModel.seasons.isEmpty {
+        } else if viewModel.isLoadingSeasons || viewModel.isLoading, viewModel.seasons.isEmpty {
             HStack(spacing: 8) {
                 ProgressView()
                 Text("media.detail.loadingSeasons")
@@ -138,7 +140,7 @@ struct SeerrMediaDetailTVView: View {
                             isSelected: season.seasonNumber == viewModel.selectedSeasonNumber,
                             onSelect: {
                                 toggleSeasonSelection(season)
-                            }
+                            },
                         )
                     }
                 }
@@ -181,7 +183,7 @@ struct SeerrMediaDetailTVView: View {
         let columnCount = width >= 1700 ? 3 : 2
         return Array(
             repeating: GridItem(.flexible(minimum: 320), spacing: 32),
-            count: columnCount
+            count: columnCount,
         )
     }
 
@@ -229,13 +231,13 @@ private struct SeerrSeasonPillButton: View {
             .foregroundStyle(.brandSecondary)
             .background(
                 Capsule(style: .continuous)
-                    .fill(isSelected ? Color.brandSecondary.opacity(0.5) : Color.gray.opacity(0.12))
+                    .fill(isSelected ? Color.brandSecondary.opacity(0.5) : Color.gray.opacity(0.12)),
             )
             .overlay {
                 Capsule(style: .continuous)
                     .stroke(
                         isFocused ? Color.brandSecondary : Color.gray.opacity(0.25),
-                        lineWidth: isFocused ? 3 : 1
+                        lineWidth: isFocused ? 3 : 1,
                     )
             }
         }
@@ -261,7 +263,7 @@ private struct SeerrEpisodeGridCard: View {
                 episode: episode,
                 imageURL: imageURL,
                 label: label,
-                airDateText: airDateText
+                airDateText: airDateText,
             )
         }
         .buttonStyle(.plain)

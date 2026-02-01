@@ -1,29 +1,31 @@
 import Foundation
 
-struct SeerrMediaRequestAvailability {
+enum SeerrMediaRequestAvailability {
     static func seasonAvailabilityBadge(
         media: SeerrMedia,
         seasonNumber: Int,
         is4k: Bool,
     ) -> SeerrSeasonAvailabilityBadge? {
         if let seasonStatus = seasonStatus(for: media, seasonNumber: seasonNumber, is4k: is4k),
-           seasonStatus != .unknown {
+           seasonStatus != .unknown
+        {
             return .media(seasonStatus)
         }
 
-        let matchingStatuses = activeRequests(for: media, is4k: is4k).compactMap { request -> SeerrMediaRequestStatus? in
-            let requestStatus = request.status
-            if let requestSeasons = request.seasons, !requestSeasons.isEmpty {
-                guard let seasonInfo = requestSeasons.first(where: { $0.seasonNumber == seasonNumber }) else {
-                    return nil
-                }
-                if let seasonStatus = seasonInfo.status, seasonStatus != .declined, seasonStatus != .completed {
-                    return seasonStatus
+        let matchingStatuses = activeRequests(for: media, is4k: is4k)
+            .compactMap { request -> SeerrMediaRequestStatus? in
+                let requestStatus = request.status
+                if let requestSeasons = request.seasons, !requestSeasons.isEmpty {
+                    guard let seasonInfo = requestSeasons.first(where: { $0.seasonNumber == seasonNumber }) else {
+                        return nil
+                    }
+                    if let seasonStatus = seasonInfo.status, seasonStatus != .declined, seasonStatus != .completed {
+                        return seasonStatus
+                    }
+                    return requestStatus
                 }
                 return requestStatus
             }
-            return requestStatus
-        }
 
         let requestBadgePriority: [SeerrMediaRequestStatus] = [.pending, .approved]
         if let status = requestBadgePriority.first(where: { matchingStatuses.contains($0) }) {
@@ -38,7 +40,8 @@ struct SeerrMediaRequestAvailability {
         is4k: Bool,
     ) -> Bool {
         if let seasonStatus = seasonStatus(for: media, seasonNumber: seasonNumber, is4k: is4k),
-           seasonStatus != .unknown {
+           seasonStatus != .unknown
+        {
             return false
         }
 

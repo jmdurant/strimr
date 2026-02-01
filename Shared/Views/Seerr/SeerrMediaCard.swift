@@ -77,7 +77,7 @@ struct SeerrMediaCard: View {
             }
             .onPlayPauseCommand(perform: onTap)
         #endif
-        .onTapGesture(perform: onTap)
+            .onTapGesture(perform: onTap)
     }
 
     private var primaryLabel: String {

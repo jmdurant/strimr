@@ -35,13 +35,13 @@ struct SeerrMediaDetailView: View {
                 SeerrRelatedSection(
                     viewModel: bindableViewModel,
                     section: .recommendations,
-                    onSelectMedia: coordinator.showSeerrMediaDetail
+                    onSelectMedia: coordinator.showSeerrMediaDetail,
                 )
 
                 SeerrRelatedSection(
                     viewModel: bindableViewModel,
                     section: .similar,
-                    onSelectMedia: coordinator.showSeerrMediaDetail
+                    onSelectMedia: coordinator.showSeerrMediaDetail,
                 )
             }
         }

@@ -214,21 +214,21 @@ struct SeerrMediaRequestTVView: View {
                 Task {
                     await viewModel.selectServer(id: newValue)
                 }
-            }
+            },
         )
     }
 
     private var profileSelectionBinding: Binding<Int> {
         Binding(
             get: { viewModel.selectedProfileId ?? viewModel.serviceProfiles.first?.id ?? 0 },
-            set: { viewModel.selectedProfileId = $0 }
+            set: { viewModel.selectedProfileId = $0 },
         )
     }
 
     private var rootFolderBinding: Binding<String> {
         Binding(
             get: { viewModel.selectedRootFolder ?? viewModel.serviceRootFolders.first?.path ?? "" },
-            set: { viewModel.selectedRootFolder = $0 }
+            set: { viewModel.selectedRootFolder = $0 },
         )
     }
 
@@ -242,7 +242,7 @@ struct SeerrMediaRequestTVView: View {
             get: { viewModel.selectedRequestType ?? selectedType },
             set: { newValue in
                 viewModel.selectRequestType(newValue)
-            }
+            },
         )
     }
 
@@ -251,7 +251,7 @@ struct SeerrMediaRequestTVView: View {
             get: { viewModel.selectedSeasons.contains(seasonNumber) },
             set: { isSelected in
                 viewModel.toggleSeason(seasonNumber, isSelected: isSelected)
-            }
+            },
         )
     }
 

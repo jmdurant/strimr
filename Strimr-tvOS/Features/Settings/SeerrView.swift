@@ -193,11 +193,11 @@ private enum SeerrSetupStep: Hashable {
     var titleKey: LocalizedStringKey {
         switch self {
         case .server:
-            return "integrations.seerr.server.title"
+            "integrations.seerr.server.title"
         case .method:
-            return "integrations.seerr.setup.method.title"
+            "integrations.seerr.setup.method.title"
         case .local:
-            return "integrations.seerr.login.local.title"
+            "integrations.seerr.login.local.title"
         }
     }
 }

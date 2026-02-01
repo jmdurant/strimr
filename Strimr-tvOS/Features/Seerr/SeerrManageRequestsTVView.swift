@@ -55,11 +55,11 @@ struct SeerrManageRequestsTVView: View {
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.white.opacity(0.08)),
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                .stroke(Color.white.opacity(0.12), lineWidth: 1),
         )
         .shadow(color: Color.black.opacity(0.35), radius: 14, x: 0, y: 8)
     }

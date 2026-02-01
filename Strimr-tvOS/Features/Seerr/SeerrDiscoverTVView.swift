@@ -69,13 +69,14 @@ struct SeerrDiscoverTVView: View {
             .tint(.primary)
 
             if viewModel.canManageRequests,
-               let manageViewModel = viewModel.makePendingRequestsViewModel() {
+               let manageViewModel = viewModel.makePendingRequestsViewModel()
+            {
                 NavigationLink {
                     SeerrPendingRequestsTVView(viewModel: manageViewModel)
                 } label: {
                     Label(
                         String(localized: "seerr.manageRequests.short \(viewModel.pendingRequestsCount)"),
-                        systemImage: "checkmark.seal.fill"
+                        systemImage: "checkmark.seal.fill",
                     )
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }

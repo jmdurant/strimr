@@ -18,7 +18,7 @@ final class SeerrDiscoverRepository {
     ) async throws -> SeerrPaginatedResponse<SeerrMedia> {
         let queryItems = paginationQueryItems(
             page: page,
-            primaryReleaseDateGte: primaryReleaseDateGte
+            primaryReleaseDateGte: primaryReleaseDateGte,
         )
         return try await client.request(path: "discover/movies", queryItems: queryItems)
     }
@@ -30,7 +30,7 @@ final class SeerrDiscoverRepository {
         let queryItems = paginationQueryItems(
             page: page,
             primaryReleaseDateGte: nil,
-            firstAirDateGte: firstAirDateGte
+            firstAirDateGte: firstAirDateGte,
         )
         return try await client.request(path: "discover/tv", queryItems: queryItems)
     }
@@ -47,7 +47,7 @@ final class SeerrDiscoverRepository {
     private func paginationQueryItems(
         page: Int,
         primaryReleaseDateGte: String?,
-        firstAirDateGte: String? = nil
+        firstAirDateGte: String? = nil,
     ) -> [URLQueryItem] {
         var items = [URLQueryItem(name: "page", value: String(page))]
 

@@ -19,7 +19,6 @@ struct SeerrRequest: Identifiable, Hashable, Decodable {
     let profileName: String?
 }
 
-
 struct SeerrRequestSeasonInfo: Identifiable, Hashable, Decodable {
     let id: Int
     let seasonNumber: Int?

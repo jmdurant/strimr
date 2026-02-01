@@ -37,7 +37,7 @@ final class SeerrMediaDetailViewModel {
     init(
         media: SeerrMedia,
         store: SeerrStore,
-        session: URLSession = .shared
+        session: URLSession = .shared,
     ) {
         self.media = media
         self.store = store
@@ -301,7 +301,7 @@ final class SeerrMediaDetailViewModel {
         if !hasQuotaForMedia {
             return "seerr.request.disabled.noQuota"
         }
-        if !canRequestStandard && !canRequest4K {
+        if !canRequestStandard, !canRequest4K {
             return "seerr.request.disabled.noPermission"
         }
         if media.mediaType == .tv, media.externalIds?.tvdbId == nil {
@@ -425,14 +425,13 @@ final class SeerrMediaDetailViewModel {
 
     private var canRequestStandard: Bool {
         guard media.mediaType == .movie || media.mediaType == .tv else { return false }
-        let permissions: [SeerrPermission]
-        switch media.mediaType {
+        let permissions: [SeerrPermission] = switch media.mediaType {
         case .tv:
-            permissions = [.request, .requestTV]
+            [.request, .requestTV]
         case .movie:
-            permissions = [.request, .requestMovie]
+            [.request, .requestMovie]
         case .person, .none:
-            permissions = []
+            []
         }
         return permissionService.hasPermission(permissions, user: store.user, options: .init(type: .or))
     }
@@ -440,14 +439,13 @@ final class SeerrMediaDetailViewModel {
     private var canRequest4K: Bool {
         guard media.mediaType == .movie || media.mediaType == .tv else { return false }
         guard is4kEnabledForMedia else { return false }
-        let permissions: [SeerrPermission]
-        switch media.mediaType {
+        let permissions: [SeerrPermission] = switch media.mediaType {
         case .tv:
-            permissions = [.request4K, .request4KTV]
+            [.request4K, .request4KTV]
         case .movie:
-            permissions = [.request4K, .request4KMovie]
+            [.request4K, .request4KMovie]
         case .person, .none:
-            permissions = []
+            []
         }
         return permissionService.hasPermission(permissions, user: store.user, options: .init(type: .or))
     }

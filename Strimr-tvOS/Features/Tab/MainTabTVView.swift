@@ -31,14 +31,14 @@ struct MainTabTVView: View {
                     NavigationStack(path: coordinator.pathBinding(for: .seerrDiscover)) {
                         SeerrDiscoverTVView(
                             viewModel: SeerrDiscoverViewModel(store: seerrStore),
-                            onSelectMedia: coordinator.showSeerrMediaDetail
+                            onSelectMedia: coordinator.showSeerrMediaDetail,
                         )
                         .navigationDestination(for: SeerrMedia.self) { media in
                             SeerrMediaDetailTVView(
                                 viewModel: SeerrMediaDetailViewModel(
                                     media: media,
-                                    store: seerrStore
-                                )
+                                    store: seerrStore,
+                                ),
                             )
                         }
                     }

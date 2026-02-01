@@ -27,7 +27,9 @@ final class SeerrManageRequestsViewModel {
                 return status == .pending
             }
             .sorted { lhs, rhs in
-                guard let leftDate = parsedDate(from: lhs.createdAt), let rightDate = parsedDate(from: rhs.createdAt) else {
+                guard let leftDate = parsedDate(from: lhs.createdAt),
+                      let rightDate = parsedDate(from: rhs.createdAt)
+                else {
                     return lhs.id < rhs.id
                 }
                 return leftDate < rightDate
@@ -74,7 +76,7 @@ final class SeerrManageRequestsViewModel {
         if let url = URL(string: avatar), url.scheme != nil {
             return url
         }
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         let path = avatar.hasPrefix("/") ? String(avatar.dropFirst()) : avatar
         return baseURL.appendingPathComponent(path)
     }
@@ -93,7 +95,7 @@ final class SeerrManageRequestsViewModel {
     }
 
     private func update(_ request: SeerrRequest, status: SeerrMediaRequestStatus) async {
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
         guard !updatingRequestIDs.contains(request.id) else { return }
 
         updatingRequestIDs.insert(request.id)
@@ -108,7 +110,7 @@ final class SeerrManageRequestsViewModel {
     }
 
     private var requestRepository: SeerrRequestRepository? {
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         return SeerrRequestRepository(baseURL: baseURL, session: session)
     }
 

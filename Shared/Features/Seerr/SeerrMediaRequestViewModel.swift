@@ -133,9 +133,17 @@ final class SeerrMediaRequestViewModel {
 
     var availableServers: [SeerrServiceServerOption] {
         if isMovie {
-            return radarrServers.map { SeerrServiceServerOption(id: $0.id, name: $0.name ?? "", isDefault: $0.isDefault ?? false) }
+            return radarrServers.map { SeerrServiceServerOption(
+                id: $0.id,
+                name: $0.name ?? "",
+                isDefault: $0.isDefault ?? false,
+            ) }
         }
-        return sonarrServers.map { SeerrServiceServerOption(id: $0.id, name: $0.name ?? "", isDefault: $0.isDefault ?? false) }
+        return sonarrServers.map { SeerrServiceServerOption(
+            id: $0.id,
+            name: $0.name ?? "",
+            isDefault: $0.isDefault ?? false,
+        ) }
     }
 
     func selectRequestType(_ type: SeerrMediaRequestType) {
@@ -194,7 +202,7 @@ final class SeerrMediaRequestViewModel {
 
     func submitRequest() async {
         guard let payload = buildPayload() else { return }
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
 
         isSubmitting = true
         defer { isSubmitting = false }
@@ -212,7 +220,7 @@ final class SeerrMediaRequestViewModel {
     }
 
     func cancelRequest() async {
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
         guard let requestId = existingRequest?.id else { return }
 
         isSubmitting = true
@@ -227,7 +235,7 @@ final class SeerrMediaRequestViewModel {
     }
 
     private func loadServers(for requestType: SeerrMediaRequestType) async {
-        guard let serviceRepository = serviceRepository else { return }
+        guard let serviceRepository else { return }
 
         isLoadingServices = true
         servicesErrorMessage = nil
@@ -241,7 +249,11 @@ final class SeerrMediaRequestViewModel {
                     servicesErrorMessage = String(localized: "seerr.request.services.unavailable")
                     return
                 }
-                selectedServerId = selectDefaultServer(from: radarrServers.map { SeerrServiceServerOption(id: $0.id, name: $0.name ?? "", isDefault: $0.isDefault ?? false) })
+                selectedServerId = selectDefaultServer(from: radarrServers.map { SeerrServiceServerOption(
+                    id: $0.id,
+                    name: $0.name ?? "",
+                    isDefault: $0.isDefault ?? false,
+                ) })
                 if let selectedServerId {
                     await loadServiceDetail(for: selectedServerId)
                 }
@@ -252,7 +264,11 @@ final class SeerrMediaRequestViewModel {
                     servicesErrorMessage = String(localized: "seerr.request.services.unavailable")
                     return
                 }
-                selectedServerId = selectDefaultServer(from: sonarrServers.map { SeerrServiceServerOption(id: $0.id, name: $0.name ?? "", isDefault: $0.isDefault ?? false) })
+                selectedServerId = selectDefaultServer(from: sonarrServers.map { SeerrServiceServerOption(
+                    id: $0.id,
+                    name: $0.name ?? "",
+                    isDefault: $0.isDefault ?? false,
+                ) })
                 if let selectedServerId {
                     await loadServiceDetail(for: selectedServerId)
                 }
@@ -264,7 +280,7 @@ final class SeerrMediaRequestViewModel {
     }
 
     private func loadServiceDetail(for serverId: Int) async {
-        guard let serviceRepository = serviceRepository else { return }
+        guard let serviceRepository else { return }
 
         isLoadingServices = true
         servicesErrorMessage = nil
@@ -277,15 +293,20 @@ final class SeerrMediaRequestViewModel {
                 serviceRootFolders = detail.rootFolders
                 serviceTags = detail.tags
                 selectedProfileId = selectProfileId(defaultID: detail.server.activeProfileId, profiles: detail.profiles)
-                selectedRootFolder = selectRootFolder(defaultPath: detail.server.activeDirectory, rootFolders: detail.rootFolders)
+                selectedRootFolder = selectRootFolder(
+                    defaultPath: detail.server.activeDirectory,
+                    rootFolders: detail.rootFolders,
+                )
                 selectedTags = []
             } else if isTV {
                 let detail = try await serviceRepository.getSonarrService(id: serverId)
                 serviceProfiles = detail.profiles
                 serviceRootFolders = detail.rootFolders
                 serviceTags = detail.tags
-                let defaultProfileId = isAnimeRequest ? detail.server.activeAnimeProfileId : detail.server.activeProfileId
-                let defaultRootFolder = isAnimeRequest ? detail.server.activeAnimeDirectory : detail.server.activeDirectory
+                let defaultProfileId = isAnimeRequest ? detail.server.activeAnimeProfileId : detail.server
+                    .activeProfileId
+                let defaultRootFolder = isAnimeRequest ? detail.server.activeAnimeDirectory : detail.server
+                    .activeDirectory
                 selectedProfileId = selectProfileId(defaultID: defaultProfileId, profiles: detail.profiles)
                 selectedRootFolder = selectRootFolder(defaultPath: defaultRootFolder, rootFolders: detail.rootFolders)
                 selectedTags = []
@@ -318,7 +339,7 @@ final class SeerrMediaRequestViewModel {
 
         selectedSeasons = Set(
             SeerrMediaRequestAvailability.requestableSeasons(media: media, is4k: requestType.is4k)
-                .compactMap(\.seasonNumber)
+                .compactMap(\.seasonNumber),
         )
     }
 
@@ -419,12 +440,12 @@ final class SeerrMediaRequestViewModel {
     }
 
     private var requestRepository: SeerrRequestRepository? {
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         return SeerrRequestRepository(baseURL: baseURL, session: session)
     }
 
     private var serviceRepository: SeerrServiceRepository? {
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         return SeerrServiceRepository(baseURL: baseURL, session: session)
     }
 

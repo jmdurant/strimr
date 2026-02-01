@@ -156,7 +156,7 @@ struct SeerrMediaDetailHeaderSection: View {
         Button(action: onManageRequestsTap) {
             Label(
                 String(localized: "seerr.manageRequests.action \(viewModel.pendingManageRequestsCount)"),
-                systemImage: "checkmark.seal.fill"
+                systemImage: "checkmark.seal.fill",
             )
             .font(.subheadline.weight(.semibold))
             .frame(maxWidth: .infinity, alignment: .center)

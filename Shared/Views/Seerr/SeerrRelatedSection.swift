@@ -8,9 +8,9 @@ enum SeerrRelatedSectionKind {
     var titleKey: LocalizedStringKey {
         switch self {
         case .recommendations:
-            return "seerr.detail.recommendations"
+            "seerr.detail.recommendations"
         case .similar:
-            return "seerr.detail.similar"
+            "seerr.detail.similar"
         }
     }
 }
@@ -87,7 +87,7 @@ struct SeerrRelatedSection: View {
             SeerrMediaCarousel(
                 items: items,
                 showsLabels: true,
-                onSelectMedia: onSelectMedia
+                onSelectMedia: onSelectMedia,
             )
         }
     }

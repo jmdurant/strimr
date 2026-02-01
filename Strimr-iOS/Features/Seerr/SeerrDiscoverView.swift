@@ -29,13 +29,14 @@ struct SeerrDiscoverView: View {
                     }
                 } else {
                     if viewModel.shouldShowManageRequestsButton,
-                       let manageViewModel = viewModel.makePendingRequestsViewModel() {
+                       let manageViewModel = viewModel.makePendingRequestsViewModel()
+                    {
                         NavigationLink {
                             SeerrPendingRequestsView(viewModel: manageViewModel)
                         } label: {
                             Label(
                                 String(localized: "seerr.manageRequests.action \(viewModel.pendingRequestsCount)"),
-                                systemImage: "checkmark.seal.fill"
+                                systemImage: "checkmark.seal.fill",
                             )
                             .font(.headline)
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -108,7 +109,8 @@ struct SeerrDiscoverView: View {
                         .foregroundStyle(.secondary)
                 } else if searchViewModel.isSearchActive,
                           !searchViewModel.isSearching,
-                          searchViewModel.searchResults.isEmpty {
+                          searchViewModel.searchResults.isEmpty
+                {
                     Text("common.empty.nothingToShow")
                         .foregroundStyle(.secondary)
                 }

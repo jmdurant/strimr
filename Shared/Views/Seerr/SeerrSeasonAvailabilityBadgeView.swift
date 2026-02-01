@@ -6,9 +6,9 @@ struct SeerrSeasonAvailabilityBadgeView: View {
 
     var body: some View {
         switch badge {
-        case .media(let status):
+        case let .media(status):
             SeerrAvailabilityBadgeView(status: status, showsLabel: showsLabel)
-        case .request(let status):
+        case let .request(status):
             switch status {
             case .pending:
                 SeerrAvailabilityBadgeView(status: .pending, showsLabel: showsLabel)

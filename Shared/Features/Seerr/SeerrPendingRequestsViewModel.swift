@@ -30,7 +30,7 @@ final class SeerrPendingRequestsViewModel {
 
     func load() async {
         guard canManageRequests else { return }
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
 
         isLoading = true
         errorMessage = nil
@@ -57,7 +57,7 @@ final class SeerrPendingRequestsViewModel {
         guard request.id == requests.last?.id else { return }
         guard !isLoadingMore else { return }
         guard requests.count < totalResults else { return }
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
 
         isLoadingMore = true
         defer { isLoadingMore = false }
@@ -66,7 +66,7 @@ final class SeerrPendingRequestsViewModel {
             let response = try await requestRepository.getRequests(
                 take: pageSize,
                 skip: requests.count,
-                filter: "pending"
+                filter: "pending",
             )
             requests.append(contentsOf: response.results)
             totalResults = max(totalResults, response.pageInfo.results)
@@ -137,21 +137,20 @@ final class SeerrPendingRequestsViewModel {
 
     func mediaYear(for media: SeerrMedia?) -> String? {
         guard let media else { return nil }
-        let dateString: String?
-        switch media.mediaType {
+        let dateString: String? = switch media.mediaType {
         case .movie:
-            dateString = media.releaseDate
+            media.releaseDate
         case .tv:
-            dateString = media.firstAirDate
+            media.firstAirDate
         case .person, .none:
-            dateString = nil
+            nil
         }
         guard let dateString, dateString.count >= 4 else { return nil }
         return String(dateString.prefix(4))
     }
 
     private func loadMediaDetails(for requests: [SeerrRequest]) async {
-        guard let mediaRepository = mediaRepository else { return }
+        guard let mediaRepository else { return }
 
         for request in requests {
             guard let key = mediaKey(for: request) else { continue }
@@ -178,7 +177,7 @@ final class SeerrPendingRequestsViewModel {
     }
 
     private func update(_ request: SeerrRequest, status: SeerrMediaRequestStatus) async {
-        guard let requestRepository = requestRepository else { return }
+        guard let requestRepository else { return }
         guard !updatingRequestIDs.contains(request.id) else { return }
 
         updatingRequestIDs.insert(request.id)
@@ -201,12 +200,12 @@ final class SeerrPendingRequestsViewModel {
     }
 
     private var mediaRepository: SeerrMediaRepository? {
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         return SeerrMediaRepository(baseURL: baseURL, session: session)
     }
 
     private var requestRepository: SeerrRequestRepository? {
-        guard let baseURL = baseURL else { return nil }
+        guard let baseURL else { return nil }
         return SeerrRequestRepository(baseURL: baseURL, session: session)
     }
 

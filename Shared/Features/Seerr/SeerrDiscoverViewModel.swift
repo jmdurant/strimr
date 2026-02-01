@@ -56,11 +56,11 @@ final class SeerrDiscoverViewModel {
             let upcomingDate = Self.upcomingDateFormatter.string(from: Date())
             let upcomingMoviesPage = try await repository.discoverMovies(
                 page: 1,
-                primaryReleaseDateGte: upcomingDate
+                primaryReleaseDateGte: upcomingDate,
             )
             let upcomingTVPage = try await repository.discoverTV(
                 page: 1,
-                firstAirDateGte: upcomingDate
+                firstAirDateGte: upcomingDate,
             )
 
             trending = trendingPage.results
