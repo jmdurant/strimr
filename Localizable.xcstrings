@@ -3697,6 +3697,28 @@
         }
       }
     },
+    "seerr.manageRequests.short %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests (%lld)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes (%lld)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请求（%lld）"
+          }
+        }
+      }
+    },
     "seerr.manageRequests.badge.4k" : {
       "localizations" : {
         "en" : {

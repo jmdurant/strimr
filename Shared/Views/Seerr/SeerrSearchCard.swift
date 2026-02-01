@@ -9,8 +9,8 @@ struct SeerrSearchCard: View {
             HStack(alignment: .top, spacing: 12) {
                 SeerrMediaArtworkView(
                     media: media,
-                    width: 90,
-                    height: 135,
+                    width: artworkSize.width,
+                    height: artworkSize.height,
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
@@ -48,6 +48,14 @@ struct SeerrSearchCard: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private var artworkSize: CGSize {
+        #if os(tvOS)
+            CGSize(width: 140, height: 210)
+        #else
+            CGSize(width: 90, height: 135)
+        #endif
     }
 
     private var title: String {

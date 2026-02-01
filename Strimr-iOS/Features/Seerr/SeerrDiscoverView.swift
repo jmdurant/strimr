@@ -3,22 +3,25 @@ import SwiftUI
 @MainActor
 struct SeerrDiscoverView: View {
     @State var viewModel: SeerrDiscoverViewModel
+    @State var searchViewModel: SeerrSearchViewModel
     let onSelectMedia: (SeerrMedia) -> Void
 
     init(
         viewModel: SeerrDiscoverViewModel,
+        searchViewModel: SeerrSearchViewModel,
         onSelectMedia: @escaping (SeerrMedia) -> Void = { _ in },
     ) {
         _viewModel = State(initialValue: viewModel)
+        _searchViewModel = State(initialValue: searchViewModel)
         self.onSelectMedia = onSelectMedia
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                if viewModel.isSearchActive {
+                if searchViewModel.isSearchActive {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(viewModel.searchResults, id: \.id) { media in
+                        ForEach(searchViewModel.searchResults, id: \.id) { media in
                             SeerrSearchCard(media: media) {
                                 onSelectMedia(media)
                             }
@@ -77,13 +80,15 @@ struct SeerrDiscoverView: View {
                         .frame(maxWidth: .infinity)
                 }
 
-                if let errorMessage = viewModel.errorMessage {
+                if let errorMessage = activeErrorMessage {
                     Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
-                } else if !viewModel.hasContent, !viewModel.isLoading, !viewModel.isSearchActive {
+                } else if !viewModel.hasContent, !viewModel.isLoading, !searchViewModel.isSearchActive {
                     Text("common.empty.nothingToShow")
                         .foregroundStyle(.secondary)
-                } else if viewModel.isSearchActive, !viewModel.isSearching, viewModel.searchResults.isEmpty {
+                } else if searchViewModel.isSearchActive,
+                          !searchViewModel.isSearching,
+                          searchViewModel.searchResults.isEmpty {
                     Text("common.empty.nothingToShow")
                         .foregroundStyle(.secondary)
                 }
@@ -96,16 +101,27 @@ struct SeerrDiscoverView: View {
         .task {
             await viewModel.load()
         }
-        .task(id: viewModel.searchQuery) {
-            await viewModel.search()
+        .task(id: searchViewModel.searchQuery) {
+            await searchViewModel.search()
         }
         .refreshable {
-            await viewModel.reload()
+            if searchViewModel.isSearchActive {
+                await searchViewModel.search()
+            } else {
+                await viewModel.reload()
+            }
         }
         .searchable(
-            text: $viewModel.searchQuery,
+            text: $searchViewModel.searchQuery,
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: Text("integrations.seerr.search.placeholder"),
         )
+    }
+
+    private var activeErrorMessage: String? {
+        if searchViewModel.isSearchActive {
+            return searchViewModel.errorMessage
+        }
+        return viewModel.errorMessage
     }
 }

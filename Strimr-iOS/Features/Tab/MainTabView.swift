@@ -34,6 +34,7 @@ struct MainTabView: View {
                     NavigationStack(path: coordinator.pathBinding(for: .seerrDiscover)) {
                         SeerrDiscoverView(
                             viewModel: SeerrDiscoverViewModel(store: seerrStore),
+                            searchViewModel: SeerrSearchViewModel(store: seerrStore),
                             onSelectMedia: coordinator.showSeerrMediaDetail,
                         )
                         .navigationDestination(for: SeerrMedia.self) { media in

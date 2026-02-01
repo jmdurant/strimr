@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct SeerrDiscoverTVView: View {
     @Environment(SeerrFocusModel.self) private var focusModel
+    @Environment(SeerrStore.self) private var seerrStore
     @State var viewModel: SeerrDiscoverViewModel
     let onSelectMedia: (SeerrMedia) -> Void
 
@@ -23,12 +24,15 @@ struct SeerrDiscoverTVView: View {
                     ZStack(alignment: .bottom) {
                         ZStack(alignment: .topLeading) {
                             SeerrHeroBackgroundView(media: focusModel.focusedMedia ?? heroMedia)
-                            SeerrHeroContentView(media: focusModel.focusedMedia ?? heroMedia)
-                                .frame(
-                                    maxWidth: proxy.size.width * 0.60,
-                                    maxHeight: .infinity,
-                                    alignment: .topLeading,
-                                )
+                            VStack(alignment: .leading, spacing: 20) {
+                                SeerrHeroContentView(media: focusModel.focusedMedia ?? heroMedia)
+                                heroActions
+                            }
+                            .frame(
+                                maxWidth: proxy.size.width * 0.60,
+                                maxHeight: .infinity,
+                                alignment: .topLeading,
+                            )
                         }
 
                         discoverContent
@@ -48,6 +52,35 @@ struct SeerrDiscoverTVView: View {
         .onAppear {
             updateInitialFocus()
         }
+    }
+
+    private var heroActions: some View {
+        HStack(spacing: 16) {
+            NavigationLink {
+                SeerrSearchTVView(
+                    viewModel: SeerrSearchViewModel(store: seerrStore),
+                    onSelectMedia: onSelectMedia,
+                )
+            } label: {
+                Label("tabs.search", systemImage: "magnifyingglass")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.primary)
+
+            if viewModel.canManageRequests {
+                Button {} label: {
+                    Label(
+                        String(localized: "seerr.manageRequests.short \(viewModel.pendingRequestsCount)"),
+                        systemImage: "checkmark.seal.fill"
+                    )
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .tint(.secondary)
+            }
+        }
+        .frame(maxWidth: 720, alignment: .leading)
     }
 
     private var discoverContent: some View {
