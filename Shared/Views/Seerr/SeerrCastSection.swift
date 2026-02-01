@@ -25,8 +25,9 @@ struct SeerrCastSection: View {
                 }
                 .padding(.horizontal, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
+            #if os(iOS)
+            .padding(.horizontal, 8)
+            #endif
         }
         .textCase(nil)
     }
