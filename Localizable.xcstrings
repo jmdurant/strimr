@@ -562,19 +562,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Try again later."
+            "value" : "An error has occurred. Please try again later."
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réessayez plus tard."
+            "state" : "needs_review",
+            "value" : "Une erreur est survenue. Veuillez réessayer plus tard."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请稍后重试"
+            "value" : "发生错误。请稍后再试。"
           }
         }
       }
@@ -975,28 +975,6 @@
         }
       }
     },
-    "integrations.seerr.discover.upcomingMovies" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upcoming Movies"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Films à venir"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "即将上映的电影"
-          }
-        }
-      }
-    },
     "integrations.seerr.discover.popularTV" : {
       "localizations" : {
         "en" : {
@@ -1019,28 +997,6 @@
         }
       }
     },
-    "integrations.seerr.discover.upcomingTV" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upcoming Series"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Séries à venir"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "即将播出的剧集"
-          }
-        }
-      }
-    },
     "integrations.seerr.discover.trending" : {
       "localizations" : {
         "en" : {
@@ -1059,6 +1015,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "趋势"
+          }
+        }
+      }
+    },
+    "integrations.seerr.discover.upcomingMovies" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming Movies"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Films à venir"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即将上映的电影"
+          }
+        }
+      }
+    },
+    "integrations.seerr.discover.upcomingTV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upcoming Series"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries à venir"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即将播出的剧集"
           }
         }
       }
@@ -1552,11 +1552,22 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "http://192.168.0.1:5055"
+            "value" : "http://url:port"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "http://url:port"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "http://url:port"
           }
         }
-      },
-      "shouldTranslate" : false
+      }
     },
     "integrations.seerr.server.url.title" : {
       "localizations" : {
@@ -2990,6 +3001,50 @@
         }
       }
     },
+    "player.settings.speed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speed"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitesse"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "速度"
+          }
+        }
+      }
+    },
+    "player.settings.speed.value %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@x"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@x"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@x"
+          }
+        }
+      }
+    },
     "player.settings.subtitles" : {
       "localizations" : {
         "en" : {
@@ -3052,50 +3107,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "关闭字幕"
-          }
-        }
-      }
-    },
-    "player.settings.speed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Speed"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vitesse"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "速度"
-          }
-        }
-      }
-    },
-    "player.settings.speed.value %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@x"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@x"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@x"
           }
         }
       }
@@ -3716,6 +3727,50 @@
         }
       }
     },
+    "seerr.detail.production" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Production"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Production"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制作"
+          }
+        }
+      }
+    },
+    "seerr.detail.recommendations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommendations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommandations"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐"
+          }
+        }
+      }
+    },
     "seerr.detail.selectSeason" : {
       "localizations" : {
         "en" : {
@@ -3738,24 +3793,24 @@
         }
       }
     },
-    "seerr.detail.production" : {
+    "seerr.detail.similar" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Production"
+            "value" : "Similar"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Production"
+            "value" : "Similaires"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "制作"
+            "value" : "相似"
           }
         }
       }
@@ -3848,28 +3903,6 @@
         }
       }
     },
-    "seerr.manageRequests.short %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requests (%lld)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demandes (%lld)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请求（%lld）"
-          }
-        }
-      }
-    },
     "seerr.manageRequests.badge.4k" : {
       "localizations" : {
         "en" : {
@@ -3958,6 +3991,28 @@
         }
       }
     },
+    "seerr.manageRequests.season.badge %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S%lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第%lld季"
+          }
+        }
+      }
+    },
     "seerr.manageRequests.seasons.all" : {
       "localizations" : {
         "en" : {
@@ -3980,24 +4035,24 @@
         }
       }
     },
-    "seerr.manageRequests.season.badge %lld" : {
+    "seerr.manageRequests.short %lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S%lld"
+            "value" : "Requests (%lld)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S%lld"
+            "value" : "Demandes (%lld)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "第%lld季"
+            "value" : "请求（%lld）"
           }
         }
       }
@@ -4064,50 +4119,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "用户 %lld"
-          }
-        }
-      }
-    },
-    "seerr.detail.recommendations" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recommendations"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recommandations"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推荐"
-          }
-        }
-      }
-    },
-    "seerr.detail.similar" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Similar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Similaires"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "相似"
           }
         }
       }

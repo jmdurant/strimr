@@ -179,7 +179,7 @@ private struct SeerrServerStepView: View {
                 TextField(
                     "integrations.seerr.server.url.title",
                     text: $viewModel.baseURLInput,
-                    prompt: Text("integrations.seerr.server.url.placeholder"),
+                    prompt: Text("integrations.seerr.server.url.placeholder").foregroundColor(.gray),
                 )
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
