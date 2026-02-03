@@ -6,43 +6,65 @@ struct LibraryBrowseView: View {
 
     private var gridColumns: [GridItem] {
         [
-            GridItem(.adaptive(minimum: 112, maximum: 112), spacing: 12),
+            GridItem(.adaptive(minimum: 112, maximum: 112), spacing: 12, alignment: .top),
         ]
     }
 
     var body: some View {
+        @Bindable var controls = viewModel.controls
+
         ScrollView {
-            LazyVGrid(columns: gridColumns, spacing: 16) {
-                ForEach(viewModel.items) { media in
-                    PortraitMediaCard(media: media, width: 112, showsLabels: true) {
-                        onSelectMedia(media)
-                    }
-                    .task {
-                        if media == viewModel.items.last {
-                            await viewModel.loadMore()
-                        }
-                    }
+            VStack(alignment: .leading, spacing: 16) {
+                if controls.hasDisplayTypes {
+                    LibraryBrowseControlsView(
+                        viewModel: controls,
+                        showsBackButton: viewModel.canNavigateBack,
+                        onNavigateBack: viewModel.navigateBack,
+                    )
+                    .padding(.horizontal, 16)
                 }
 
-                if viewModel.isLoadingMore {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
+                LazyVGrid(columns: gridColumns, spacing: 16) {
+                    ForEach(Array(viewModel.browseItems.enumerated()), id: \.element.id) { index, item in
+                        Group {
+                            switch item {
+                            case let .media(media):
+                                PortraitMediaCard(media: media, width: 112, showsLabels: true) {
+                                    onSelectMedia(media)
+                                }
+                            case let .folder(folder):
+                                FolderCard(title: folder.title, width: 112, showsLabels: true) {
+                                    viewModel.enterFolder(folder)
+                                }
+                            }
+                        }
+                        .task {
+                            if index == viewModel.browseItems.count - 1 {
+                                await viewModel.loadMore()
+                            }
+                        }
+                    }
+
+                    if viewModel.isLoadingMore {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                    }
                 }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
             .padding(.top, 16)
         }
         .overlay {
-            if viewModel.isLoading, viewModel.items.isEmpty {
+            if viewModel.isLoading, viewModel.browseItems.isEmpty {
                 ProgressView("library.browse.loading")
-            } else if let errorMessage = viewModel.errorMessage, viewModel.items.isEmpty {
+            } else if let errorMessage = viewModel.errorMessage, viewModel.browseItems.isEmpty {
                 ContentUnavailableView(
                     errorMessage,
                     systemImage: "exclamationmark.triangle.fill",
                     description: Text("common.errors.tryAgainLater"),
                 )
                 .symbolRenderingMode(.multicolor)
-            } else if viewModel.items.isEmpty {
+            } else if viewModel.browseItems.isEmpty {
                 ContentUnavailableView(
                     "library.browse.empty.title",
                     systemImage: "square.grid.2x2.fill",

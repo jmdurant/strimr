@@ -79,11 +79,24 @@ struct PlexSectionItemFilter: Codable, Equatable {
     let key: String
     let title: String
     let type: String
+
+    var isBoolean: Bool {
+        filterType.lowercased() == "boolean"
+    }
 }
 
 enum PlexSortDirection: String, Codable {
     case asc
     case desc
+
+    var opposite: PlexSortDirection {
+        switch self {
+        case .asc:
+            .desc
+        case .desc:
+            .asc
+        }
+    }
 }
 
 struct PlexSectionItemSort: Codable, Equatable {
@@ -365,11 +378,13 @@ struct PlexItemMediaContainer: Codable, Equatable {
         let size: Int?
         let totalSize: Int?
         let metadata: [PlexItem]?
+        let meta: PlexSectionItemMeta?
 
         private enum CodingKeys: String, CodingKey {
             case size
             case totalSize
             case metadata = "Metadata"
+            case meta = "Meta"
         }
     }
 
@@ -378,6 +393,90 @@ struct PlexItemMediaContainer: Codable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case mediaContainer = "MediaContainer"
     }
+}
+
+struct PlexBrowseMediaContainer: Codable, Equatable {
+    struct MediaContainer: Codable, Equatable {
+        let size: Int?
+        let totalSize: Int?
+        let metadata: [PlexBrowseMetadata]?
+        let meta: PlexSectionItemMeta?
+
+        private enum CodingKeys: String, CodingKey {
+            case size
+            case totalSize
+            case metadata = "Metadata"
+            case meta = "Meta"
+        }
+    }
+
+    let mediaContainer: MediaContainer
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+enum PlexBrowseMetadata: Codable, Equatable {
+    case item(PlexItem)
+    case folder(PlexFolderItem)
+
+    init(from decoder: Decoder) throws {
+        if let item = try? PlexItem(from: decoder) {
+            self = .item(item)
+            return
+        }
+        if let folder = try? PlexFolderItem(from: decoder) {
+            self = .folder(folder)
+            return
+        }
+        throw DecodingError.typeMismatch(
+            PlexBrowseMetadata.self,
+            DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Unsupported Plex browse metadata payload.",
+            ),
+        )
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case let .item(item):
+            try item.encode(to: encoder)
+        case let .folder(folder):
+            try folder.encode(to: encoder)
+        }
+    }
+}
+
+struct PlexFolderItem: Codable, Equatable {
+    let key: String
+    let title: String
+}
+
+struct PlexFilterMediaContainer: Codable, Equatable {
+    struct MediaContainer: Codable, Equatable {
+        let size: Int?
+        let directory: [PlexFilterDirectory]?
+
+        private enum CodingKeys: String, CodingKey {
+            case size
+            case directory = "Directory"
+        }
+    }
+
+    let mediaContainer: MediaContainer
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+struct PlexFilterDirectory: Codable, Equatable {
+    let fastKey: String?
+    let key: String
+    let title: String
+    let type: String?
 }
 
 struct PlexSearchResult: Codable, Equatable {
@@ -412,42 +511,6 @@ struct PlexSectionMediaContainer: Codable, Equatable {
     struct MediaContainer: Codable, Equatable {
         let size: Int?
         let directory: [PlexSection]?
-
-        private enum CodingKeys: String, CodingKey {
-            case size
-            case directory = "Directory"
-        }
-    }
-
-    let mediaContainer: MediaContainer
-
-    private enum CodingKeys: String, CodingKey {
-        case mediaContainer = "MediaContainer"
-    }
-}
-
-struct PlexSectionMetaMediaContainer: Codable, Equatable {
-    struct MediaContainer: Codable, Equatable {
-        let size: Int?
-        let meta: PlexSectionItemMeta?
-
-        private enum CodingKeys: String, CodingKey {
-            case size
-            case meta = "Meta"
-        }
-    }
-
-    let mediaContainer: MediaContainer
-
-    private enum CodingKeys: String, CodingKey {
-        case mediaContainer = "MediaContainer"
-    }
-}
-
-struct PlexDirectoryMediaContainer: Codable, Equatable {
-    struct MediaContainer: Codable, Equatable {
-        let size: Int?
-        let directory: [PlexItem]?
 
         private enum CodingKeys: String, CodingKey {
             case size
