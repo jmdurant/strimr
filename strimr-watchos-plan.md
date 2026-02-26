@@ -751,15 +751,18 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 
 ## Scope Summary
 
-### v1 (MVP)
+### v1 (MVP) — COMPLETE
 - Standalone auth via on-Watch OAuth (watchOS 26 browser), WatchConnectivity token transfer, or Plex PIN fallback
 - Home screen (continue watching + recently added)
 - Library browsing
 - Media detail with play button
 - Search
 - Audio direct play via VLCKit 4.x (FLAC, DTS, AC3, Opus, etc.)
-- Video playback via AVPlayer + Plex HLS transcode (new shared-layer work)
-- Now Playing integration + background audio via WKExtendedRuntimeSession
+- Video playback via AVPlayer + Plex HLS transcode via local HTTP proxy (NWListener TLS bypass)
+- Now Playing integration + background audio
+- Player UI: landscape rotation toggle, playback speed control, overlay controls with auto-fade, aspect-fill video
+- Detail view: landscape backdrop art with caching, season picker
+- Downloads & offline playback: download button on detail view, Downloads tab, transcoded 720kbps progressive download, local file playback
 
 ### v2 (Live TV)
 - Shared layer: Plex Live TV API client, channel/program models, LiveTVRepository, LiveTVViewModel
@@ -774,7 +777,7 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 ### Excluded from v1/v2/v3
 - Seerr/Overseerr integration
 - WatchTogether
-- Downloads/offline playback
+- ~~Downloads/offline playback~~ → **DONE** (added in v1, commit `e92f75d`)
 - Complications
 - Settings UI (inherit from iPhone)
 - DVR recording management
@@ -1039,37 +1042,96 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 - Player view now presents correctly (fullScreenCover fix)
 - API calls succeed via both relay and direct connections
 
-### AVPlayer TLS Certificate Issue: BLOCKING
+### AVPlayer TLS Certificate Issue: RESOLVED
 
-**Problem:** AVPlayer rejects `.plex.direct` TLS certificates when loading HLS transcode URLs on watchOS.
+**Problem:** AVPlayer rejects `.plex.direct` TLS certificates when loading HLS transcode URLs on watchOS. Server sends only the leaf cert without the R12 intermediate — AVPlayer on watchOS does NOT do AIA chasing.
 
-**Error:** `status=2, error=The certificate for this server is invalid.` — confirmed on both simulator AND real Apple Watch Ultra 3 device.
+**Solution:** Local HTTP proxy via NWListener. AVPlayer connects to `http://localhost:PORT`, the proxy forwards requests to Plex via `PlexURLSession` (which has custom TLS trust).
 
-**Root cause investigation:**
-- The Plex server's `.plex.direct` cert is **valid** — issued by **Let's Encrypt R12**, wildcard cert `*.hash.plex.direct`, not expired
-- However, the server sends **only the leaf certificate** without the R12 intermediate in the chain
-- `openssl s_client -showcerts` confirms only 1 cert in the chain (leaf only)
-- Most clients handle incomplete chains via AIA (Authority Information Access) fetching — downloading the missing intermediate from `http://r12.i.lencr.org/`
-- **AVPlayer on watchOS does NOT do AIA chasing** — confirmed on both simulator and real device
-- `PlexURLSession` works for API calls because `TrustDelegate` blindly trusts `.plex.direct` hosts, bypassing chain validation entirely
-- `AVAssetResourceLoader` (the standard iOS way to intercept AVPlayer TLS) is **unavailable on watchOS**
+**Created:** `Strimr-watchOS/Library/HLSProxyServer.swift`
+- NWListener-based local HTTP proxy on watchOS
+- Rewrites HLS manifest URLs so all segment fetches also go through the proxy
+- AVPlayer sees plain HTTP, proxy handles TLS via PlexURLSession
+- Works on both simulator and real Apple Watch Ultra 3
+- `start(baseURL:)` / `stop()` / `proxyURL(for:)` API
 
-**Approaches considered:**
-1. ~~AVAssetResourceLoader~~ — unavailable on watchOS, compile error confirmed
-2. ~~Route all playback through VLCKit~~ — VLCKit can't render video on watchOS (no drawable/UIView), only audio
-3. ~~Preload intermediate cert~~ — no API to inject trust anchors into AVPlayer's internal TLS evaluation on watchOS
-4. **Local HTTP proxy (NWListener)** — AVPlayer hits `http://localhost:PORT`, proxy forwards to Plex via `PlexURLSession`. Old watchOS versions (6-7) blocked TCP listeners on physical devices, but watchOS 26 may have relaxed this. **Next to try.**
-5. Use Plex relay URL for transcode (relay has valid public certs) — untested fallback option
+**Commits:** `68d81f7` (proxy + transcode), `a8c66b9` (aspect fill, bitrate, toolbar)
 
-**Note:** iOS and tvOS don't hit this issue because they use VLCKit/MPVKit for video playback, which have their own networking stacks that handle TLS independently. watchOS is the only platform using AVPlayer for video because VLCKit can't render video on watchOS.
+### Player UI Enhancements: COMPLETE
+
+**Commit:** `5788d64`
+
+**Landscape rotation toggle:**
+- Manual toggle button (bottom-left overlay) rotates video 90° via `.rotationEffect(.degrees(90))` with swapped frame dimensions
+- No CoreMotion auto-detect (walking causes constant rotation)
+
+**Custom overlay controls (fade on 4s timer):**
+- Close (X) button — top-left, dismisses player
+- Rotate button — bottom-left, toggles landscape
+- Speed button — bottom-right, cycles 1x→1.25x→1.5x→1.75x→2x via client-side `AVPlayer.rate`
+- All controls fade together after 4 seconds, reappear on tap
+- `.simultaneousGesture(TapGesture())` to coexist with VideoPlayer's built-in tap
+
+**Video aspect-fill:**
+- `GeometryReader` + `.scaleEffect(y: videoRatio/screenRatio)` + `.clipped()` — SwiftUI's `VideoPlayer` ignores `.scaledToFill()`
+
+**Detail view improvements:**
+- Switched from portrait poster to landscape backdrop art (200x112) via `media.artPath` with 16:9 aspect ratio, `.frame(maxHeight: 65)`
+- Season picker fixed with `.pickerStyle(.navigationLink)`
+
+**Image caching:**
+- Added `NSCache<NSURL, UIImage>` (countLimit 60) to `PlexAsyncImage` for faster reload
+
+**Background playback:**
+- `player?.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible` in `WatchAVPlayerController`
+
+**Transcode settings:**
+- Lowered to 720kbps / 480x320 (from 2000kbps) — appropriate for watch screen size
+
+### Downloads & Offline Playback: COMPLETE
+
+**Commit:** `e92f75d`
+
+**Moved:** `Strimr-iOS/Features/Downloads/DownloadModels.swift` → `Shared/Models/DownloadModels.swift`
+- `DownloadStatus`, `DownloadItem`, `DownloadedMediaMetadata`, `DownloadStorageSummary` — pure Codable structs, shared by iOS and watchOS
+
+**Modified:** `Shared/Repository/Plex/TranscodeRepository.swift`
+- Added `transcodeDownloadURL()` — progressive HTTP download URL (not HLS) at 720kbps/320p
+- Uses `protocol=http`, path `/video/:/transcode/universal/start` (no `.m3u8`)
+
+**Created:** `Strimr-watchOS/Features/Downloads/WatchDownloadManager.swift`
+- `@MainActor @Observable` class with URLSession + custom TLS delegate for `.plex.direct`
+- `URLSessionDownloadDelegate` for progress tracking (throttled at 1% intervals)
+- Persistence via `index.json` in `~/Library/Application Support/Downloads/`
+- Key methods: `enqueueItem(ratingKey:context:)`, `delete(_:)`, `localVideoURL(for:)`, `localPosterURL(for:)`, `localMediaItem(for:)`
+- Downloads poster thumbnails (160x240) alongside video
+- On cold start, marks any previously-active downloads as failed (app was killed)
+
+**Created:** `Strimr-watchOS/Features/Downloads/WatchDownloadsView.swift`
+- Downloads tab UI: empty state, storage summary (downloads size / available space), download rows with status indicators
+- Tap completed item → `fullScreenCover` with `WatchPlayerView` using local file URLs
+- Swipe to delete
+
+**Modified:** `Strimr-watchOS/Features/WatchMainTabView.swift`
+- Added 4th tab for Downloads
+
+**Modified:** `Strimr-watchOS/Features/MediaDetail/WatchMediaDetailView.swift`
+- Download button below Play buttons for movies, episodes, and shows (downloads next episode for shows)
+- Button states: Download / Downloading X% / Downloaded (green checkmark) / Retry Download
+
+**Modified:** `Strimr-watchOS/StrimrWatchApp.swift`
+- Initialized `WatchDownloadManager` and injected via `.environment()`
+
+**Modified:** `Strimr-watchOS/Features/Player/WatchPlayerView.swift`
+- Added optional `localMedia: MediaItem?` and `localPlaybackURL: URL?` params for offline playback
+- Local files skip HLS proxy and server reporting
 
 ### Next Steps
 
-1. **Build local HTTP proxy** — test NWListener on watchOS 26 (both simulator and device) to see if localhost TCP listeners work
-2. **If proxy works** — integrate into WatchAVPlayerController to rewrite HLS URLs through localhost
-3. **If proxy blocked** — try relay URL approach or investigate other workarounds
-4. **Clean up debug logging** — remove writeDebug calls once playback is working
-5. **UI polish** — loading states, error handling, artwork caching
+1. **Clean up debug logging** — remove writeDebug calls
+2. **Test downloads on real device** — verify download progress, completion, and offline playback on Apple Watch Ultra 3
+3. **Music library support** (Phase 7) — artist/album/track browsing, VLCKit audio direct play
+4. **Live TV** (Phase 6) — channel browsing, tap-to-tune HLS playback
 
 ## Claude Code Workflow
 

@@ -35,6 +35,11 @@ struct WatchMainTabView: View {
                 WatchDownloadsView()
             }
             .tag(3)
+
+            NavigationStack {
+                WatchLiveTVView()
+            }
+            .tag(4)
         }
     }
 }
