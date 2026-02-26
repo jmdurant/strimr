@@ -5,6 +5,16 @@ final class TranscodeRepository {
     private let authToken: String
     private let clientIdentifier: String
     private let network: PlexServerNetworkClient
+    // Plex server has no client profile for watchOS — report as iOS
+    // so the server can select appropriate transcode settings
+    private let platform: String = {
+        #if os(tvOS)
+            return "tvOS"
+        #else
+            return "iOS"
+        #endif
+    }()
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
 
     init(context: PlexAPIContext) throws {
         guard let baseURLServer = context.baseURLServer else {
@@ -44,17 +54,25 @@ final class TranscodeRepository {
             URLQueryItem(name: "protocol", value: "hls"),
             URLQueryItem(name: "directPlay", value: "0"),
             URLQueryItem(name: "directStream", value: "1"),
-            URLQueryItem(name: "videoCodec", value: videoCodec),
-            URLQueryItem(name: "audioCodec", value: audioCodec),
+            URLQueryItem(name: "hasMDE", value: "1"),
             URLQueryItem(name: "maxVideoBitrate", value: String(maxVideoBitrate)),
+            URLQueryItem(name: "videoQuality", value: "75"),
             URLQueryItem(name: "videoResolution", value: videoResolution),
             URLQueryItem(name: "mediaIndex", value: String(mediaIndex)),
             URLQueryItem(name: "partIndex", value: String(partIndex)),
             URLQueryItem(name: "offset", value: String(offset)),
+            URLQueryItem(name: "audioBoost", value: "100"),
             URLQueryItem(name: "fastSeek", value: "1"),
-            URLQueryItem(name: "copyts", value: "1"),
             URLQueryItem(name: "X-Plex-Token", value: authToken),
             URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
+            URLQueryItem(name: "location", value: "lan"),
+            URLQueryItem(name: "X-Plex-Product", value: "Strimr"),
+            URLQueryItem(name: "X-Plex-Platform", value: platform),
+            URLQueryItem(name: "X-Plex-Version", value: appVersion),
+            URLQueryItem(
+                name: "X-Plex-Client-Profile-Extra",
+                value: "append-transcode-target-codec(type=videoProfile&context=streaming&protocol=hls&videoCodec=\(videoCodec)&audioCodec=\(audioCodec))"
+            ),
         ]
         return components?.url
     }

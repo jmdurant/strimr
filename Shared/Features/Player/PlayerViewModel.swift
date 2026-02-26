@@ -264,12 +264,17 @@ final class PlayerViewModel {
 
         #if os(watchOS)
             if let type = metadata?.type, type == .movie || type == .episode {
+                // Plex transcode API expects the metadata key (/library/metadata/XX),
+                // not the part key (/library/parts/XX/...)
+                guard let metadataPath = metadata?.key else {
+                    return nil
+                }
                 guard let transcodeRepo = try? TranscodeRepository(context: context) else {
                     return nil
                 }
                 let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
                 return transcodeRepo.transcodeURL(
-                    path: partPath,
+                    path: metadataPath,
                     session: sessionIdentifier,
                     offset: offset
                 )

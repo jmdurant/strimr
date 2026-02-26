@@ -150,10 +150,25 @@ struct WatchPlayerView: View {
 
         if isVideo {
             writeDebug("[WatchPlayer] creating AVPlayer for video")
+
+            // Start local proxy to handle .plex.direct TLS certs
+            let proxy = HLSProxyServer.shared
+            if let serverBase = plexApiContext.baseURLServer {
+                do {
+                    try await proxy.start(baseURL: serverBase)
+                    writeDebug("[HLSProxy] started on port \(proxy.port)")
+                } catch {
+                    writeDebug("[HLSProxy] failed to start: \(error)")
+                }
+            }
+
+            let playURL = proxy.proxyURL(for: url) ?? url
+            writeDebug("[WatchPlayer] playURL=\(playURL.absoluteString)")
+
             let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
             coordinator = playerCoordinator
             setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
-            playerCoordinator.play(url)
+            playerCoordinator.play(playURL)
             avPlayer = playerCoordinator.player
 
             if vm.shouldResumeFromOffset, let offset = vm.resumePosition, offset > 0 {
@@ -225,5 +240,6 @@ struct WatchPlayerView: View {
         coordinator?.destruct()
         coordinator = nil
         avPlayer = nil
+        HLSProxyServer.shared.stop()
     }
 }
