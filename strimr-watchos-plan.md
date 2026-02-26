@@ -1014,11 +1014,62 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 - Auth PIN request/polling works correctly
 - WatchConnectivity token transfer wired up (untested on real devices pending simultaneous iOS+watchOS device run)
 
+### PlexURLSession & Image Loading Fix: COMPLETE
+
+**Created:** `Shared/Networking/Plex/PlexURLSession.swift`
+- Shared URLSession with `TrustDelegate` that accepts `.plex.direct` server certificates
+- `TrustDelegate` implements `urlSession(_:didReceive:completionHandler:)` — trusts any `.plex.direct` host via `URLCredential(trust:)`
+- Used by `PlexServerNetworkClient` and `PlexAPIContext.isConnectionReachable()` (replaced `URLSession.shared`)
+
+**Created:** `Strimr-watchOS/Views/PlexAsyncImage.swift`
+- Custom async image view that loads images via `PlexURLSession.shared` instead of `URLSession.shared`
+- SwiftUI `AsyncImage` uses `URLSession.shared` internally with no way to inject custom TLS handling
+- Replaced `AsyncImage` usage in `WatchMediaRow.swift` and `WatchMediaDetailView.swift`
+
+**Modified:** `Shared/Features/Player/PlayQueue/PlayQueueState.swift`
+- Added `Identifiable` conformance (already had `let id: Int`)
+
+**Modified:** `Strimr-watchOS/Features/MediaDetail/WatchMediaDetailView.swift`
+- Fixed `fullScreenCover` state capture bug: changed from `fullScreenCover(isPresented:)` to `fullScreenCover(item: $presentedPlayQueue)` — the `isPresented` variant captures @State values at closure creation time, so `playQueue` was always nil when the player view rendered
+- Added `.environment(plexApiContext)` to fullScreenCover content — fullScreenCover creates a separate view hierarchy that doesn't inherit parent environment values
+- Replaced `AsyncImage` with `PlexAsyncImage`
+
+**Device testing results:**
+- Images load correctly on both simulator and real device
+- Player view now presents correctly (fullScreenCover fix)
+- API calls succeed via both relay and direct connections
+
+### AVPlayer TLS Certificate Issue: BLOCKING
+
+**Problem:** AVPlayer rejects `.plex.direct` TLS certificates when loading HLS transcode URLs on watchOS.
+
+**Error:** `status=2, error=The certificate for this server is invalid.` — confirmed on both simulator AND real Apple Watch Ultra 3 device.
+
+**Root cause investigation:**
+- The Plex server's `.plex.direct` cert is **valid** — issued by **Let's Encrypt R12**, wildcard cert `*.hash.plex.direct`, not expired
+- However, the server sends **only the leaf certificate** without the R12 intermediate in the chain
+- `openssl s_client -showcerts` confirms only 1 cert in the chain (leaf only)
+- Most clients handle incomplete chains via AIA (Authority Information Access) fetching — downloading the missing intermediate from `http://r12.i.lencr.org/`
+- **AVPlayer on watchOS does NOT do AIA chasing** — confirmed on both simulator and real device
+- `PlexURLSession` works for API calls because `TrustDelegate` blindly trusts `.plex.direct` hosts, bypassing chain validation entirely
+- `AVAssetResourceLoader` (the standard iOS way to intercept AVPlayer TLS) is **unavailable on watchOS**
+
+**Approaches considered:**
+1. ~~AVAssetResourceLoader~~ — unavailable on watchOS, compile error confirmed
+2. ~~Route all playback through VLCKit~~ — VLCKit can't render video on watchOS (no drawable/UIView), only audio
+3. ~~Preload intermediate cert~~ — no API to inject trust anchors into AVPlayer's internal TLS evaluation on watchOS
+4. **Local HTTP proxy (NWListener)** — AVPlayer hits `http://localhost:PORT`, proxy forwards to Plex via `PlexURLSession`. Old watchOS versions (6-7) blocked TCP listeners on physical devices, but watchOS 26 may have relaxed this. **Next to try.**
+5. Use Plex relay URL for transcode (relay has valid public certs) — untested fallback option
+
+**Note:** iOS and tvOS don't hit this issue because they use VLCKit/MPVKit for video playback, which have their own networking stacks that handle TLS independently. watchOS is the only platform using AVPlayer for video because VLCKit can't render video on watchOS.
+
 ### Next Steps
 
-1. **End-to-end playback test** — sign in on device and test playback with a reachable Plex server
-2. **Clean up debug logging** — remove debugPrint statements from WatchSignInView
-3. **UI polish** — loading states, error handling, artwork caching
+1. **Build local HTTP proxy** — test NWListener on watchOS 26 (both simulator and device) to see if localhost TCP listeners work
+2. **If proxy works** — integrate into WatchAVPlayerController to rewrite HLS URLs through localhost
+3. **If proxy blocked** — try relay URL approach or investigate other workarounds
+4. **Clean up debug logging** — remove writeDebug calls once playback is working
+5. **UI polish** — loading states, error handling, artwork caching
 
 ## Claude Code Workflow
 
