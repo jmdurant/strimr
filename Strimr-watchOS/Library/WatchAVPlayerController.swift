@@ -32,6 +32,7 @@ final class WatchAVPlayerController: PlayerCoordinating {
         let asset = AVURLAsset(url: url)
         let item = AVPlayerItem(asset: asset)
         player = AVPlayer(playerItem: item)
+        player?.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
         setupObservers()
         player?.play()
     }

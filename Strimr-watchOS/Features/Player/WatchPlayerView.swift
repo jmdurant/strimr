@@ -37,6 +37,10 @@ struct WatchPlayerView: View {
     @State private var coordinator: (any PlayerCoordinating)?
     @State private var avPlayer: AVPlayer?
     @State private var nowPlayingManager: WatchNowPlayingManager?
+    @State private var isLandscape = false
+    @State private var showControls = true
+    @State private var controlsTask: Task<Void, Never>?
+    @State private var playbackSpeed: Float = 1.0
 
     var body: some View {
         Group {
@@ -55,17 +59,75 @@ struct WatchPlayerView: View {
                     .padding()
                 } else if let avPlayer {
                     GeometryReader { geo in
-                        let screenRatio = geo.size.width / geo.size.height
+                        let w = isLandscape ? geo.size.height : geo.size.width
+                        let h = isLandscape ? geo.size.width : geo.size.height
+                        let screenRatio = w / h
                         let videoRatio: CGFloat = 16.0 / 9.0
                         let scale = videoRatio / screenRatio
                         VideoPlayer(player: avPlayer)
                             .scaleEffect(y: scale)
+                            .frame(width: w, height: h)
+                            .rotationEffect(isLandscape ? .degrees(90) : .zero)
                             .frame(width: geo.size.width, height: geo.size.height)
+                            .overlay {
+                                let buttonOpacity: Double = showControls ? 0.7 : 0
+                                VStack {
+                                    HStack {
+                                        Button { dismiss() } label: {
+                                            Image(systemName: "xmark")
+                                                .font(.caption2)
+                                                .foregroundStyle(.white)
+                                                .padding(6)
+                                                .background(.black.opacity(0.4), in: Circle())
+                                        }
+                                        .buttonStyle(.plain)
+                                        Spacer()
+                                    }
+                                    Spacer()
+                                    HStack {
+                                        Button {
+                                            withAnimation(.easeInOut(duration: 0.3)) {
+                                                isLandscape.toggle()
+                                            }
+                                            scheduleControlsHide()
+                                        } label: {
+                                            Image(systemName: "crop.rotate")
+                                                .font(.caption2)
+                                                .foregroundStyle(.white)
+                                                .padding(6)
+                                                .background(.black.opacity(0.4), in: Circle())
+                                        }
+                                        .buttonStyle(.plain)
+                                        Spacer()
+                                        Button {
+                                            cyclePlaybackSpeed()
+                                            scheduleControlsHide()
+                                        } label: {
+                                            Text(speedLabel)
+                                                .font(.caption2)
+                                                .fontWeight(.semibold)
+                                                .foregroundStyle(.white)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 4)
+                                                .background(.black.opacity(0.4), in: Capsule())
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(8)
+                                .opacity(buttonOpacity)
+                                .animation(.easeInOut(duration: 0.3), value: showControls)
+                                .allowsHitTesting(showControls)
+                            }
                     }
                     .clipped()
                     .ignoresSafeArea()
                     .toolbar(.hidden)
                     .persistentSystemOverlays(.hidden)
+                    .onAppear { scheduleControlsHide() }
+                    .simultaneousGesture(
+                        TapGesture().onEnded { scheduleControlsHide() }
+                    )
                 } else {
                     audioPlayerView(viewModel: viewModel)
                 }
@@ -240,6 +302,38 @@ struct WatchPlayerView: View {
 
         coordinator.onPlaybackEnded = {
             Task { await viewModel.markPlaybackFinished() }
+        }
+    }
+
+    private static let speedSteps: [Float] = [1.0, 1.25, 1.5, 1.75, 2.0]
+
+    private var speedLabel: String {
+        if playbackSpeed == 1.0 { return "1x" }
+        let text = playbackSpeed.truncatingRemainder(dividingBy: 1) == 0
+            ? String(format: "%.0f", playbackSpeed)
+            : String(format: "%.2g", playbackSpeed)
+        return "\(text)x"
+    }
+
+    private func cyclePlaybackSpeed() {
+        let steps = Self.speedSteps
+        if let idx = steps.firstIndex(of: playbackSpeed), idx + 1 < steps.count {
+            playbackSpeed = steps[idx + 1]
+        } else {
+            playbackSpeed = steps[0]
+        }
+        coordinator?.setPlaybackRate(playbackSpeed)
+    }
+
+    private func scheduleControlsHide() {
+        controlsTask?.cancel()
+        showControls = true
+        controlsTask = Task {
+            try? await Task.sleep(for: .seconds(4))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showControls = false
+            }
         }
     }
 

@@ -1,5 +1,22 @@
 import SwiftUI
 
+private final class ImageCache {
+    static let shared = ImageCache()
+    private let cache = NSCache<NSURL, UIImage>()
+
+    init() {
+        cache.countLimit = 60
+    }
+
+    func image(for url: URL) -> UIImage? {
+        cache.object(forKey: url as NSURL)
+    }
+
+    func store(_ image: UIImage, for url: URL) {
+        cache.setObject(image, forKey: url as NSURL)
+    }
+}
+
 struct PlexAsyncImage<Placeholder: View>: View {
     let url: URL?
     @ViewBuilder let placeholder: () -> Placeholder
@@ -22,6 +39,12 @@ struct PlexAsyncImage<Placeholder: View>: View {
 
     private func loadImage() async {
         guard let url, !isLoading else { return }
+
+        if let cached = ImageCache.shared.image(for: url) {
+            image = Image(uiImage: cached)
+            return
+        }
+
         isLoading = true
         defer { isLoading = false }
 
@@ -29,6 +52,7 @@ struct PlexAsyncImage<Placeholder: View>: View {
             let (data, _) = try await PlexURLSession.shared.data(from: url)
             #if canImport(UIKit)
                 if let uiImage = UIImage(data: data) {
+                    ImageCache.shared.store(uiImage, for: url)
                     image = Image(uiImage: uiImage)
                 }
             #endif

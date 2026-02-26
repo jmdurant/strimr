@@ -18,11 +18,11 @@ struct WatchMediaDetailView: View {
                             PlexAsyncImage(url: thumbURL) {
                                 Rectangle()
                                     .fill(.quaternary)
-                                    .aspectRatio(2/3, contentMode: .fit)
+                                    .aspectRatio(16/9, contentMode: .fit)
                             }
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(16/9, contentMode: .fill)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 100)
+                            .frame(maxHeight: 65)
                             .clipped()
                             .cornerRadius(8)
                         }
@@ -103,6 +103,7 @@ struct WatchMediaDetailView: View {
                     Text(season.title).tag(season.id)
                 }
             }
+            .pickerStyle(.navigationLink)
 
             if viewModel.isLoadingEpisodes {
                 ProgressView()
@@ -160,6 +161,10 @@ struct WatchMediaDetailView: View {
 
     private func thumbURL(for media: PlayableMediaItem) -> URL? {
         guard let imageRepository = try? ImageRepository(context: plexApiContext) else { return nil }
+        // Prefer landscape backdrop art for the banner, fall back to poster thumb
+        if let artPath = media.artPath {
+            return imageRepository.transcodeImageURL(path: artPath, width: 200, height: 112)
+        }
         let path = media.thumbPath ?? media.parentThumbPath ?? media.grandparentThumbPath
         return path.flatMap { imageRepository.transcodeImageURL(path: $0, width: 400, height: 600) }
     }
