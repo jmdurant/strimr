@@ -32,6 +32,8 @@ struct WatchPlayerView: View {
 
     let playQueue: PlayQueueState
     let shouldResumeFromOffset: Bool
+    var localMedia: MediaItem? = nil
+    var localPlaybackURL: URL? = nil
 
     @State private var viewModel: PlayerViewModel?
     @State private var coordinator: (any PlayerCoordinating)?
@@ -203,39 +205,53 @@ struct WatchPlayerView: View {
     }
 
     private func setupPlayer() async {
-        writeDebug("[WatchPlayer] setupPlayer called, queue.selectedRatingKey=\(playQueue.selectedRatingKey ?? "nil")")
-        let vm = PlayerViewModel(
-            playQueue: playQueue,
-            context: plexApiContext,
-            shouldResumeFromOffset: shouldResumeFromOffset
-        )
-        viewModel = vm
-        writeDebug("[WatchPlayer] calling vm.load()")
-        await vm.load()
-        writeDebug("[WatchPlayer] vm.load() returned")
+        let vm: PlayerViewModel
+        if let localMedia, let localPlaybackURL {
+            // Offline playback — local file, no server interaction
+            vm = PlayerViewModel(
+                localMedia: localMedia,
+                localPlaybackURL: localPlaybackURL,
+                context: plexApiContext
+            )
+            viewModel = vm
+        } else {
+            // Streaming playback
+            writeDebug("[WatchPlayer] setupPlayer called, queue.selectedRatingKey=\(playQueue.selectedRatingKey ?? "nil")")
+            vm = PlayerViewModel(
+                playQueue: playQueue,
+                context: plexApiContext,
+                shouldResumeFromOffset: shouldResumeFromOffset
+            )
+            viewModel = vm
+            writeDebug("[WatchPlayer] calling vm.load()")
+            await vm.load()
+            writeDebug("[WatchPlayer] vm.load() returned")
+            writeDebug("[WatchPlayer] load done, url=\(vm.playbackURL?.absoluteString ?? "nil"), error=\(vm.errorMessage ?? "none")")
+        }
 
-        writeDebug("[WatchPlayer] load done, url=\(vm.playbackURL?.absoluteString ?? "nil"), error=\(vm.errorMessage ?? "none")")
         guard let url = vm.playbackURL else { return }
 
         let isVideo = vm.media?.type == .movie || vm.media?.type == .episode
-        writeDebug("[WatchPlayer] mediaType=\(vm.media?.type.rawValue ?? "nil"), isVideo=\(isVideo), url=\(url.absoluteString)")
+        let isLocal = localPlaybackURL != nil
 
         if isVideo {
-            writeDebug("[WatchPlayer] creating AVPlayer for video")
+            var playURL = url
 
-            // Start local proxy to handle .plex.direct TLS certs
-            let proxy = HLSProxyServer.shared
-            if let serverBase = plexApiContext.baseURLServer {
-                do {
-                    try await proxy.start(baseURL: serverBase)
-                    writeDebug("[HLSProxy] started on port \(proxy.port)")
-                } catch {
-                    writeDebug("[HLSProxy] failed to start: \(error)")
+            // Only start HLS proxy for remote streaming (not local files)
+            if !isLocal {
+                writeDebug("[WatchPlayer] creating AVPlayer for video")
+                let proxy = HLSProxyServer.shared
+                if let serverBase = plexApiContext.baseURLServer {
+                    do {
+                        try await proxy.start(baseURL: serverBase)
+                        writeDebug("[HLSProxy] started on port \(proxy.port)")
+                    } catch {
+                        writeDebug("[HLSProxy] failed to start: \(error)")
+                    }
                 }
+                playURL = proxy.proxyURL(for: url) ?? url
+                writeDebug("[WatchPlayer] playURL=\(playURL.absoluteString)")
             }
-
-            let playURL = proxy.proxyURL(for: url) ?? url
-            writeDebug("[WatchPlayer] playURL=\(playURL.absoluteString)")
 
             let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
             coordinator = playerCoordinator

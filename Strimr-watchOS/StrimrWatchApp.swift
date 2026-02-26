@@ -6,6 +6,7 @@ struct StrimrWatchApp: App {
     @State private var sessionManager: SessionManager
     @State private var settingsManager: SettingsManager
     @State private var libraryStore: LibraryStore
+    @State private var downloadManager: WatchDownloadManager
 
     init() {
         let context = PlexAPIContext()
@@ -15,6 +16,7 @@ struct StrimrWatchApp: App {
         _sessionManager = State(initialValue: sessionManager)
         _settingsManager = State(initialValue: SettingsManager())
         _libraryStore = State(initialValue: store)
+        _downloadManager = State(initialValue: WatchDownloadManager())
 
         WatchSessionManager.shared.activate()
         WatchSessionManager.shared.onTokenReceived = { _ in
@@ -31,6 +33,7 @@ struct StrimrWatchApp: App {
                 .environment(sessionManager)
                 .environment(settingsManager)
                 .environment(libraryStore)
+                .environment(downloadManager)
         }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct WatchMediaDetailView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
     @Environment(SettingsManager.self) private var settingsManager
+    @Environment(WatchDownloadManager.self) private var downloadManager
 
     let media: PlayableMediaItem
 
@@ -58,6 +59,12 @@ struct WatchMediaDetailView: View {
                                 Label("Play from Start", systemImage: "arrow.counterclockwise")
                                     .frame(maxWidth: .infinity)
                             }
+                        }
+
+                        if viewModel.media.type == .movie || viewModel.media.type == .episode {
+                            downloadButton(ratingKey: viewModel.media.id)
+                        } else if viewModel.media.type == .show, let episodeKey = viewModel.primaryActionRatingKey {
+                            downloadButton(ratingKey: episodeKey)
                         }
 
                         if let summary = viewModel.media.summary, !summary.isEmpty {
@@ -123,6 +130,43 @@ struct WatchMediaDetailView: View {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func downloadButton(ratingKey: String) -> some View {
+        let status = downloadManager.downloadStatus(for: ratingKey)
+        switch status?.status {
+        case .downloading:
+            HStack(spacing: 6) {
+                ProgressView(value: status?.progress ?? 0)
+                    .tint(.accentColor)
+                Text("\(Int((status?.progress ?? 0) * 100))%")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        case .completed:
+            Label("Downloaded", systemImage: "checkmark.circle.fill")
+                .font(.caption2)
+                .foregroundStyle(.green)
+        case .queued:
+            Label("Queued", systemImage: "clock")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        case .failed:
+            Button {
+                Task { await downloadManager.enqueueItem(ratingKey: ratingKey, context: plexApiContext) }
+            } label: {
+                Label("Retry Download", systemImage: "arrow.clockwise")
+                    .frame(maxWidth: .infinity)
+            }
+        case nil:
+            Button {
+                Task { await downloadManager.enqueueItem(ratingKey: ratingKey, context: plexApiContext) }
+            } label: {
+                Label("Download", systemImage: "arrow.down.circle")
+                    .frame(maxWidth: .infinity)
             }
         }
     }

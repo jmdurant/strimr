@@ -30,6 +30,11 @@ struct WatchMainTabView: View {
                 WatchSearchView()
             }
             .tag(2)
+
+            NavigationStack {
+                WatchDownloadsView()
+            }
+            .tag(3)
         }
     }
 }
