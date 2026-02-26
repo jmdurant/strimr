@@ -54,8 +54,18 @@ struct WatchPlayerView: View {
                     }
                     .padding()
                 } else if let avPlayer {
-                    VideoPlayer(player: avPlayer)
-                        .ignoresSafeArea()
+                    GeometryReader { geo in
+                        let screenRatio = geo.size.width / geo.size.height
+                        let videoRatio: CGFloat = 16.0 / 9.0
+                        let scale = videoRatio / screenRatio
+                        VideoPlayer(player: avPlayer)
+                            .scaleEffect(y: scale)
+                            .frame(width: geo.size.width, height: geo.size.height)
+                    }
+                    .clipped()
+                    .ignoresSafeArea()
+                    .toolbar(.hidden)
+                    .persistentSystemOverlays(.hidden)
                 } else {
                     audioPlayerView(viewModel: viewModel)
                 }

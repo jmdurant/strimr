@@ -43,8 +43,8 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        maxVideoBitrate: Int = 2000,
-        videoResolution: String = "480x360"
+        maxVideoBitrate: Int = 720,
+        videoResolution: String = "480x320"
     ) -> URL? {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.path = "/video/:/transcode/universal/start.m3u8"
