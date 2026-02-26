@@ -1,6 +1,6 @@
 import Foundation
 
-struct PlayQueueState: Equatable {
+struct PlayQueueState: Equatable, Identifiable {
     let id: Int
     let selectedItemID: Int?
     let selectedMetadataItemID: String?

@@ -29,11 +29,14 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
     }
 
     func play(_ url: URL) {
+        writeDebug("[VLC] play called, url=\(url.absoluteString)")
         configureAudioSession()
         hasNotifiedFileLoaded = false
         lastReportedTimeSeconds = -1.0
         mediaPlayer?.media = VLCMedia(url: url)
+        writeDebug("[VLC] media set, calling play()")
         mediaPlayer?.play()
+        writeDebug("[VLC] play() returned, isPlaying=\(mediaPlayer?.isPlaying ?? false), state=\(mediaPlayer?.state.rawValue ?? -1)")
     }
 
     func togglePlayback() {

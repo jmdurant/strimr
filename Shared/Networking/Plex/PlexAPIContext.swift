@@ -124,7 +124,7 @@ final class PlexAPIContext {
         request.timeoutInterval = 6
 
         do {
-            let (_, response) = try await URLSession.shared.data(for: request)
+            let (_, response) = try await PlexURLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
                 return false
             }

@@ -7,8 +7,7 @@ struct WatchMediaDetailView: View {
     let media: PlayableMediaItem
 
     @State private var viewModel: MediaDetailViewModel?
-    @State private var isShowingPlayer = false
-    @State private var playQueue: PlayQueueState?
+    @State private var presentedPlayQueue: PlayQueueState?
 
     var body: some View {
         Group {
@@ -16,13 +15,12 @@ struct WatchMediaDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
                         if let thumbURL = thumbURL(for: viewModel.media) {
-                            AsyncImage(url: thumbURL) { image in
-                                image.resizable().aspectRatio(contentMode: .fill)
-                            } placeholder: {
+                            PlexAsyncImage(url: thumbURL) {
                                 Rectangle()
                                     .fill(.quaternary)
                                     .aspectRatio(2/3, contentMode: .fit)
                             }
+                            .aspectRatio(contentMode: .fill)
                             .frame(maxWidth: .infinity)
                             .frame(height: 100)
                             .clipped()
@@ -85,13 +83,12 @@ struct WatchMediaDetailView: View {
             viewModel = vm
             await vm.loadDetails()
         }
-        .fullScreenCover(isPresented: $isShowingPlayer) {
-            if let playQueue {
-                WatchPlayerView(
-                    playQueue: playQueue,
-                    shouldResumeFromOffset: true
-                )
-            }
+        .fullScreenCover(item: $presentedPlayQueue) { queue in
+            WatchPlayerView(
+                playQueue: queue,
+                shouldResumeFromOffset: true
+            )
+            .environment(plexApiContext)
         }
     }
 
@@ -130,7 +127,11 @@ struct WatchMediaDetailView: View {
     }
 
     private func play(shouldResume: Bool) async {
-        guard let ratingKey = viewModel?.primaryActionRatingKey else { return }
+        writeDebug("[Detail] play tapped, shouldResume=\(shouldResume), vm=\(viewModel != nil), ratingKey=\(viewModel?.primaryActionRatingKey ?? "NIL"), plexType=\(media.plexType.rawValue)")
+        guard let ratingKey = viewModel?.primaryActionRatingKey else {
+            writeDebug("[Detail] BAILING: primaryActionRatingKey is nil")
+            return
+        }
         await launchPlayback(ratingKey: ratingKey, type: media.plexType, shouldResume: shouldResume)
     }
 
@@ -139,6 +140,7 @@ struct WatchMediaDetailView: View {
     }
 
     private func launchPlayback(ratingKey: String, type: PlexItemType, shouldResume: Bool) async {
+        writeDebug("[Detail] launchPlayback ratingKey=\(ratingKey), type=\(type.rawValue)")
         do {
             let manager = try PlayQueueManager(context: plexApiContext)
             let queue = try await manager.createQueue(
@@ -147,12 +149,14 @@ struct WatchMediaDetailView: View {
                 continuous: type == .episode || type == .show || type == .season,
                 shuffle: false
             )
-            playQueue = queue
-            isShowingPlayer = true
+            writeDebug("[Detail] queue created, showing player")
+            presentedPlayQueue = queue
         } catch {
+            writeDebug("[Detail] FAILED to create play queue: \(error)")
             debugPrint("Failed to create play queue:", error)
         }
     }
+
 
     private func thumbURL(for media: PlayableMediaItem) -> URL? {
         guard let imageRepository = try? ImageRepository(context: plexApiContext) else { return nil }

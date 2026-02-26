@@ -1,7 +1,7 @@
 import Foundation
 
 final class PlexServerNetworkClient {
-    private let session: URLSession = .shared
+    private let session: URLSession = PlexURLSession.shared
     private var authToken: String
     private var baseURL: URL
     private var language: String

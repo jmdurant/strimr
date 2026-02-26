@@ -23,11 +23,10 @@ struct WatchMediaRow: View {
     private var rowContent: some View {
         HStack(spacing: 8) {
             if let thumbURL = thumbURL {
-                AsyncImage(url: thumbURL) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
+                PlexAsyncImage(url: thumbURL) {
                     Rectangle().fill(.quaternary)
                 }
+                .aspectRatio(contentMode: .fill)
                 .frame(width: 40, height: 56)
                 .clipped()
                 .cornerRadius(4)

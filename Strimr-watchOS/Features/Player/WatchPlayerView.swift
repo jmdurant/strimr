@@ -1,6 +1,21 @@
 import AVFoundation
 import AVKit
+import os
 import SwiftUI
+
+private let logger = Logger(subsystem: "com.strimr.app.watchos", category: "Player")
+
+func writeDebug(_ msg: String) {
+    let path = NSHomeDirectory() + "/tmp/strimr-debug.log"
+    let line = "\(Date()): \(msg)\n"
+    if let handle = FileHandle(forWritingAtPath: path) {
+        handle.seekToEndOfFile()
+        handle.write(line.data(using: .utf8)!)
+        handle.closeFile()
+    } else {
+        FileManager.default.createFile(atPath: path, contents: line.data(using: .utf8))
+    }
+}
 
 private protocol PlayerCallbackProviding: PlayerCoordinating {
     var onPropertyChange: ((PlayerProperty, Any?) -> Void)? { get set }
@@ -116,19 +131,25 @@ struct WatchPlayerView: View {
     }
 
     private func setupPlayer() async {
+        writeDebug("[WatchPlayer] setupPlayer called, queue.selectedRatingKey=\(playQueue.selectedRatingKey ?? "nil")")
         let vm = PlayerViewModel(
             playQueue: playQueue,
             context: plexApiContext,
             shouldResumeFromOffset: shouldResumeFromOffset
         )
         viewModel = vm
+        writeDebug("[WatchPlayer] calling vm.load()")
         await vm.load()
+        writeDebug("[WatchPlayer] vm.load() returned")
 
+        writeDebug("[WatchPlayer] load done, url=\(vm.playbackURL?.absoluteString ?? "nil"), error=\(vm.errorMessage ?? "none")")
         guard let url = vm.playbackURL else { return }
 
         let isVideo = vm.media?.type == .movie || vm.media?.type == .episode
+        writeDebug("[WatchPlayer] mediaType=\(vm.media?.type.rawValue ?? "nil"), isVideo=\(isVideo), url=\(url.absoluteString)")
 
         if isVideo {
+            writeDebug("[WatchPlayer] creating AVPlayer for video")
             let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
             coordinator = playerCoordinator
             setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
@@ -139,6 +160,7 @@ struct WatchPlayerView: View {
                 playerCoordinator.seek(to: offset)
             }
         } else {
+            writeDebug("[WatchPlayer] creating VLC for audio")
             let playerCoordinator = WatchVLCPlayerController(options: PlayerOptions())
             coordinator = playerCoordinator
             setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)

@@ -1,6 +1,7 @@
 import AVFoundation
 import AVKit
 import MediaPlayer
+import os
 
 @MainActor
 final class WatchAVPlayerController: PlayerCoordinating {
@@ -26,6 +27,7 @@ final class WatchAVPlayerController: PlayerCoordinating {
     }
 
     func play(_ url: URL) {
+        writeDebug("[WatchAVPlayer] play url=\(url.absoluteString)")
         configureAudioSession()
         let asset = AVURLAsset(url: url)
         let item = AVPlayerItem(asset: asset)
@@ -153,15 +155,17 @@ final class WatchAVPlayerController: PlayerCoordinating {
 
         statusObservation = player.currentItem?.observe(\.status) { [weak self] item, _ in
             Task { @MainActor in
+                writeDebug("[WatchAVPlayer] status=\(item.status.rawValue), error=\(item.error?.localizedDescription ?? "none")")
                 switch item.status {
                 case .readyToPlay:
                     let duration = CMTimeGetSeconds(item.duration)
+                    writeDebug("[WatchAVPlayer] readyToPlay, duration=\(duration)")
                     if duration.isFinite {
                         self?.onPropertyChange?(.duration, duration)
                     }
                     self?.onMediaLoaded?()
                 case .failed:
-                    break
+                    writeDebug("[WatchAVPlayer] FAILED: \(item.error?.localizedDescription ?? "unknown")")
                 default:
                     break
                 }
