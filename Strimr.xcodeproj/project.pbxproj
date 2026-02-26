@@ -12,6 +12,9 @@
 		E97F3FC32ED9E12000CA6E05 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */; };
 		E98AE52E2F008D9D0062F372 /* MobileVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E98AE9B02F009FE30062F372 /* TVVLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E9AA000B2F5A000100000001 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E9AA000A2F5A000100000001 /* Sentry */; };
+		E9AA000C2F5A000100000001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */; };
+		E9AA00212F5B000100000001 /* VLCKit.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E9AA00202F5B000100000001 /* VLCKit.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E9B55C4B2F18F6FE00AC81AD /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E9B55C4A2F18F6FE00AC81AD /* Sentry */; };
 		E9B55C4D2F18F71100AC81AD /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = E9B55C4C2F18F71100AC81AD /* Sentry */; };
 		E9E4DB4F2EF4534E0035147A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E97F3FC22ED9E12000CA6E05 /* Localizable.xcstrings */; };
@@ -40,6 +43,17 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E9AA00222F5B000100000001 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E9AA00212F5B000100000001 /* VLCKit.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +61,8 @@
 		E98A13B92ED8CBAD002F98B2 /* Strimr-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MobileVLCKit.xcframework; path = Carthage/Build/MobileVLCKit.xcframework; sourceTree = "<group>"; };
 		E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = TVVLCKit.xcframework; path = Carthage/Build/TVVLCKit.xcframework; sourceTree = "<group>"; };
+		E9AA00022F5A000100000001 /* Strimr-watchOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-watchOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9AA00202F5B000100000001 /* VLCKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VLCKit.xcframework; path = Carthage/Build/VLCKit.xcframework; sourceTree = "<group>"; };
 		E9C448F32EF3034900D2895B /* Strimr-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -57,6 +73,103 @@
 				Info.plist,
 			);
 			target = E98A13B82ED8CBAD002F98B2 /* Strimr-iOS */;
+		};
+		E9AA000D2F5A000100000001 /* Exceptions for "Strimr-watchOS" folder in "Strimr-watchOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E9AA00012F5A000100000001 /* Strimr-watchOS */;
+		};
+		E9AA000E2F5A000100000001 /* Exceptions for "Shared" folder in "Strimr-watchOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Extensions/ImageCornerColorSampler.swift,
+				Features/Integrations/SeerrPermissionService.swift,
+				Features/Integrations/SeerrSessionService.swift,
+				Features/Integrations/SeerrViewModel.swift,
+				Features/Library/LibraryBrowseControlsView.swift,
+				Features/MainCoordinator.swift,
+				Features/MediaDetail/CastSection.swift,
+				Features/MediaDetail/RelatedHubsSection.swift,
+				Features/Player/Controls/PlayerBadge.swift,
+				Features/Player/Controls/PlayerTimelineView.swift,
+				Features/Player/ExternalPlaybackLauncher.swift,
+				Features/Player/PlaybackLauncher.swift,
+				Features/Search/SearchResultCard.swift,
+				Features/Seerr/SeerrDiscoverViewModel.swift,
+				Features/Seerr/SeerrManageRequestsViewModel.swift,
+				Features/Seerr/SeerrMediaDetailViewModel.swift,
+				Features/Seerr/SeerrMediaRequestAvailability.swift,
+				Features/Seerr/SeerrMediaRequestType.swift,
+				Features/Seerr/SeerrMediaRequestViewModel.swift,
+				Features/Seerr/SeerrPendingRequestsViewModel.swift,
+				Features/Seerr/SeerrSearchViewModel.swift,
+				Features/Settings/DisplayedLibrariesSectionView.swift,
+				Features/Settings/DisplayedLibrariesViewModel.swift,
+				Features/Settings/NavigationLibrariesSectionView.swift,
+				Features/Settings/NavigationLibrariesViewModel.swift,
+				Features/Settings/SettingsViewModel.swift,
+				Features/WatchTogether/Playback/WatchTogetherPlaybackSyncEngine.swift,
+				Features/WatchTogether/Playback/WatchTogetherPlayerEvent.swift,
+				Features/WatchTogether/WatchTogetherModels.swift,
+				Features/WatchTogether/WatchTogetherProtocol.swift,
+				Features/WatchTogether/WatchTogetherViewModel.swift,
+				Features/WatchTogether/WatchTogetherWebSocketClient.swift,
+				Library/MPV/MetalLayer.swift,
+				Library/MPV/MPVPlayerDelegate.swift,
+				Library/MPV/MPVPlayerView.swift,
+				Library/MPV/MPVPlayerViewController.swift,
+				Library/MPV/MPVProperty.swift,
+				Library/Player/PlayerFactory.swift,
+				Library/VLC/VLCPlayerDelegate.swift,
+				Library/VLC/VLCPlayerView.swift,
+				Library/VLC/VLCPlayerViewController.swift,
+				Models/Seerr/SeerrAuthRequests.swift,
+				Models/Seerr/SeerrMedia.swift,
+				Models/Seerr/SeerrPaginatedResponse.swift,
+				Models/Seerr/SeerrQuota.swift,
+				Models/Seerr/SeerrRequest.swift,
+				Models/Seerr/SeerrRequestCount.swift,
+				Models/Seerr/SeerrRequestPageResponse.swift,
+				Models/Seerr/SeerrRequestPayloads.swift,
+				Models/Seerr/SeerrServiceModels.swift,
+				Models/Seerr/SeerrSettings.swift,
+				Models/Seerr/SeerrUser.swift,
+				Networking/Seerr/SeerrAPI.swift,
+				Networking/Seerr/SeerrNetworkClient.swift,
+				Networking/Seerr/TMDBImageService.swift,
+				Repository/Seerr/SeerrAuthRepository.swift,
+				Repository/Seerr/SeerrDiscoverRepository.swift,
+				Repository/Seerr/SeerrMediaRepository.swift,
+				Repository/Seerr/SeerrRequestRepository.swift,
+				Repository/Seerr/SeerrServiceRepository.swift,
+				Repository/Seerr/SeerrSettingsRepository.swift,
+				Store/SeerrStore.swift,
+				Views/FolderCard.swift,
+				Views/Media/Card/LandscapeMediaCard.swift,
+				Views/Media/Card/MediaCard.swift,
+				Views/Media/Card/PortraitMediaCard.swift,
+				Views/Media/EpisodeArtworkView.swift,
+				Views/Media/MediaBackdropGradient.swift,
+				Views/Media/MediaCarousel.swift,
+				Views/Media/MediaHubSection.swift,
+				Views/Media/MediaImageView.swift,
+				Views/Media/MediaImageViewModel.swift,
+				Views/Media/WatchStatusBadge.swift,
+				Views/Seerr/SeerrAvailabilityBadgeView.swift,
+				Views/Seerr/SeerrCastSection.swift,
+				Views/Seerr/SeerrEpisodeCardView.swift,
+				Views/Seerr/SeerrMediaArtworkView.swift,
+				Views/Seerr/SeerrMediaCard.swift,
+				Views/Seerr/SeerrMediaCarousel.swift,
+				Views/Seerr/SeerrMediaSection.swift,
+				Views/Seerr/SeerrRelatedSection.swift,
+				Views/Seerr/SeerrSearchCard.swift,
+				Views/Seerr/SeerrSeasonAvailabilityBadgeView.swift,
+				Views/Toast/ToastOverlay.swift,
+			);
+			target = E9AA00012F5A000100000001 /* Strimr-watchOS */;
 		};
 		E9C449F82EF322DE00D2895B /* Exceptions for "Shared" folder in "Strimr-tvOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -232,6 +345,14 @@
 			path = "Strimr-iOS";
 			sourceTree = "<group>";
 		};
+		E9AA00062F5A000100000001 /* Strimr-watchOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E9AA000D2F5A000100000001 /* Exceptions for "Strimr-watchOS" folder in "Strimr-watchOS" target */,
+			);
+			path = "Strimr-watchOS";
+			sourceTree = "<group>";
+		};
 		E9C448F42EF3034900D2895B /* Strimr-tvOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -244,6 +365,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				E9C449F82EF322DE00D2895B /* Exceptions for "Shared" folder in "Strimr-tvOS" target */,
+				E9AA000E2F5A000100000001 /* Exceptions for "Shared" folder in "Strimr-watchOS" target */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -262,6 +384,14 @@
 			files = (
 				E9B55C4B2F18F6FE00AC81AD /* Sentry in Frameworks */,
 				E93807CC2F20DE6D00A5C3B7 /* MPVKit-GPL in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9AA00042F5A000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9AA000B2F5A000100000001 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +415,7 @@
 				E9C449012EF30A9500D2895B /* Shared */,
 				E98A13BB2ED8CBAD002F98B2 /* Strimr-iOS */,
 				E9C448F42EF3034900D2895B /* Strimr-tvOS */,
+				E9AA00062F5A000100000001 /* Strimr-watchOS */,
 				E9C448FE2EF3063500D2895B /* Frameworks */,
 				E98A13BA2ED8CBAD002F98B2 /* Products */,
 			);
@@ -295,6 +426,7 @@
 			children = (
 				E98A13B92ED8CBAD002F98B2 /* Strimr-iOS.app */,
 				E9C448F32EF3034900D2895B /* Strimr-tvOS.app */,
+				E9AA00022F5A000100000001 /* Strimr-watchOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -304,6 +436,7 @@
 			children = (
 				E98AE52F2F008DA20062F372 /* TVVLCKit.xcframework */,
 				E98AE52C2F008D9D0062F372 /* MobileVLCKit.xcframework */,
+				E9AA00202F5B000100000001 /* VLCKit.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -336,6 +469,32 @@
 			);
 			productName = Strimr;
 			productReference = E98A13B92ED8CBAD002F98B2 /* Strimr-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E9AA00012F5A000100000001 /* Strimr-watchOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9AA00092F5A000100000001 /* Build configuration list for PBXNativeTarget "Strimr-watchOS" */;
+			buildPhases = (
+				E9AA00032F5A000100000001 /* Sources */,
+				E9AA00042F5A000100000001 /* Frameworks */,
+				E9AA00052F5A000100000001 /* Resources */,
+				E9AA00222F5B000100000001 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E9AA00062F5A000100000001 /* Strimr-watchOS */,
+				E9C449012EF30A9500D2895B /* Shared */,
+				E9E70EF02F0D6FD7009C62B3 /* Config */,
+			);
+			name = "Strimr-watchOS";
+			packageProductDependencies = (
+				E9AA000A2F5A000100000001 /* Sentry */,
+			);
+			productName = "Strimr-watchOS";
+			productReference = E9AA00022F5A000100000001 /* Strimr-watchOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 		E9C448F22EF3034900D2895B /* Strimr-tvOS */ = {
@@ -376,6 +535,9 @@
 					E98A13B82ED8CBAD002F98B2 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
+					E9AA00012F5A000100000001 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					E9C448F22EF3034900D2895B = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -402,6 +564,7 @@
 			targets = (
 				E98A13B82ED8CBAD002F98B2 /* Strimr-iOS */,
 				E9C448F22EF3034900D2895B /* Strimr-tvOS */,
+				E9AA00012F5A000100000001 /* Strimr-watchOS */,
 			);
 		};
 /* End PBXProject section */
@@ -412,6 +575,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				E97F3FC32ED9E12000CA6E05 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9AA00052F5A000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9AA000C2F5A000100000001 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +598,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		E98A13B52ED8CBAD002F98B2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9AA00032F5A000100000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -568,6 +746,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -616,6 +795,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -655,6 +835,85 @@
 			};
 			name = Release;
 		};
+		E9AA00072F5A000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = E9E70EF02F0D6FD7009C62B3 /* Config */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Strimr-watchOS/Strimr-watchOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.strimr.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(IOS_BUNDLE_IDENTIFIER).watchos";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=watchos*]" = "$(IOS_BUNDLE_IDENTIFIER).watchos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		E9AA00082F5A000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = E9E70EF02F0D6FD7009C62B3 /* Config */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Strimr-watchOS/Strimr-watchOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.strimr.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(IOS_BUNDLE_IDENTIFIER).watchos";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=watchos*]" = "$(IOS_BUNDLE_IDENTIFIER).watchos";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
 		E9C448FC2EF3034900D2895B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = E9E70EF02F0D6FD7009C62B3 /* Config */;
@@ -664,6 +923,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Strimr-tvOS/Info.plist";
@@ -699,6 +959,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
+				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Strimr-tvOS/Info.plist";
@@ -747,6 +1008,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E9AA00092F5A000100000001 /* Build configuration list for PBXNativeTarget "Strimr-watchOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9AA00072F5A000100000001 /* Debug */,
+				E9AA00082F5A000100000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E9C448FB2EF3034900D2895B /* Build configuration list for PBXNativeTarget "Strimr-tvOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -787,6 +1057,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E93807CA2F20DE6D00A5C3B7 /* XCRemoteSwiftPackageReference "MPVKit" */;
 			productName = "MPVKit-GPL";
+		};
+		E9AA000A2F5A000100000001 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E9B55C492F18F6FE00AC81AD /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 		E9B55C4A2F18F6FE00AC81AD /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;

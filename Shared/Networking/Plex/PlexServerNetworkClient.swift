@@ -10,6 +10,8 @@ final class PlexServerNetworkClient {
     private let platform: String = {
         #if os(tvOS)
             return "tvOS"
+        #elseif os(watchOS)
+            return "watchOS"
         #elseif os(iOS)
             return "iOS"
         #else

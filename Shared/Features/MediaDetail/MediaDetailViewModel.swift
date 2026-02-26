@@ -165,7 +165,9 @@ final class MediaDetailViewModel {
     }
 
     private func resolveGradient() {
-        backdropGradient = MediaBackdropGradient.colors(for: .playable(media.mediaItem))
+        #if !os(watchOS)
+            backdropGradient = MediaBackdropGradient.colors(for: .playable(media.mediaItem))
+        #endif
     }
 
     private func loadWatchlistStatus() async {

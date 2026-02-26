@@ -28,6 +28,8 @@ struct StrimrApp: App {
             sessionManager: sessionManager,
             context: context,
         ))
+
+        PhoneSessionManager.shared.activate(sessionManager: sessionManager)
     }
 
     var body: some Scene {
@@ -41,6 +43,16 @@ struct StrimrApp: App {
                 .environment(seerrStore)
                 .environment(watchTogetherViewModel)
                 .preferredColorScheme(.dark)
+                .onChange(of: sessionManager.status, initial: true) { _, newStatus in
+                    if newStatus == .ready,
+                       let token = sessionManager.authToken
+                    {
+                        PhoneSessionManager.shared.sendAuthToken(
+                            token,
+                            serverIdentifier: sessionManager.plexServer?.clientIdentifier
+                        )
+                    }
+                }
         }
     }
 }

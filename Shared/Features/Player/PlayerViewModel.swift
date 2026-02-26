@@ -163,6 +163,7 @@ final class PlayerViewModel {
 
     func handleStop() {
         reportTimeline(state: .stopped, force: true)
+        stopTranscodeSession()
     }
 
     func markPlaybackFinished() async {
@@ -182,6 +183,21 @@ final class PlayerViewModel {
         } catch {
             debugPrint("Failed to mark playback as finished:", error)
         }
+        stopTranscodeSession()
+    }
+
+    private func stopTranscodeSession() {
+        #if os(watchOS)
+            let session = sessionIdentifier
+            Task {
+                do {
+                    let repo = try TranscodeRepository(context: context)
+                    try await repo.stopSession(id: session)
+                } catch {
+                    debugPrint("Failed to stop transcode session:", error)
+                }
+            }
+        #endif
     }
 
     func nextItemInQueue() async -> PlexItem? {
@@ -242,13 +258,27 @@ final class PlayerViewModel {
     }
 
     private func resolvePlaybackURL(from metadata: PlexItem?) -> URL? {
-        guard
-            let partPath = metadata?.media?.first?.parts.first?.key,
-            let mediaRepository = try? MediaRepository(context: context)
-        else {
+        guard let partPath = metadata?.media?.first?.parts.first?.key else {
             return nil
         }
 
+        #if os(watchOS)
+            if let type = metadata?.type, type == .movie || type == .episode {
+                guard let transcodeRepo = try? TranscodeRepository(context: context) else {
+                    return nil
+                }
+                let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
+                return transcodeRepo.transcodeURL(
+                    path: partPath,
+                    session: sessionIdentifier,
+                    offset: offset
+                )
+            }
+        #endif
+
+        guard let mediaRepository = try? MediaRepository(context: context) else {
+            return nil
+        }
         return mediaRepository.mediaURL(path: partPath)
     }
 
