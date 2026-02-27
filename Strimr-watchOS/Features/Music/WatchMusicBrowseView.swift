@@ -84,10 +84,15 @@ struct MusicPlaylistsDestination: Hashable {
     let library: Library
 }
 
+struct MusicAlbumDestination: Hashable {
+    let album: MediaItem
+}
+
 // MARK: - Album List
 
 struct WatchMusicAlbumsView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(WatchDownloadManager.self) private var downloadManager
 
     let artist: MediaItem
 
@@ -106,8 +111,21 @@ struct WatchMusicAlbumsView: View {
                     )
                 } else {
                     List(viewModel.items) { album in
-                        NavigationLink(value: album) {
+                        NavigationLink(value: MusicAlbumDestination(album: album)) {
                             albumRow(album)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button {
+                                Task {
+                                    await downloadManager.enqueueAlbum(
+                                        ratingKey: album.id,
+                                        context: plexApiContext
+                                    )
+                                }
+                            } label: {
+                                Label("Download", systemImage: "arrow.down.circle")
+                            }
+                            .tint(.accentColor)
                         }
                     }
                 }
@@ -116,8 +134,8 @@ struct WatchMusicAlbumsView: View {
             }
         }
         .navigationTitle(artist.title)
-        .navigationDestination(for: MediaItem.self) { album in
-            WatchMusicTracksView(album: album)
+        .navigationDestination(for: MusicAlbumDestination.self) { dest in
+            WatchMusicTracksView(album: dest.album)
         }
         .task {
             let vm = MusicBrowseViewModel(
@@ -152,11 +170,14 @@ struct WatchMusicAlbumsView: View {
 
 struct WatchMusicTracksView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(WatchDownloadManager.self) private var downloadManager
 
     let album: MediaItem
 
     @State private var viewModel: MusicBrowseViewModel?
     @State private var presentedPlayQueue: PlayQueueState?
+    @State private var isDownloadingAlbum = false
+    @State private var addToPlaylistTrack: MediaItem?
 
     var body: some View {
         Group {
@@ -185,11 +206,30 @@ struct WatchMusicTracksView: View {
                                 .frame(maxWidth: .infinity)
                         }
 
+                        Button {
+                            Task { await downloadAlbum() }
+                        } label: {
+                            Label(
+                                isDownloadingAlbum ? "Downloading…" : "Download All",
+                                systemImage: "arrow.down.circle"
+                            )
+                            .frame(maxWidth: .infinity)
+                        }
+                        .disabled(isDownloadingAlbum)
+
                         ForEach(viewModel.items) { track in
                             Button {
                                 Task { await playTrack(track) }
                             } label: {
                                 trackRow(track)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button {
+                                    addToPlaylistTrack = track
+                                } label: {
+                                    Label("Playlist", systemImage: "music.note.list")
+                                }
+                                .tint(.accentColor)
                             }
                         }
                     }
@@ -201,6 +241,10 @@ struct WatchMusicTracksView: View {
         .navigationTitle(album.title)
         .fullScreenCover(item: $presentedPlayQueue) { queue in
             WatchPlayerView(playQueue: queue, shouldResumeFromOffset: false)
+                .environment(plexApiContext)
+        }
+        .sheet(item: $addToPlaylistTrack) { track in
+            WatchAddToPlaylistView(ratingKey: track.id, playlistType: "audio")
                 .environment(plexApiContext)
         }
         .task {
@@ -231,7 +275,49 @@ struct WatchMusicTracksView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Spacer()
+            trackDownloadIcon(track)
         }
+    }
+
+    @ViewBuilder
+    private func trackDownloadIcon(_ track: MediaItem) -> some View {
+        if let status = downloadManager.downloadStatus(for: track.id) {
+            switch status.status {
+            case .completed:
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.green)
+            case .downloading:
+                ProgressView()
+                    .scaleEffect(0.6)
+            case .queued:
+                Image(systemName: "clock")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            case .failed:
+                Image(systemName: "exclamationmark.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+            }
+        } else {
+            Button {
+                Task {
+                    await downloadManager.enqueueTrack(ratingKey: track.id, context: plexApiContext)
+                }
+            } label: {
+                Image(systemName: "arrow.down.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func downloadAlbum() async {
+        isDownloadingAlbum = true
+        await downloadManager.enqueueAlbum(ratingKey: album.id, context: plexApiContext)
+        isDownloadingAlbum = false
     }
 
     private func playTrack(_ track: MediaItem) async {

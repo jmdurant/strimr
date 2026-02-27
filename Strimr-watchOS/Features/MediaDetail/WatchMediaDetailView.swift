@@ -9,6 +9,7 @@ struct WatchMediaDetailView: View {
 
     @State private var viewModel: MediaDetailViewModel?
     @State private var presentedPlayQueue: PlayQueueState?
+    @State private var addToPlaylistEpisode: MediaItem?
 
     var body: some View {
         Group {
@@ -97,6 +98,10 @@ struct WatchMediaDetailView: View {
             )
             .environment(plexApiContext)
         }
+        .sheet(item: $addToPlaylistEpisode) { episode in
+            WatchAddToPlaylistView(ratingKey: episode.id, playlistType: "video")
+                .environment(plexApiContext)
+        }
     }
 
     @ViewBuilder
@@ -115,22 +120,82 @@ struct WatchMediaDetailView: View {
             if viewModel.isLoadingEpisodes {
                 ProgressView()
             } else {
+                if let seasonId = viewModel.selectedSeasonId, !viewModel.episodes.isEmpty {
+                    Button {
+                        Task {
+                            await downloadManager.enqueueSeason(
+                                ratingKey: seasonId,
+                                context: plexApiContext
+                            )
+                        }
+                    } label: {
+                        Label("Download Season", systemImage: "arrow.down.circle")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+
                 ForEach(viewModel.episodes) { episode in
                     Button {
                         Task { await playEpisode(episode) }
                     } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            if let label = episode.tertiaryLabel {
-                                Text(label)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                        HStack(spacing: 8) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                if let label = episode.tertiaryLabel {
+                                    Text(label)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Text(episode.title)
+                                    .font(.caption)
                             }
-                            Text(episode.title)
-                                .font(.caption)
+                            Spacer()
+                            episodeDownloadIcon(episode)
                         }
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            addToPlaylistEpisode = episode
+                        } label: {
+                            Label("Playlist", systemImage: "text.badge.plus")
+                        }
+                        .tint(.accentColor)
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func episodeDownloadIcon(_ episode: MediaItem) -> some View {
+        if let status = downloadManager.downloadStatus(for: episode.id) {
+            switch status.status {
+            case .completed:
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.green)
+            case .downloading:
+                ProgressView()
+                    .scaleEffect(0.6)
+            case .queued:
+                Image(systemName: "clock")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            case .failed:
+                Image(systemName: "exclamationmark.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+            }
+        } else {
+            Button {
+                Task {
+                    await downloadManager.enqueueItem(ratingKey: episode.id, context: plexApiContext)
+                }
+            } label: {
+                Image(systemName: "arrow.down.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
         }
     }
 

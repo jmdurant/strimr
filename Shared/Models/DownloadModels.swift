@@ -52,7 +52,9 @@ struct DownloadedMediaMetadata: Codable, Hashable {
             return parentTitle
         case .show:
             return nil
-        case .artist, .album, .track, .photo, .clip, .collection, .playlist, .unknown:
+        case .track:
+            return grandparentTitle ?? parentTitle
+        case .artist, .album, .photo, .clip, .collection, .playlist, .unknown:
             return nil
         }
     }

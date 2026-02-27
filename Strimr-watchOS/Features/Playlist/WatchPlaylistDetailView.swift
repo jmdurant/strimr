@@ -2,11 +2,13 @@ import SwiftUI
 
 struct WatchPlaylistDetailView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(WatchDownloadManager.self) private var downloadManager
 
     let playlist: PlaylistMediaItem
 
     @State private var viewModel: PlaylistDetailViewModel?
     @State private var presentedPlayQueue: PlayQueueState?
+    @State private var isDownloadingAll = false
 
     var body: some View {
         Group {
@@ -48,11 +50,28 @@ struct WatchPlaylistDetailView: View {
                                 Label("Shuffle", systemImage: "shuffle")
                                     .frame(maxWidth: .infinity)
                             }
+
+                            Button {
+                                Task { await downloadAll() }
+                            } label: {
+                                Label(
+                                    isDownloadingAll ? "Downloading…" : "Download All",
+                                    systemImage: "arrow.down.circle"
+                                )
+                                .frame(maxWidth: .infinity)
+                            }
+                            .disabled(isDownloadingAll)
                         }
 
                         Section {
                             ForEach(viewModel.items) { item in
-                                WatchMediaRow(item: item)
+                                HStack(spacing: 0) {
+                                    WatchMediaRow(item: item)
+                                    if let mediaItem = item.playableItem {
+                                        Spacer()
+                                        playlistItemDownloadIcon(mediaItem)
+                                    }
+                                }
                             }
                         }
                     }
@@ -76,8 +95,57 @@ struct WatchPlaylistDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private func playlistItemDownloadIcon(_ item: MediaItem) -> some View {
+        if let status = downloadManager.downloadStatus(for: item.id) {
+            switch status.status {
+            case .completed:
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.green)
+            case .downloading:
+                ProgressView()
+                    .scaleEffect(0.6)
+            case .queued:
+                Image(systemName: "clock")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            case .failed:
+                Image(systemName: "exclamationmark.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.red)
+            }
+        } else {
+            Button {
+                Task { await enqueueItem(item) }
+            } label: {
+                Image(systemName: "arrow.down.circle")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func enqueueItem(_ item: MediaItem) async {
+        if item.type == .track {
+            await downloadManager.enqueueTrack(ratingKey: item.id, context: plexApiContext)
+        } else {
+            await downloadManager.enqueueItem(ratingKey: item.id, context: plexApiContext)
+        }
+    }
+
+    private func downloadAll() async {
+        guard let items = viewModel?.items else { return }
+        isDownloadingAll = true
+        for item in items {
+            guard let mediaItem = item.playableItem else { continue }
+            await enqueueItem(mediaItem)
+        }
+        isDownloadingAll = false
+    }
+
     private func playPlaylist(shuffle: Bool) async {
-        let launcher = WatchPlaybackLauncher(context: plexApiContext)
         let queueType = playlist.playlistType == "audio" ? "audio" : "video"
         do {
             let manager = try PlayQueueManager(context: plexApiContext)

@@ -43,6 +43,7 @@ struct WatchPlayerView: View {
     @State private var showControls = true
     @State private var controlsTask: Task<Void, Never>?
     @State private var playbackSpeed: Float = 1.0
+    @State private var showVisualization = false
 
     var body: some View {
         Group {
@@ -198,8 +199,26 @@ struct WatchPlayerView: View {
                 .buttonStyle(.plain)
             }
 
-            Button("Close") { dismiss() }
-                .font(.caption)
+            HStack(spacing: 16) {
+                if let vlcCoordinator = coordinator as? WatchVLCPlayerController {
+                    Button {
+                        showVisualization = true
+                    } label: {
+                        Image(systemName: "waveform")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                            .padding(6)
+                            .background(.black.opacity(0.4), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .fullScreenCover(isPresented: $showVisualization) {
+                        WatchVisualizationView(spectrumData: vlcCoordinator.spectrumData)
+                    }
+                }
+
+                Button("Close") { dismiss() }
+                    .font(.caption)
+            }
         }
         .padding()
     }
@@ -231,15 +250,30 @@ struct WatchPlayerView: View {
 
         guard let url = vm.playbackURL else { return }
 
-        let isVideo = vm.media?.type == .movie || vm.media?.type == .episode
         let isLocal = localPlaybackURL != nil
+        let isVideo = vm.media?.type == .movie || vm.media?.type == .episode
+        let useVLC = isLocal && !isVideo  // VLC only for offline audio (has no HTTP access module)
 
-        if isVideo {
+        if useVLC {
+            // Offline audio — use VLC for local file playback + visualization bridge
+            writeDebug("[WatchPlayer] creating VLC for offline audio")
+            await WatchVLCPlayerController.activateAudioSession()
+
+            let playerCoordinator = WatchVLCPlayerController(options: PlayerOptions())
+            coordinator = playerCoordinator
+            setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
+            playerCoordinator.play(url)
+
+            if vm.shouldResumeFromOffset, let offset = vm.resumePosition, offset > 0 {
+                playerCoordinator.seek(to: offset)
+            }
+        } else {
+            // AVPlayer for all streaming (video + audio) and local video
             var playURL = url
 
-            // Only start HLS proxy for remote streaming (not local files)
             if !isLocal {
-                writeDebug("[WatchPlayer] creating AVPlayer for video")
+                // Remote streaming — proxy through localhost for TLS termination
+                writeDebug("[WatchPlayer] creating AVPlayer for streaming")
                 let proxy = HLSProxyServer.shared
                 if let serverBase = plexApiContext.baseURLServer {
                     do {
@@ -251,23 +285,19 @@ struct WatchPlayerView: View {
                 }
                 playURL = proxy.proxyURL(for: url) ?? url
                 writeDebug("[WatchPlayer] playURL=\(playURL.absoluteString)")
+            } else {
+                writeDebug("[WatchPlayer] creating AVPlayer for local \(isVideo ? "video" : "audio")")
             }
 
             let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
             coordinator = playerCoordinator
             setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
             playerCoordinator.play(playURL)
-            avPlayer = playerCoordinator.player
 
-            if vm.shouldResumeFromOffset, let offset = vm.resumePosition, offset > 0 {
-                playerCoordinator.seek(to: offset)
+            // Only set avPlayer for video — audio uses the audio player UI
+            if isVideo {
+                avPlayer = playerCoordinator.player
             }
-        } else {
-            writeDebug("[WatchPlayer] creating VLC for audio")
-            let playerCoordinator = WatchVLCPlayerController(options: PlayerOptions())
-            coordinator = playerCoordinator
-            setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
-            playerCoordinator.play(url)
 
             if vm.shouldResumeFromOffset, let offset = vm.resumePosition, offset > 0 {
                 playerCoordinator.seek(to: offset)

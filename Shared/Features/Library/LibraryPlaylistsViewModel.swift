@@ -25,6 +25,10 @@ final class LibraryPlaylistsViewModel {
         await fetch(reset: true)
     }
 
+    func reload() async {
+        await fetch(reset: true)
+    }
+
     func loadMore() async {
         guard !isLoading, !isLoadingMore, !reachedEnd else { return }
         await fetch(reset: false)

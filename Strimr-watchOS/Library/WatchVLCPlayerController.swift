@@ -8,32 +8,54 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
     var onPlaybackEnded: (() -> Void)?
     var onMediaLoaded: (() -> Void)?
 
+    private(set) var spectrumData = SpectrumData()
+    private var audioBridge: VLCAudioBridge?
     private var mediaPlayer: VLCMediaPlayer?
     private var hasNotifiedFileLoaded = false
     private var lastReportedTimeSeconds = -1.0
 
     init(options: PlayerOptions) {
         super.init()
+        // Enable VLC console logging to diagnose errors
+        let logger = VLCConsoleLogger()
+        logger.level = .debug
+        VLCLibrary.shared().loggers = [logger]
+
         mediaPlayer = VLCMediaPlayer()
         mediaPlayer?.delegate = self
     }
 
-    private func configureAudioSession() {
+    static func activateAudioSession() async {
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.playback, mode: .default, policy: .longFormAudio)
-        session.activate(options: []) { activated, error in
-            if let error {
-                debugPrint("Audio session activation failed:", error)
+        do {
+            try session.setCategory(.playback, mode: .default, policy: .longFormAudio)
+        } catch {
+            writeDebug("[VLC] setCategory failed: \(error)")
+        }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            session.activate(options: []) { activated, error in
+                if let error {
+                    writeDebug("[VLC] audio session activation failed: \(error)")
+                } else {
+                    writeDebug("[VLC] audio session activated: \(activated)")
+                }
+                continuation.resume()
             }
         }
     }
 
     func play(_ url: URL) {
         writeDebug("[VLC] play called, url=\(url.absoluteString)")
-        configureAudioSession()
         hasNotifiedFileLoaded = false
         lastReportedTimeSeconds = -1.0
         mediaPlayer?.media = VLCMedia(url: url)
+
+        // Install audio callbacks for visualization + AVAudioEngine re-injection.
+        // Must happen before play() so VLC uses our callbacks from the first sample.
+        if let mp = mediaPlayer {
+            audioBridge = VLCAudioBridge(player: mp, spectrumData: spectrumData)
+        }
+
         writeDebug("[VLC] media set, calling play()")
         mediaPlayer?.play()
         writeDebug("[VLC] play() returned, isPlaying=\(mediaPlayer?.isPlaying ?? false), state=\(mediaPlayer?.state.rawValue ?? -1)")
@@ -104,9 +126,14 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
     }
 
     func destruct() {
+        // Stop media player first — VLC's stop triggers flush_cb which
+        // needs the audio bridge context to still be valid.
         mediaPlayer?.stop()
         mediaPlayer?.delegate = nil
         mediaPlayer = nil
+        audioBridge?.stop()
+        audioBridge = nil
+        spectrumData.reset()
         try? AVAudioSession.sharedInstance().setActive(false)
     }
 
@@ -124,6 +151,12 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
 extension WatchVLCPlayerController: VLCMediaPlayerDelegate {
     nonisolated func mediaPlayerStateChanged(_ newState: VLCMediaPlayerState) {
         Task { @MainActor in
+            let stateNames = ["stopped","stopping","opening","buffering","error","playing","paused"]
+            let stateName = newState.rawValue < stateNames.count ? stateNames[Int(newState.rawValue)] : "unknown(\(newState.rawValue))"
+            writeDebug("[VLC] stateChanged: \(stateName) (\(newState.rawValue))")
+            if newState == .error {
+                writeDebug("[VLC] ERROR state!")
+            }
             let isPaused = newState == .paused || newState == .stopped || newState == .stopping
 
             onPropertyChange?(.pause, isPaused)

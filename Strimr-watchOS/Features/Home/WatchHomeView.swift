@@ -44,6 +44,12 @@ struct WatchHomeView: View {
         .task {
             await viewModel.load()
         }
+        .onAppear {
+            // Re-fetch if data is already loaded (navigated back)
+            if viewModel.hasContent {
+                Task { await viewModel.reload() }
+            }
+        }
         .refreshable {
             await viewModel.reload()
         }

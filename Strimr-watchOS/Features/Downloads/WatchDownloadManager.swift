@@ -111,6 +111,111 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate {
         }
     }
 
+    func enqueueTrack(ratingKey: String, context: PlexAPIContext) async {
+        guard !isAlreadyScheduled(for: ratingKey) else { return }
+
+        do {
+            let metadataRepository = try MetadataRepository(context: context)
+            let response = try await metadataRepository.getMetadata(
+                ratingKey: ratingKey,
+                params: .init(checkFiles: true)
+            )
+            guard let plexItem = response.mediaContainer.metadata?.first else { return }
+
+            let mediaItem = MediaItem(plexItem: plexItem)
+            guard mediaItem.type == .track else { return }
+
+            guard let partPath = plexItem.media?.first?.parts.first?.key else { return }
+
+            let mediaRepo = try MediaRepository(context: context)
+            guard let downloadURL = mediaRepo.mediaURL(path: partPath) else { return }
+
+            let id = UUID().uuidString
+            let folderURL = downloadsDirectory.appendingPathComponent(id, isDirectory: true)
+            try createDirectoryIfNeeded(at: folderURL)
+
+            let posterFileName = await downloadPosterIfAvailable(
+                for: mediaItem,
+                context: context,
+                destinationFolder: folderURL,
+                square: true
+            )
+
+            let request = URLRequest(url: downloadURL)
+            let task = session.downloadTask(with: request)
+            task.taskDescription = id
+
+            let metadata = DownloadedMediaMetadata(
+                ratingKey: mediaItem.id,
+                guid: mediaItem.guid,
+                type: mediaItem.type,
+                title: mediaItem.title,
+                summary: mediaItem.summary,
+                genres: mediaItem.genres,
+                year: mediaItem.year,
+                duration: mediaItem.duration,
+                contentRating: mediaItem.contentRating,
+                studio: mediaItem.studio,
+                tagline: mediaItem.tagline,
+                parentRatingKey: mediaItem.parentRatingKey,
+                grandparentRatingKey: mediaItem.grandparentRatingKey,
+                grandparentTitle: mediaItem.grandparentTitle,
+                parentTitle: mediaItem.parentTitle,
+                parentIndex: mediaItem.parentIndex,
+                index: mediaItem.index,
+                posterFileName: posterFileName,
+                videoFileName: "audio",
+                fileSize: nil,
+                createdAt: Date()
+            )
+
+            let item = DownloadItem(
+                id: id,
+                status: .downloading,
+                progress: 0,
+                bytesWritten: 0,
+                totalBytes: 0,
+                taskIdentifier: task.taskIdentifier,
+                errorMessage: nil,
+                metadata: metadata
+            )
+            items.append(item)
+            persistState()
+            task.resume()
+        } catch {
+            writeDebug("[WatchDownload] enqueueTrack failed: \(error)")
+        }
+    }
+
+    func enqueueAlbum(ratingKey: String, context: PlexAPIContext) async {
+        do {
+            let metadataRepository = try MetadataRepository(context: context)
+            let response = try await metadataRepository.getMetadataChildren(ratingKey: ratingKey)
+            guard let tracks = response.mediaContainer.metadata else { return }
+
+            for track in tracks {
+                let trackItem = MediaItem(plexItem: track)
+                guard trackItem.type == .track else { continue }
+                await enqueueTrack(ratingKey: trackItem.id, context: context)
+            }
+        } catch {
+            writeDebug("[WatchDownload] enqueueAlbum failed: \(error)")
+        }
+    }
+
+    func enqueueSeason(ratingKey: String, context: PlexAPIContext) async {
+        do {
+            let metadataRepository = try MetadataRepository(context: context)
+            let response = try await metadataRepository.getMetadataChildren(ratingKey: ratingKey)
+            let episodes = (response.mediaContainer.metadata ?? []).filter { $0.type == .episode }
+            for episode in episodes {
+                await enqueueItem(ratingKey: episode.ratingKey, context: context)
+            }
+        } catch {
+            writeDebug("[WatchDownload] enqueueSeason failed: \(error)")
+        }
+    }
+
     func delete(_ item: DownloadItem) {
         if let taskIdentifier = item.taskIdentifier {
             ignoredCompletionIDs.insert(item.id)
@@ -282,11 +387,13 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate {
     private func downloadPosterIfAvailable(
         for mediaItem: MediaItem,
         context: PlexAPIContext,
-        destinationFolder: URL
+        destinationFolder: URL,
+        square: Bool = false
     ) async -> String? {
         guard let imageRepository = try? ImageRepository(context: context) else { return nil }
         guard let thumbPath = mediaItem.preferredThumbPath else { return nil }
-        guard let posterURL = imageRepository.transcodeImageURL(path: thumbPath, width: 160, height: 240)
+        let height: Int = square ? 160 : 240
+        guard let posterURL = imageRepository.transcodeImageURL(path: thumbPath, width: 160, height: height)
         else { return nil }
 
         do {

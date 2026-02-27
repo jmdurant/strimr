@@ -1215,6 +1215,59 @@ Photo library support added across shared and watchOS layers.
 
 **Build verified:** watchOS and iOS targets build cleanly.
 
+### Audio Playback Architecture Fix: COMPLETE
+
+**Discovery:** VLCKit 4.x on watchOS has **no HTTP access module** — it cannot stream any HTTP/HTTPS URLs. `VLCConsoleLogger` output showed `looking for access module matching "http": 0 candidates`. VLC on watchOS can only play local `file://` URLs.
+
+**Architecture change:**
+- **Before:** Video → AVPlayer+HLS proxy, Audio → VLC (streaming failed)
+- **After:** Everything streaming → AVPlayer+HLS proxy, VLC only for offline/downloaded audio
+
+**Branching logic in `WatchPlayerView.setupPlayer()`:**
+- `useVLC = isLocal && !isVideo` — VLC only for downloaded audio files (with audio bridge for visualizations)
+- All streaming (video + audio) → `WatchAVPlayerController` + `HLSProxyServer` for TLS termination
+- Local video → `WatchAVPlayerController` directly (no proxy needed for `file://`)
+- `avPlayer` state var only set for video (controls whether VideoPlayer or audio UI renders)
+
+**Crash fix:** Reordered `destruct()` in `WatchVLCPlayerController` — media player must stop before audio bridge frees its context, otherwise VLC's flush callback fires on freed memory (`EXC_BAD_ACCESS` in `flush_cb`).
+
+### Audio Visualizations (Milkdrop): COMPLETE
+
+**Pipeline:** VLC audio callbacks → FFT (vDSP, 1024-sample window) → 32 logarithmic bins → SpectrumData → SwiftUI Canvas at 60fps
+
+**Files created:**
+- `Strimr-watchOS/Library/VLCAudioBridge.h` + `.m` — ObjC bridge to libvlc audio callbacks, AVAudioEngine re-injection, real-time FFT
+- `Strimr-watchOS/Library/SpectrumData.swift` — thread-safe spectrum bin storage with temporal smoothing (rise fast 0.6, fall slow 0.15)
+- `Strimr-watchOS/Features/Player/WatchVisualizationView.swift` — fullscreen Canvas visualization with 11 Milkdrop-inspired presets
+- `Strimr-watchOS/Strimr-watchOS-Bridging-Header.h` — imports VLCAudioBridge.h
+
+**11 visualization presets** (ported from [winamp-macos](https://github.com/mbrukman/winamp-macos)):
+1. Classic Bars — green→red gradient bars with glow + peak hold dots (the Winamp look)
+2. Frequency Rings — glowing concentric pulsing rings
+3. LFO Morph — organic morphing closed paths with glow strokes
+4. Oscillator Grid — 6×8 grid of pulsing colored dots with halos
+5. Spiral Galaxy — 3-arm spiral + energy rings + waveforms + floating particles
+6. Plasma Field — procedural 4-layer sine plasma
+7. Particle Storm — radial burst particles with glow
+8. Waveform Tunnel — 20-layer concentric depth rings
+9. Kaleidoscope — 8-segment rotational symmetry
+10. Nebula Galaxy — stars + blur nebula clouds + glowing core + spiral arms
+11. Starfield Flight — 3D perspective stars with motion trails + glow + distant nebula
+
+**FFT tuning:**
+- Logarithmic bin mapping with pow(2.5) for better resolution in musically active range
+- Frequency-dependent gain: 12× at bass, 32× at treble (compensates for music's natural energy dropoff)
+- Temporal smoothing in SpectrumData: rise 0.6 / fall 0.15 blend for responsive but flowing visualization
+
+**UI integration:**
+- Waveform button on audio player (only visible for VLC/offline playback)
+- `.fullScreenCover` presentation
+- Digital Crown cycles presets with haptic feedback
+- Auto-advance every 60 seconds with fade transition
+- Tap to dismiss
+
+**Rendering techniques:** Canvas blur/glow layers, 3D perspective projection, motion trails, procedural textures, context transforms for kaleidoscope symmetry — all running at 60fps on S10 chip.
+
 ### Next Steps
 
 1. **Clean up debug logging** — remove writeDebug calls

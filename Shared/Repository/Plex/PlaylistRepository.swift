@@ -2,6 +2,7 @@ import Foundation
 
 final class PlaylistRepository {
     private let network: PlexServerNetworkClient
+    private let serverIdentifier: String
 
     struct PlaylistParams: QueryItemConvertible {
         var sectionId: Int
@@ -27,6 +28,11 @@ final class PlaylistRepository {
             throw PlexAPIError.missingAuthToken
         }
 
+        guard let serverIdentifier = context.serverIdentifier else {
+            throw PlexAPIError.missingConnection
+        }
+
+        self.serverIdentifier = serverIdentifier
         network = PlexServerNetworkClient(authToken: authToken, baseURL: baseURLServer)
     }
 
@@ -63,5 +69,50 @@ final class PlaylistRepository {
             path: "/playlists/\(ratingKey)/items",
             headers: resolvedPagination.headers,
         )
+    }
+
+    func getAllPlaylists(
+        playlistType: String,
+        pagination: PlexPagination? = nil,
+    ) async throws -> PlexItemMediaContainer {
+        let resolvedPagination = pagination ?? PlexPagination()
+        return try await network.request(
+            path: "/playlists",
+            queryItems: [
+                URLQueryItem(name: "playlistType", value: playlistType),
+            ],
+            headers: resolvedPagination.headers,
+        )
+    }
+
+    func createPlaylist(
+        title: String,
+        type: String,
+        ratingKey: String,
+    ) async throws -> PlexItemMediaContainer {
+        let uri = metadataURI(for: ratingKey)
+        return try await network.request(
+            path: "/playlists",
+            queryItems: [
+                URLQueryItem(name: "type", value: type),
+                URLQueryItem(name: "title", value: title),
+                URLQueryItem(name: "uri", value: uri),
+                URLQueryItem(name: "smart", value: "0"),
+            ],
+            method: "POST",
+        )
+    }
+
+    func addItem(toPlaylist playlistId: String, ratingKey: String) async throws {
+        let uri = metadataURI(for: ratingKey)
+        try await network.send(
+            path: "/playlists/\(playlistId)/items",
+            queryItems: [URLQueryItem(name: "uri", value: uri)],
+            method: "PUT",
+        )
+    }
+
+    private func metadataURI(for ratingKey: String) -> String {
+        "server://\(serverIdentifier)/com.plexapp.plugins.library/library/metadata/\(ratingKey)"
     }
 }

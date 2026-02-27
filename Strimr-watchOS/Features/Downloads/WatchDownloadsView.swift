@@ -84,41 +84,48 @@ struct WatchDownloadsView: View {
 
     @ViewBuilder
     private func downloadRow(_ item: DownloadItem) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(item.metadata.title)
+        HStack(spacing: 8) {
+            Image(systemName: item.metadata.type == .track ? "music.note" : "film")
                 .font(.caption)
-                .lineLimit(2)
+                .foregroundStyle(.secondary)
+                .frame(width: 16)
 
-            if let subtitle = item.metadata.subtitle {
-                Text(subtitle)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.metadata.title)
+                    .font(.caption)
+                    .lineLimit(2)
 
-            switch item.status {
-            case .queued:
-                Text("Queued")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            case .downloading:
-                HStack(spacing: 6) {
-                    ProgressView(value: item.progress)
-                        .tint(.accentColor)
-                    Text("\(Int(item.progress * 100))%")
+                if let subtitle = item.metadata.subtitle {
+                    Text(subtitle)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
-            case .completed:
-                if let fileSize = item.metadata.fileSize {
-                    Text(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))
+
+                switch item.status {
+                case .queued:
+                    Text("Queued")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                case .downloading:
+                    HStack(spacing: 6) {
+                        ProgressView(value: item.progress)
+                            .tint(.accentColor)
+                        Text("\(Int(item.progress * 100))%")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                case .completed:
+                    if let fileSize = item.metadata.fileSize {
+                        Text(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                case .failed:
+                    Text("Failed")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
                 }
-            case .failed:
-                Text("Failed")
-                    .font(.caption2)
-                    .foregroundStyle(.red)
             }
         }
         .padding(.vertical, 4)
