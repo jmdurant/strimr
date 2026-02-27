@@ -35,12 +35,11 @@ struct WatchMusicBrowseView: View {
                             NavigationLink(value: artist) {
                                 artistRow(artist)
                             }
-                        }
-
-                        if !viewModel.items.isEmpty {
-                            Color.clear
-                                .frame(height: 1)
-                                .onAppear { Task { await viewModel.loadMore() } }
+                            .onAppear {
+                                if artist.id == viewModel.items.last?.id {
+                                    Task { await viewModel.loadMore() }
+                                }
+                            }
                         }
                     }
                 }
