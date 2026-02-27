@@ -5,6 +5,9 @@ enum PlayableItemType: String, Codable, Hashable {
     case show
     case season
     case episode
+    case artist
+    case album
+    case track
 
     init?(plexType: PlexItemType) {
         switch plexType {
@@ -16,7 +19,13 @@ enum PlayableItemType: String, Codable, Hashable {
             self = .season
         case .episode:
             self = .episode
-        case .collection, .playlist, .unknown:
+        case .artist:
+            self = .artist
+        case .album:
+            self = .album
+        case .track:
+            self = .track
+        case .photo, .clip, .collection, .playlist, .unknown:
             return nil
         }
     }
@@ -31,6 +40,12 @@ enum PlayableItemType: String, Codable, Hashable {
             .season
         case .episode:
             .episode
+        case .artist:
+            .artist
+        case .album:
+            .album
+        case .track:
+            .track
         }
     }
 }

@@ -419,7 +419,7 @@ struct MediaDetailHeaderSection: View {
             Task {
                 await downloadManager.enqueueItem(ratingKey: viewModel.media.id, context: context)
             }
-        case .collection, .playlist, .unknown:
+        case .artist, .album, .track, .photo, .clip, .collection, .playlist, .unknown:
             break
         }
     }

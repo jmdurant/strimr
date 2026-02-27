@@ -5,6 +5,11 @@ enum PlexItemType: String, Codable {
     case show
     case season
     case episode
+    case artist
+    case album
+    case track
+    case photo
+    case clip
     case collection
     case playlist
     case unknown
@@ -15,11 +20,15 @@ enum PlexItemType: String, Codable {
 
     var isPlayable: Bool {
         switch self {
-        case .movie, .show, .season, .episode:
+        case .movie, .show, .season, .episode, .artist, .album, .track, .clip:
             true
-        case .collection, .playlist, .unknown:
+        case .photo, .collection, .playlist, .unknown:
             false
         }
+    }
+
+    var isAudio: Bool {
+        self == .artist || self == .album || self == .track
     }
 
     init(from decoder: Decoder) throws {

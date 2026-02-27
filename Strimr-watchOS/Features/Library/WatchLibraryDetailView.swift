@@ -38,6 +38,9 @@ struct WatchLibraryDetailView: View {
         .navigationDestination(for: PlayableMediaItem.self) { media in
             WatchMediaDetailView(media: media)
         }
+        .navigationDestination(for: PlaylistMediaItem.self) { playlist in
+            WatchPlaylistDetailView(playlist: playlist)
+        }
         .navigationTitle(library.title)
         .task {
             let vm = LibraryRecommendedViewModel(library: library, context: plexApiContext)

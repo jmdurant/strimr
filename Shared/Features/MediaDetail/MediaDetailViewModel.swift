@@ -240,7 +240,7 @@ final class MediaDetailViewModel {
             hasProgress(for: onDeckItem)
                 ? String(localized: "common.actions.resume")
                 : String(localized: "common.actions.play")
-        case .season, .episode:
+        case .season, .episode, .artist, .album, .track:
             hasProgress(for: media.mediaItem)
                 ? String(localized: "common.actions.resume")
                 : String(localized: "common.actions.play")
@@ -259,7 +259,7 @@ final class MediaDetailViewModel {
                 return "\(episodeLabel) • \(timeLeft)"
             }
             return episodeLabel ?? timeLeft
-        case .season, .episode:
+        case .season, .episode, .artist, .album, .track:
             return timeLeftText(for: media.mediaItem)
         }
     }
@@ -271,7 +271,7 @@ final class MediaDetailViewModel {
         case .show:
             guard let onDeckItem else { return nil }
             return progressFraction(for: onDeckItem)
-        case .season, .episode:
+        case .season, .episode, .artist, .album, .track:
             return progressFraction(for: media.mediaItem)
         }
     }
@@ -282,7 +282,7 @@ final class MediaDetailViewModel {
             hasProgress(for: media.mediaItem)
         case .show:
             hasProgress(for: onDeckItem)
-        case .season, .episode:
+        case .season, .episode, .artist, .album, .track:
             hasProgress(for: media.mediaItem)
         }
     }
@@ -293,7 +293,7 @@ final class MediaDetailViewModel {
             media.id
         case .show:
             onDeckItem?.id
-        case .season, .episode:
+        case .season, .episode, .artist, .album, .track:
             media.id
         }
     }
@@ -337,9 +337,9 @@ final class MediaDetailViewModel {
         guard let playableType = PlayableItemType(plexType: item.type) else { return false }
 
         switch playableType {
-        case .movie, .episode:
+        case .movie, .episode, .track:
             return (item.viewCount ?? 0) > 0
-        case .show, .season:
+        case .show, .season, .artist, .album:
             guard let leafCount = item.leafCount, let viewedLeafCount = item.viewedLeafCount else {
                 return false
             }

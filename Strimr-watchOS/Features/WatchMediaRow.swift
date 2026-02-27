@@ -15,8 +15,12 @@ struct WatchMediaRow: View {
             } else {
                 rowContent
             }
-        case .collection, .playlist:
+        case .collection:
             rowContent
+        case let .playlist(playlist):
+            NavigationLink(value: playlist) {
+                rowContent
+            }
         }
     }
 

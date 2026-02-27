@@ -12,10 +12,12 @@ final class LibraryPlaylistsViewModel {
     private var reachedEnd = false
 
     @ObservationIgnored private let context: PlexAPIContext
+    @ObservationIgnored private let playlistType: String
 
-    init(library: Library, context: PlexAPIContext) {
+    init(library: Library, context: PlexAPIContext, playlistType: String = "video") {
         self.library = library
         self.context = context
+        self.playlistType = playlistType
     }
 
     func load() async {
@@ -53,6 +55,7 @@ final class LibraryPlaylistsViewModel {
             let start = reset ? 0 : items.count
             let response = try await playlistRepository.getPlaylists(
                 sectionId: sectionId,
+                playlistType: playlistType,
                 pagination: PlexPagination(start: start, size: 20),
             )
 

@@ -10,12 +10,14 @@ final class PlayQueueManager {
     func createQueue(
         for ratingKey: String,
         itemType: PlexItemType,
+        type: String = "video",
         continuous: Bool = false,
         shuffle: Bool = false,
     ) async throws -> PlayQueueState {
         let response = try await repository.createQueue(
             for: ratingKey,
             itemType: itemType,
+            type: type,
             shuffle: shuffle,
             continuous: continuous,
         )

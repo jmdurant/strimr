@@ -30,7 +30,13 @@ struct WatchLibrariesView: View {
         }
         .navigationTitle("Libraries")
         .navigationDestination(for: Library.self) { library in
-            WatchLibraryDetailView(library: library)
+            if library.type == .artist {
+                WatchMusicBrowseView(library: library)
+            } else if library.type == .photo {
+                WatchPhotoBrowseView(library: library)
+            } else {
+                WatchLibraryDetailView(library: library)
+            }
         }
         .task {
             let vm = LibraryViewModel(context: plexApiContext, libraryStore: libraryStore)

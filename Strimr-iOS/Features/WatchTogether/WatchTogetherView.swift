@@ -319,6 +319,16 @@ private struct WatchTogetherSelectedMediaCard: View {
             String(localized: "search.badge.season")
         case .episode:
             String(localized: "search.badge.episode")
+        case .artist:
+            "Artist"
+        case .album:
+            "Album"
+        case .track:
+            "Track"
+        case .photo:
+            "Photo"
+        case .clip:
+            "Clip"
         case .collection:
             String(localized: "search.badge.collection")
         case .playlist:

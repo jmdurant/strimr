@@ -616,14 +616,41 @@ Offline sync is more important for music than for video on the Watch — the pri
 
 The `PlexItemType` extension and music models/view models are a clean upstream PR. The playlist type fix (`"video"` → configurable) is a small but valuable bug fix PR on its own. The iOS app could then build a proper music browsing UI (album grid, artist pages, queue management) on top of the shared layer.
 
+### Phase 7b: Photo Library Support
+
+Photo libraries in Plex return `type: "photo"` for sections. Before this phase, `PlexItemType` lacked a `.photo` case so photo libraries decoded as `.unknown` and were filtered out by `LibraryStore`.
+
+**Key insight:** The same `ImageRepository.transcodeImageURL` endpoint (`/photo/:/transcode`) already used for all artwork thumbnails is the exact mechanism for displaying photos at any resolution. No new networking code needed.
+
+**Plex Photo API:**
+- `GET /library/sections/{sectionId}/all?type=14` — photo albums
+- `GET /library/metadata/{albumRatingKey}/children` — photos within an album
+- Photo albums have `childCount`/`leafCount`; individual photos have `media` arrays
+- Video clips (`type: "clip"`) can appear within photo libraries
+
+**Shared layer changes:**
+- `PlexItemType` — `.photo` (not playable in video player), `.clip` (playable)
+- Exhaustive switch fixes across ~8 shared files (same pattern as music)
+- `SearchResultCard` — "Photo"/"Clip" badges with `.cyan`/`.orange` colors
+
+**watchOS views:**
+- `PhotoBrowseViewModel` — two-level: albums (section type=14) → photos (metadata children)
+- `WatchPhotoBrowseView` — album list with square thumbnails
+- `WatchPhotoAlbumView` — 2-column grid of photo thumbnails
+- `WatchPhotoDetailView` — full-screen viewer with `TabView(.verticalPage)` for swiping between photos, auto-hiding controls, dismiss button, photo counter
+
+**Navigation:** `WatchLibrariesView` routes `.photo` libraries to `WatchPhotoBrowseView`.
+
 ### Phase 8: Polish & Additional Enhancements
 
 - **Complications** showing currently playing, continue watching, or live TV "what's on now"
 - **Streaming to AirPods** directly from Watch for audio content (built into Phase 7)
 - **Seerr integration** (request movies/shows from your wrist)
 - **Remote control mode** — control playback on Apple TV/iPhone from the Watch
-- **Offline sync** — download media to Watch storage for phone-free playback
+- **Music offline sync** — download albums/playlists for phone-free listening during workouts
 - **DVR recording management** — schedule recordings from the Watch, view upcoming/completed
+- **Photo viewer enhancements** — pinch-to-zoom, EXIF metadata display (camera, lens, aperture, ISO), clip video playback within photo libraries
+- **Photo sharing** — share photos from Plex to contacts or save to Watch Photos
 
 ---
 
@@ -888,6 +915,11 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 | 21 | `Strimr-watchOS/Assets.xcassets/` | Done — AppIcon.appiconset with watch icon sizes, Contents.json |
 | 22 | `Strimr-watchOS/Library/WatchNowPlayingManager.swift` | Done — MPRemoteCommandCenter + MPNowPlayingInfoCenter, artwork loading, playback state updates |
 | 23 | `Strimr-watchOS/Strimr-watchOS.entitlements` | Done — `com.apple.security.network.client` for real device networking |
+| 24 | `Strimr-watchOS/Features/Music/MusicBrowseViewModel.swift` | Done — three-level browsing (artists/albums/tracks) |
+| 25 | `Strimr-watchOS/Features/Music/WatchMusicBrowseView.swift` | Done — artist list → album list → track list with play all/shuffle |
+| 26 | `Strimr-watchOS/Features/Photos/PhotoBrowseViewModel.swift` | Done — two-level browsing (albums/photos) |
+| 27 | `Strimr-watchOS/Features/Photos/WatchPhotoBrowseView.swift` | Done — album list + photo grid (WatchPhotoAlbumView) |
+| 28 | `Strimr-watchOS/Features/Photos/WatchPhotoDetailView.swift` | Done — full-screen viewer with vertical page swiping |
 
 **Build fixes applied during Phase 0:**
 - Added `import AVFoundation` to `WatchPlayerView.swift` (AVPlayer type not in scope with just AVKit on watchOS)
@@ -1126,12 +1158,71 @@ Alternatively, build VLCKit 4.x from source via `compileAndBuildVLCKit.sh -w` an
 - Added optional `localMedia: MediaItem?` and `localPlaybackURL: URL?` params for offline playback
 - Local files skip HLS proxy and server reporting
 
+### Phase 6 (Live TV): COMPLETE
+
+**Commit:** `f6e5689`
+
+Live TV channel browsing and HLS playback on watchOS. Shared-layer models, repository, and view model for channel data. watchOS UI with channel list (current program + progress bar) and full-screen live player view with dismiss overlay and channel name badge. Tap-to-tune flow via HLS proxy.
+
+### Phase 7 (Music Library): COMPLETE
+
+Music library support added across shared and watchOS layers:
+
+**Shared layer changes:**
+- `PlexItemType` — added `.artist`, `.album`, `.track` cases with `isPlayable`, `isAudio`
+- `Library.iconName` — `"music.note.list"` for artist libraries
+- `MediaItem` — `secondaryLabel` for artists (album count), albums (artist + year), tracks (artist); `tertiaryLabel` for tracks
+- `MediaDisplayItem` — maps `.artist`, `.album`, `.track` to `.playable()`
+- `PlayableMediaItem` — added `.artist`, `.album`, `.track` to `PlayableItemType`
+- All exhaustive switches updated across ~8 files
+- `PlaybackLauncher` / `WatchPlaybackLauncher` — `continuous: true` for music types
+
+**watchOS files created:**
+- `MusicBrowseViewModel.swift` — three-level browsing (artists via section type=8, albums via metadata children, tracks via metadata children)
+- `WatchMusicBrowseView.swift` — artist list → album list → track list with play all / shuffle / individual track playback
+- Playlists link for audio playlists
+
+**Navigation wiring:**
+- `WatchLibrariesView` routes `.artist` libraries to `WatchMusicBrowseView`
+
+### Photo Library Support: COMPLETE
+
+Photo library support added across shared and watchOS layers.
+
+**Shared layer changes:**
+- `PlexItemType` — added `.photo` (not playable), `.clip` (playable, video clips in photo libraries)
+- `Library.iconName` — `"photo.on.rectangle"` for photo libraries, `"video.fill"` for clip
+- `MediaItem` — `secondaryLabel` for photos (photo count or year), clips (year); `tertiaryLabel` returns nil
+- `MediaDisplayItem` — maps `.photo`, `.clip` to `.playable()` for display (thumbnails, labels)
+- `PlayableMediaItem` — returns `nil` for `.photo`/`.clip` (photos don't go through video/audio player)
+- All exhaustive switches updated across ~8 files (WatchStatus, DownloadModels, SearchResultCard, MediaDetailHeaderSection, WatchTogetherView iOS+tvOS)
+- `SearchResultCard` — "Photo"/"Clip" labels, `.cyan`/`.orange` badge colors
+
+**watchOS files created:**
+- `PhotoBrowseViewModel.swift` — two-level browsing (albums via section type=14, photos via metadata children)
+- `WatchPhotoBrowseView.swift` — album list with square thumbnails + photo count labels
+- `WatchPhotoAlbumView` (same file) — 2-column grid of photo/clip thumbnails with video badge overlay on clips, tap photo → full-screen viewer, tap clip → HLS video playback via `WatchPlaybackLauncher`
+- `WatchPhotoDetailView.swift` — full-screen photo viewer with vertical page swiping (TabView), auto-hiding dismiss button + photo counter overlay, high-res image loading (2x screen size)
+
+**Clip (video) playback:**
+- Plex classifies all video files in photo libraries as `type: "clip"` — Live Photos, home videos, any MP4/MOV
+- Clips show a video icon badge in the album grid for visual distinction
+- Tap a clip → `WatchPlaybackLauncher.createPlayQueue(type: .clip)` → HLS transcode → `WatchPlayerView`
+- Photo detail viewer filters out clips so photo-only swiping stays clean
+
+**Navigation wiring:**
+- `WatchLibrariesView` routes `.photo` libraries to `WatchPhotoBrowseView`
+
+**Build verified:** watchOS and iOS targets build cleanly.
+
 ### Next Steps
 
 1. **Clean up debug logging** — remove writeDebug calls
 2. **Test downloads on real device** — verify download progress, completion, and offline playback on Apple Watch Ultra 3
-3. **Music library support** (Phase 7) — artist/album/track browsing, VLCKit audio direct play
-4. **Live TV** (Phase 6) — channel browsing, tap-to-tune HLS playback
+3. **Photo viewer enhancements** — pinch-to-zoom, EXIF metadata display
+4. **Music offline sync** — download albums/playlists for phone-free listening during workouts
+5. **Complications** — currently playing, continue watching
+6. **Remote control mode** — control playback on Apple TV/iPhone from the Watch
 
 ## Claude Code Workflow
 
