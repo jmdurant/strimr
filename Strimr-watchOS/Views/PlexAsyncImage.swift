@@ -49,7 +49,13 @@ struct PlexAsyncImage<Placeholder: View>: View {
         defer { isLoading = false }
 
         do {
-            let (data, _) = try await PlexURLSession.shared.data(from: url)
+            let data: Data
+            if url.isFileURL {
+                data = try Data(contentsOf: url)
+            } else {
+                let (remoteData, _) = try await PlexURLSession.shared.data(from: url)
+                data = remoteData
+            }
             #if canImport(UIKit)
                 if let uiImage = UIImage(data: data) {
                     ImageCache.shared.store(uiImage, for: url)

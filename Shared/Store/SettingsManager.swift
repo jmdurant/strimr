@@ -98,6 +98,11 @@ final class SettingsManager {
         persist()
     }
 
+    func setOfflineMode(_ enabled: Bool) {
+        settings.interface.offlineMode = enabled
+        persist()
+    }
+
     func setDownloadWiFiOnly(_ enabled: Bool) {
         settings.downloads.wifiOnly = enabled
         persist()

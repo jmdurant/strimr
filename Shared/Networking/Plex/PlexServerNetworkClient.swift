@@ -7,15 +7,12 @@ final class PlexServerNetworkClient {
     private var language: String
     private var clientIdentifier: String?
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    // Plex server has no client profile for watchOS — report as iOS
     private let platform: String = {
         #if os(tvOS)
             return "tvOS"
-        #elseif os(watchOS)
-            return "watchOS"
-        #elseif os(iOS)
-            return "iOS"
         #else
-            return "Unknown"
+            return "iOS"
         #endif
     }()
 

@@ -37,6 +37,13 @@ struct DownloadedMediaMetadata: Codable, Hashable {
     var posterFileName: String?
     var videoFileName: String
     var fileSize: Int64?
+    /// Absolute path for AVAssetDownloadURLSession downloads (.movpkg).
+    /// Apple requires these remain at the system-provided location.
+    var assetLocation: String?
+    /// Last playback position in seconds, for local resume support.
+    var viewOffset: TimeInterval?
+    /// Timestamp of last local playback, mirrors Plex `lastViewedAt`.
+    var lastViewedAt: Date?
     var createdAt: Date
 
     var subtitle: String? {

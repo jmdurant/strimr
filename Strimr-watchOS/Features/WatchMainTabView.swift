@@ -37,7 +37,7 @@ struct WatchMainTabView: View {
             .tag(3)
 
             NavigationStack {
-                WatchLiveTVView()
+                WatchSettingsView()
             }
             .tag(4)
         }

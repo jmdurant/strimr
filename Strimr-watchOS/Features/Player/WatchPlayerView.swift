@@ -148,7 +148,11 @@ struct WatchPlayerView: View {
 
     @ViewBuilder
     private func audioPlayerView(viewModel: PlayerViewModel) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
+            audioAlbumArt
+                .frame(width: 80, height: 80)
+                .cornerRadius(8)
+
             Text(viewModel.media?.title ?? "")
                 .font(.headline)
                 .lineLimit(2)
@@ -197,40 +201,66 @@ struct WatchPlayerView: View {
                         .font(.title3)
                 }
                 .buttonStyle(.plain)
-            }
 
-            HStack(spacing: 16) {
                 if let vlcCoordinator = coordinator as? WatchVLCPlayerController {
                     Button {
                         showVisualization = true
                     } label: {
                         Image(systemName: "waveform")
-                            .font(.caption2)
-                            .foregroundStyle(.white)
-                            .padding(6)
-                            .background(.black.opacity(0.4), in: Circle())
+                            .font(.title3)
                     }
                     .buttonStyle(.plain)
                     .fullScreenCover(isPresented: $showVisualization) {
                         WatchVisualizationView(spectrumData: vlcCoordinator.spectrumData)
                     }
                 }
-
-                Button("Close") { dismiss() }
-                    .font(.caption)
             }
         }
         .padding()
     }
 
+    @ViewBuilder
+    private var audioAlbumArt: some View {
+        if let ratingKey = localMedia?.id,
+           let item = downloadManager.downloadStatus(for: ratingKey),
+           let posterURL = downloadManager.localPosterURL(for: item) {
+            PlexAsyncImage(url: posterURL) {
+                audioArtPlaceholder
+            }
+            .aspectRatio(contentMode: .fill)
+        } else if let thumbPath = viewModel?.media?.preferredThumbPath,
+                  let imageRepo = try? ImageRepository(context: plexApiContext),
+                  let url = imageRepo.transcodeImageURL(path: thumbPath, width: 160, height: 160) {
+            PlexAsyncImage(url: url) {
+                audioArtPlaceholder
+            }
+            .aspectRatio(contentMode: .fill)
+        } else {
+            audioArtPlaceholder
+        }
+    }
+
+    private var audioArtPlaceholder: some View {
+        Rectangle()
+            .fill(.quaternary)
+            .overlay {
+                Image(systemName: "music.note")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+            }
+    }
+
     private func setupPlayer() async {
+        guard viewModel == nil else { return }
+
         let vm: PlayerViewModel
         if let localMedia, let localPlaybackURL {
             // Offline playback — local file, no server interaction
             vm = PlayerViewModel(
                 localMedia: localMedia,
                 localPlaybackURL: localPlaybackURL,
-                context: plexApiContext
+                context: plexApiContext,
+                shouldResumeFromOffset: shouldResumeFromOffset
             )
             viewModel = vm
         } else {
@@ -313,6 +343,13 @@ struct WatchPlayerView: View {
             manager.updateMetadata(from: media, context: plexApiContext)
         }
 
+        manager.onNextTrack = { [weak coordinator] in
+            coordinator?.seek(by: 30)
+        }
+        manager.onPreviousTrack = { [weak coordinator] in
+            coordinator?.seek(by: -15)
+        }
+
         coordinator.onPropertyChange = { property, value in
             viewModel.handlePropertyChange(property: property, data: value, isScrubbing: false)
 
@@ -383,13 +420,26 @@ struct WatchPlayerView: View {
         }
     }
 
+    @Environment(WatchDownloadManager.self) private var downloadManager
+
     private func teardown() {
         nowPlayingManager?.invalidate()
         nowPlayingManager = nil
-        viewModel?.handleStop()
         coordinator?.destruct()
         coordinator = nil
         avPlayer = nil
-        HLSProxyServer.shared.stop()
+
+        if localPlaybackURL != nil {
+            // Save playback position for local resume
+            if let vm = viewModel, let mediaId = localMedia?.id, vm.position > 0 {
+                downloadManager.savePlaybackPosition(vm.position, forRatingKey: mediaId)
+            }
+            viewModel = nil
+        } else {
+            // Streaming — stop transcode session and HLS proxy
+            viewModel?.handleStop()
+            viewModel = nil
+            HLSProxyServer.shared.stop()
+        }
     }
 }

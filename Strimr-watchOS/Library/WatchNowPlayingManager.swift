@@ -7,6 +7,9 @@ final class WatchNowPlayingManager {
     private let commandCenter = MPRemoteCommandCenter.shared()
     private let infoCenter = MPNowPlayingInfoCenter.default()
 
+    var onNextTrack: (() -> Void)?
+    var onPreviousTrack: (() -> Void)?
+
     init(coordinator: any PlayerCoordinating) {
         self.coordinator = coordinator
         setupRemoteCommands()
@@ -55,6 +58,16 @@ final class WatchNowPlayingManager {
             Task { @MainActor in self?.coordinator?.seek(to: event.positionTime) }
             return .success
         }
+
+        commandCenter.nextTrackCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.onNextTrack?() }
+            return .success
+        }
+
+        commandCenter.previousTrackCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.onPreviousTrack?() }
+            return .success
+        }
     }
 
     private func removeRemoteCommands() {
@@ -64,6 +77,8 @@ final class WatchNowPlayingManager {
         commandCenter.skipForwardCommand.removeTarget(nil)
         commandCenter.skipBackwardCommand.removeTarget(nil)
         commandCenter.changePlaybackPositionCommand.removeTarget(nil)
+        commandCenter.nextTrackCommand.removeTarget(nil)
+        commandCenter.previousTrackCommand.removeTarget(nil)
     }
 
     // MARK: - Metadata

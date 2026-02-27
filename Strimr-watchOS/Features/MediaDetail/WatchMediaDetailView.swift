@@ -9,6 +9,7 @@ struct WatchMediaDetailView: View {
 
     @State private var viewModel: MediaDetailViewModel?
     @State private var presentedPlayQueue: PlayQueueState?
+    @State private var localPlayback: LocalPlaybackRequest?
     @State private var addToPlaylistEpisode: MediaItem?
 
     var body: some View {
@@ -39,8 +40,9 @@ struct WatchMediaDetailView: View {
                             if let runtime = viewModel.runtimeText {
                                 Text(runtime)
                             }
-                            if let rating = viewModel.ratingText {
-                                Text(rating)
+                            if let detail = viewModel.primaryActionDetail {
+                                Text("·")
+                                Text(detail)
                             }
                         }
                         .font(.caption2)
@@ -98,6 +100,15 @@ struct WatchMediaDetailView: View {
             )
             .environment(plexApiContext)
         }
+        .fullScreenCover(item: $localPlayback) { request in
+            WatchPlayerView(
+                playQueue: PlayQueueState(localRatingKey: request.ratingKey),
+                shouldResumeFromOffset: true,
+                localMedia: request.media,
+                localPlaybackURL: request.localURL
+            )
+            .environment(plexApiContext)
+        }
         .sheet(item: $addToPlaylistEpisode) { episode in
             WatchAddToPlaylistView(ratingKey: episode.id, playlistType: "video")
                 .environment(plexApiContext)
@@ -138,18 +149,18 @@ struct WatchMediaDetailView: View {
                     Button {
                         Task { await playEpisode(episode) }
                     } label: {
-                        HStack(spacing: 8) {
-                            VStack(alignment: .leading, spacing: 2) {
+                        VStack(spacing: 2) {
+                            HStack(spacing: 4) {
                                 if let label = episode.tertiaryLabel {
                                     Text(label)
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                 }
-                                Text(episode.title)
-                                    .font(.caption)
+                                episodeDownloadIcon(episode)
                             }
-                            Spacer()
-                            episodeDownloadIcon(episode)
+                            Text(episode.title)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
                         }
                     }
                     .swipeActions(edge: .trailing) {
@@ -168,23 +179,24 @@ struct WatchMediaDetailView: View {
     @ViewBuilder
     private func episodeDownloadIcon(_ episode: MediaItem) -> some View {
         if let status = downloadManager.downloadStatus(for: episode.id) {
-            switch status.status {
-            case .completed:
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.green)
-            case .downloading:
-                ProgressView()
-                    .scaleEffect(0.6)
-            case .queued:
-                Image(systemName: "clock")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            case .failed:
-                Image(systemName: "exclamationmark.circle")
-                    .font(.caption2)
-                    .foregroundStyle(.red)
+            Group {
+                switch status.status {
+                case .completed:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                case .downloading:
+                    ProgressView()
+                        .scaleEffect(0.5)
+                case .queued:
+                    Image(systemName: "clock")
+                        .foregroundStyle(.secondary)
+                case .failed:
+                    Image(systemName: "exclamationmark.circle")
+                        .foregroundStyle(.red)
+                }
             }
+            .font(.caption2)
+            .frame(width: 14, height: 14)
         } else {
             Button {
                 Task {
@@ -194,6 +206,7 @@ struct WatchMediaDetailView: View {
                 Image(systemName: "arrow.down.circle")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .frame(width: 14, height: 14)
             }
             .buttonStyle(.plain)
         }
@@ -251,6 +264,21 @@ struct WatchMediaDetailView: View {
 
     private func launchPlayback(ratingKey: String, type: PlexItemType, shouldResume: Bool) async {
         writeDebug("[Detail] launchPlayback ratingKey=\(ratingKey), type=\(type.rawValue)")
+
+        // Play from local download if available
+        if let downloadItem = downloadManager.downloadStatus(for: ratingKey),
+           downloadItem.status == .completed,
+           let localURL = downloadManager.localVideoURL(for: downloadItem) {
+            writeDebug("[Detail] playing local download for \(ratingKey)")
+            localPlayback = LocalPlaybackRequest(
+                id: downloadItem.id,
+                ratingKey: downloadItem.ratingKey,
+                localURL: localURL,
+                media: downloadManager.localMediaItem(for: downloadItem)
+            )
+            return
+        }
+
         do {
             let manager = try PlayQueueManager(context: plexApiContext)
             let queue = try await manager.createQueue(

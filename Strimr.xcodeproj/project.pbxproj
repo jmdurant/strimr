@@ -849,7 +849,6 @@
 				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-
 				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -890,7 +889,6 @@
 				DEVELOPMENT_TEAM = PHS5V2FW3J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-
 				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;

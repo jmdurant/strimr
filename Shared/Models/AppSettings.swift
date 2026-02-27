@@ -25,6 +25,7 @@ struct InterfaceSettings: Codable, Equatable {
     var displayCollections = true
     var displayPlaylists = true
     var displaySeerrDiscoverTab = true
+    var offlineMode = false
 
     init() {}
 
@@ -35,6 +36,7 @@ struct InterfaceSettings: Codable, Equatable {
         displayCollections = try container.decodeIfPresent(Bool.self, forKey: .displayCollections) ?? true
         displayPlaylists = try container.decodeIfPresent(Bool.self, forKey: .displayPlaylists) ?? true
         displaySeerrDiscoverTab = try container.decodeIfPresent(Bool.self, forKey: .displaySeerrDiscoverTab) ?? true
+        offlineMode = try container.decodeIfPresent(Bool.self, forKey: .offlineMode) ?? false
     }
 }
 
