@@ -9,6 +9,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
     private let serverIdKey = "strimr.plex.serverIdentifier"
 
     var onTokenReceived: ((String) -> Void)?
+    var syncReceiver: WatchSyncReceiver?
 
     private override init() {
         super.init()
@@ -38,6 +39,14 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         handleReceivedData(message)
+    }
+
+    func session(_ session: WCSession, didReceive file: WCSessionFile) {
+        let fileURL = file.fileURL
+        let metadata = file.metadata ?? [:]
+        Task { @MainActor in
+            syncReceiver?.handleReceivedFile(fileURL, metadata: metadata)
+        }
     }
 
     private func handleReceivedData(_ data: [String: Any]) {

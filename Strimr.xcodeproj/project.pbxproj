@@ -856,7 +856,7 @@
 				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.strimr.app;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.strimr;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -896,7 +896,7 @@
 				INFOPLIST_FILE = "Strimr-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Strimr;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.strimr.app;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.strimr;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

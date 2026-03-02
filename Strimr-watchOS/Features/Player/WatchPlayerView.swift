@@ -3,7 +3,7 @@ import AVKit
 import os
 import SwiftUI
 
-private let logger = Logger(subsystem: "com.strimr.app.watchos", category: "Player")
+private let logger = Logger(subsystem: "com.doctordurant.strimr.watchos", category: "Player")
 
 func writeDebug(_ msg: String) {
     let path = NSHomeDirectory() + "/tmp/strimr-debug.log"

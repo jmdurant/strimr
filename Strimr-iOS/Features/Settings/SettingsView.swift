@@ -26,6 +26,12 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Apple Watch") {
+                NavigationLink("Watch Sync") {
+                    WatchSyncView()
+                }
+            }
+
             Section("settings.integrations.title") {
                 NavigationLink("settings.integrations.manage") {
                     IntegrationsView()

@@ -11,10 +11,12 @@ struct StrimrApp: App {
     @State private var libraryStore: LibraryStore
     @State private var seerrStore: SeerrStore
     @State private var watchTogetherViewModel: WatchTogetherViewModel
+    @State private var watchSyncManager: WatchSyncManager
 
     init() {
         let deps = AppDependencies.shared
         let downloadManager = DownloadManager(settingsManager: deps.settingsManager)
+        let syncManager = WatchSyncManager(context: deps.plexApiContext, downloadManager: downloadManager)
         _plexApiContext = State(initialValue: deps.plexApiContext)
         _sessionManager = State(initialValue: deps.sessionManager)
         _settingsManager = State(initialValue: deps.settingsManager)
@@ -25,8 +27,10 @@ struct StrimrApp: App {
             sessionManager: deps.sessionManager,
             context: deps.plexApiContext,
         ))
+        _watchSyncManager = State(initialValue: syncManager)
 
         PhoneSessionManager.shared.activate(sessionManager: deps.sessionManager)
+        PhoneSessionManager.shared.syncManager = syncManager
     }
 
     var body: some Scene {
@@ -39,6 +43,7 @@ struct StrimrApp: App {
                 .environment(libraryStore)
                 .environment(seerrStore)
                 .environment(watchTogetherViewModel)
+                .environment(watchSyncManager)
                 .preferredColorScheme(.dark)
                 .onChange(of: sessionManager.status, initial: true) { _, newStatus in
                     if newStatus == .ready,

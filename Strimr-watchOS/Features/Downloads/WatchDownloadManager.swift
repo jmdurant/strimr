@@ -630,7 +630,16 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         if !failedItems.isEmpty { persistState() }
     }
 
-    private func persistState() {
+    // MARK: - Watch Sync Integration
+
+    func insertSyncedItem(_ item: DownloadItem) {
+        guard !items.contains(where: { $0.ratingKey == item.ratingKey && $0.status == .completed }) else { return }
+        items.append(item)
+        persistState()
+        refreshStorageSummary()
+    }
+
+    func persistState() {
         guard !isLoadingPersistedState else { return }
         do {
             let data = try JSONEncoder().encode(items)

@@ -19,6 +19,7 @@ struct StrimrWatchApp: App {
         _downloadManager = State(initialValue: WatchDownloadManager())
 
         WatchSessionManager.shared.activate()
+        WatchSessionManager.shared.syncReceiver = WatchSyncReceiver(downloadManager: downloadManager)
         WatchSessionManager.shared.onTokenReceived = { _ in
             Task { @MainActor in
                 await sessionManager.hydrate()

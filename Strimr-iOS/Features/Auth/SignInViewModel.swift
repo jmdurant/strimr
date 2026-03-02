@@ -1,7 +1,10 @@
 import AuthenticationServices
 import Foundation
 import Observation
+import os.log
 import UIKit
+
+private let signInLog = Logger(subsystem: Bundle.main.bundleIdentifier ?? "strimr", category: "SignIn")
 
 @MainActor
 @Observable
@@ -26,19 +29,24 @@ final class SignInViewModel {
         isAuthenticating = true
 
         do {
+            signInLog.info("Starting sign-in, requesting PIN...")
             let authRepository = AuthRepository(context: plexContext)
             let pinResponse = try await authRepository.requestPin()
+            signInLog.info("PIN received: \(pinResponse.id), opening auth session...")
 
             let url = plexAuthURL(pin: pinResponse)
             let startedSession = await openAuthSession(url)
 
             guard startedSession else {
+                signInLog.error("Auth session failed to start")
                 throw SignInError.authSessionFailed
             }
 
+            signInLog.info("Auth session started, beginning polling...")
             beginPolling(pinID: pinResponse.id)
 
         } catch {
+            signInLog.error("Sign-in failed: \(error.localizedDescription)")
             errorMessage = String(localized: "signIn.error.startFailed")
             ErrorReporter.capture(error)
             cancelSignIn()
@@ -109,10 +117,13 @@ final class SignInViewModel {
                     let result = try await authRepository.pollToken(pinId: pinID)
                     if let token = result.authToken {
                         do {
+                            signInLog.info("Token received, signing in...")
                             try await sessionManager.signIn(with: token)
+                            signInLog.info("Sign-in bootstrap complete")
                             cancelSignIn()
                             return
                         } catch {
+                            signInLog.error("Bootstrap failed: \(error.localizedDescription)")
                             errorMessage = String(localized: "signIn.error.startFailed")
                             ErrorReporter.capture(error)
                             cancelSignIn()
@@ -120,11 +131,13 @@ final class SignInViewModel {
                     }
                 } catch {
                     if case PlexAPIError.requestFailed(statusCode: 404) = error {
+                        signInLog.error("PIN expired (404)")
                         errorMessage = String(localized: "signIn.error.pinExpired")
                         cancelSignIn()
                         return
                     }
 
+                    signInLog.error("Polling error: \(error.localizedDescription)")
                     errorMessage = String(localized: "signIn.error.startFailed")
                     ErrorReporter.capture(error)
                 }

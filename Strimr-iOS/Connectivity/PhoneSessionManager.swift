@@ -5,6 +5,7 @@ final class PhoneSessionManager: NSObject, WCSessionDelegate {
     static let shared = PhoneSessionManager()
 
     private var sessionManager: SessionManager?
+    weak var syncManager: WatchSyncManager?
 
     private override init() {
         super.init()
@@ -37,6 +38,12 @@ final class PhoneSessionManager: NSObject, WCSessionDelegate {
     ) {
         if let error {
             debugPrint("WCSession activation failed:", error)
+        }
+    }
+
+    func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?) {
+        Task { @MainActor in
+            syncManager?.handleTransferComplete(fileTransfer: fileTransfer, error: error)
         }
     }
 
