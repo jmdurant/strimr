@@ -4,6 +4,9 @@ final class SearchRepository {
     enum SearchType: String {
         case movies
         case tv
+        case artist
+        case album
+        case track
     }
 
     struct SearchParams: QueryItemConvertible {

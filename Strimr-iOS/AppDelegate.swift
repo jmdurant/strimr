@@ -1,3 +1,4 @@
+import CarPlay
 import SwiftUI
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
@@ -37,6 +38,20 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_: UIApplication, supportedInterfaceOrientationsFor _: UIWindow?) -> UIInterfaceOrientationMask {
         Self.orientationLock
+    }
+
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions,
+    ) -> UISceneConfiguration {
+        if connectingSceneSession.role == UISceneSession.Role.carTemplateApplication {
+            let config = UISceneConfiguration(name: "CarPlay", sessionRole: connectingSceneSession.role)
+            config.delegateClass = CarPlaySceneDelegate.self
+            return config
+        }
+        let config = UISceneConfiguration(name: "Default", sessionRole: connectingSceneSession.role)
+        return config
     }
 
     func application(

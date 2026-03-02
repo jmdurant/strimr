@@ -13,23 +13,20 @@ struct StrimrApp: App {
     @State private var watchTogetherViewModel: WatchTogetherViewModel
 
     init() {
-        let context = PlexAPIContext()
-        let store = LibraryStore(context: context)
-        let sessionManager = SessionManager(context: context, libraryStore: store)
-        let settingsManager = SettingsManager()
-        let downloadManager = DownloadManager(settingsManager: settingsManager)
-        _plexApiContext = State(initialValue: context)
-        _sessionManager = State(initialValue: sessionManager)
-        _settingsManager = State(initialValue: settingsManager)
+        let deps = AppDependencies.shared
+        let downloadManager = DownloadManager(settingsManager: deps.settingsManager)
+        _plexApiContext = State(initialValue: deps.plexApiContext)
+        _sessionManager = State(initialValue: deps.sessionManager)
+        _settingsManager = State(initialValue: deps.settingsManager)
         _downloadManager = State(initialValue: downloadManager)
-        _libraryStore = State(initialValue: store)
+        _libraryStore = State(initialValue: deps.libraryStore)
         _seerrStore = State(initialValue: SeerrStore())
         _watchTogetherViewModel = State(initialValue: WatchTogetherViewModel(
-            sessionManager: sessionManager,
-            context: context,
+            sessionManager: deps.sessionManager,
+            context: deps.plexApiContext,
         ))
 
-        PhoneSessionManager.shared.activate(sessionManager: sessionManager)
+        PhoneSessionManager.shared.activate(sessionManager: deps.sessionManager)
     }
 
     var body: some Scene {
