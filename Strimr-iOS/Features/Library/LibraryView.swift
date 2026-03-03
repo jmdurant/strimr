@@ -2,11 +2,14 @@ import SwiftUI
 
 struct LibraryView: View {
     @State var viewModel: LibraryViewModel
+    @Environment(PlexAPIContext.self) private var plexApiContext
     @Environment(SettingsManager.self) private var settingsManager
     let onSelectMedia: (MediaDisplayItem) -> Void
     private let cardMinHeight: CGFloat = 120
     private let cardMaxHeight: CGFloat = 160
     @State private var isHiddenExpanded = false
+    @State private var hasLiveTV = false
+    @State private var showLiveTV = false
 
     init(
         viewModel: LibraryViewModel,
@@ -18,6 +21,18 @@ struct LibraryView: View {
 
     var body: some View {
         List {
+            if hasLiveTV {
+                Section {
+                    NavigationLink {
+                        LiveTVView()
+                    } label: {
+                        liveTVRow
+                    }
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                }
+            }
+
             Section {
                 ForEach(visibleLibraries) { library in
                     libraryRow(for: library)
@@ -58,7 +73,55 @@ struct LibraryView: View {
         .userMenuToolbar()
         .task {
             await viewModel.load()
+            await checkLiveTV()
         }
+    }
+
+    @ViewBuilder
+    private var liveTVRow: some View {
+        ZStack(alignment: .bottomLeading) {
+            Color.indigo.opacity(0.3)
+                .frame(maxWidth: .infinity, minHeight: cardMinHeight, maxHeight: cardMaxHeight)
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.6),
+                    Color.black.opacity(0.3),
+                    .clear,
+                ],
+                startPoint: .bottom,
+                endPoint: .top
+            )
+            .frame(maxWidth: .infinity, minHeight: cardMinHeight, maxHeight: cardMaxHeight)
+
+            HStack(spacing: 12) {
+                Image(systemName: "tv")
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                    .padding(10)
+                    .background(.ultraThinMaterial, in: Circle())
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Live TV")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+
+                    Text("Watch live channels")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+            }
+            .padding(16)
+        }
+        .frame(maxWidth: .infinity, minHeight: cardMinHeight, maxHeight: cardMaxHeight, alignment: .leading)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+        .padding(.vertical, 4)
+    }
+
+    private func checkLiveTV() async {
+        let vm = LiveTVViewModel(context: plexApiContext)
+        hasLiveTV = await vm.checkAvailability()
     }
 
     private var hiddenLibraryIds: Set<String> {

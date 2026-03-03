@@ -40,6 +40,34 @@ final class LiveTVRepository {
         )
     }
 
+    /// Discover the EPG provider key (e.g. "tv.plex.providers.epg.onconnect:16").
+    func getEPGProviderKey() async throws -> String? {
+        let response: PlexEPGProviderResponse = try await network.request(
+            path: "/tv.plex.providers.epg.cloud"
+        )
+        // The second directory entry contains the grid key
+        guard let directories = response.mediaContainer.directory,
+              directories.count >= 2,
+              let key = directories[1].title
+        else {
+            return nil
+        }
+        return key
+    }
+
+    /// Fetch programs airing right now from the EPG grid.
+    func getNowPlaying(epgKey: String) async throws -> PlexEPGGridResponse {
+        let now = Int(Date().timeIntervalSince1970)
+        return try await network.request(
+            path: "/\(epgKey)/grid",
+            queryItems: [
+                URLQueryItem(name: "type", value: "4"),
+                URLQueryItem(name: "beginsAt<=", value: String(now)),
+                URLQueryItem(name: "endsAt>=", value: String(now)),
+            ]
+        )
+    }
+
     func streamURL(partKey: String) -> URL? {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.path = partKey

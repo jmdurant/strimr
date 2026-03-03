@@ -124,3 +124,101 @@ struct PlexTunePart: Codable {
         case protocolType = "protocol"
     }
 }
+
+// MARK: - GET /tv.plex.providers.epg.cloud (EPG provider discovery)
+
+struct PlexEPGProviderResponse: Codable {
+    let mediaContainer: MediaContainer
+
+    struct MediaContainer: Codable {
+        let directory: [PlexEPGDirectory]?
+
+        private enum CodingKeys: String, CodingKey {
+            case directory = "Directory"
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+struct PlexEPGDirectory: Codable {
+    let title: String?
+    let key: String?
+}
+
+// MARK: - GET /{epgKey}/grid (EPG grid / now playing)
+
+struct PlexEPGGridResponse: Codable {
+    let mediaContainer: MediaContainer
+
+    struct MediaContainer: Codable {
+        let metadata: [PlexEPGProgram]?
+
+        private enum CodingKeys: String, CodingKey {
+            case metadata = "Metadata"
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+struct PlexEPGProgram: Codable, Identifiable {
+    let ratingKey: String?
+    let key: String?
+    let type: String?
+    let title: String?
+    let grandparentTitle: String?
+    let summary: String?
+    let year: Int?
+    let beginsAt: Int?
+    let endsAt: Int?
+    let onAir: Int?
+    let thumb: String?
+    let media: [PlexEPGMedia]?
+
+    var id: String { ratingKey ?? key ?? UUID().uuidString }
+
+    /// Display title: "Show Name - Episode Title" for episodes, or just the title for movies.
+    var displayTitle: String {
+        if let show = grandparentTitle, let ep = title {
+            return "\(show) - \(ep)"
+        }
+        return title ?? "Unknown"
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case ratingKey, key, type, title, grandparentTitle, summary, year
+        case beginsAt, endsAt, onAir, thumb
+        case media = "Media"
+    }
+}
+
+struct PlexEPGMedia: Codable {
+    let channelCallSign: String?
+    let channelIdentifier: String?
+    let channelThumb: String?
+    let channelTitle: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case channelCallSign, channelIdentifier, channelThumb, channelTitle
+    }
+}
+
+// MARK: - NowPlaying (view-layer convenience)
+
+struct NowPlaying {
+    let title: String
+    let endsAt: Date?
+
+    var timeRemaining: String? {
+        guard let endsAt else { return nil }
+        let remaining = endsAt.timeIntervalSinceNow
+        guard remaining > 0 else { return nil }
+        let minutes = Int(remaining / 60)
+        return "\(minutes)m left"
+    }
+}

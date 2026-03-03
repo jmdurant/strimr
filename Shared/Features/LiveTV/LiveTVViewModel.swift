@@ -9,6 +9,9 @@ final class LiveTVViewModel {
     private(set) var errorMessage: String?
     private(set) var dvrKey: String?
 
+    /// Now-playing info keyed by channel identifier (e.g. channel call sign or identifier).
+    private(set) var nowPlaying: [String: NowPlaying] = [:]
+
     private let context: PlexAPIContext
 
     init(context: PlexAPIContext) {
@@ -41,11 +44,21 @@ final class LiveTVViewModel {
 
             if channels.isEmpty {
                 errorMessage = "No channels found"
+            } else {
+                await loadNowPlaying(repo: repo)
             }
         } catch {
             guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// Look up what's currently on a given channel.
+    func nowPlaying(for channel: PlexChannel) -> NowPlaying? {
+        // Try matching by title (channel name), key, and ratingKey
+        nowPlaying[channel.displayName]
+            ?? nowPlaying[channel.key]
+            ?? channel.ratingKey.flatMap { nowPlaying[$0] }
     }
 
     func tune(channel: PlexChannel) async -> (url: URL, channelName: String)? {
@@ -76,4 +89,54 @@ final class LiveTVViewModel {
             return nil
         }
     }
+
+    /// Check whether the connected server has at least one DVR configured.
+    func checkAvailability() async -> Bool {
+        do {
+            let repo = try LiveTVRepository(context: context)
+            let response = try await repo.getDVRs()
+            return response.mediaContainer.dvr?.isEmpty == false
+        } catch {
+            return false
+        }
+    }
+
+    // MARK: - Private
+
+    private func loadNowPlaying(repo: LiveTVRepository) async {
+        do {
+            guard let epgKey = try await repo.getEPGProviderKey() else { return }
+            let grid = try await repo.getNowPlaying(epgKey: epgKey)
+
+            var map: [String: NowPlaying] = [:]
+            for program in grid.mediaContainer.metadata ?? [] {
+                let endsAt = program.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
+                let np = NowPlaying(title: program.displayTitle, endsAt: endsAt)
+
+                // Index by every channel identifier we can find on this program
+                for media in program.media ?? [] {
+                    if let callSign = media.channelCallSign {
+                        map[callSign] = np
+                    }
+                    if let identifier = media.channelIdentifier {
+                        map[identifier] = np
+                    }
+                    if let title = media.channelTitle {
+                        map[title] = np
+                    }
+                }
+            }
+            nowPlaying = map
+        } catch {
+            // EPG is best-effort — don't surface errors for it
+        }
+    }
+}
+
+// MARK: - LiveStreamInfo
+
+struct LiveStreamInfo: Identifiable {
+    let id = UUID()
+    let url: URL
+    let channelName: String
 }

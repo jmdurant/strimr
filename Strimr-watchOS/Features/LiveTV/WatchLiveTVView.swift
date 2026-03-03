@@ -1,11 +1,5 @@
 import SwiftUI
 
-struct LiveStreamInfo: Identifiable {
-    let id = UUID()
-    let url: URL
-    let channelName: String
-}
-
 struct WatchLiveTVView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
 
@@ -82,6 +76,11 @@ struct WatchLiveTVView: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
+                } else if let np = viewModel?.nowPlaying(for: channel) {
+                    Text(np.title)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
             }
         }
