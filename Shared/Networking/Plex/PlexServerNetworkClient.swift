@@ -48,6 +48,47 @@ final class PlexServerNetworkClient {
         }
     }
 
+    /// Perform a request with a pre-built URL (for cases where query encoding needs manual control).
+    func requestURL<Response: Decodable>(
+        url: URL,
+        method: String = "GET",
+        headers: [String: String] = [:],
+    ) async throws -> Response {
+        NSLog("[PlexNetwork] %@ %@", method, url.absoluteString)
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue(platform, forHTTPHeaderField: "X-Plex-Platform")
+        if let appVersion {
+            request.setValue(appVersion, forHTTPHeaderField: "X-Plex-Version")
+        }
+        request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
+        request.setValue(language, forHTTPHeaderField: "X-Plex-Language")
+        if let clientIdentifier {
+            request.setValue(clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
+        }
+        for (key, value) in headers {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw PlexAPIError.requestFailed(statusCode: -1)
+        }
+        guard 200 ..< 300 ~= httpResponse.statusCode else {
+            throw PlexAPIError.requestFailed(statusCode: httpResponse.statusCode)
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            return try decoder.decode(Response.self, from: data)
+        } catch {
+            debugPrint(error)
+            throw PlexAPIError.decodingFailed(error)
+        }
+    }
+
     func send(
         path: String,
         queryItems: [URLQueryItem]? = nil,
@@ -82,6 +123,7 @@ final class PlexServerNetworkClient {
             throw PlexAPIError.invalidURL
         }
 
+        NSLog("[PlexNetwork] %@ %@", method, url.absoluteString)
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")

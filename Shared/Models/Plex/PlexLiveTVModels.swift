@@ -43,44 +43,58 @@ struct PlexTunerDevice: Codable {
     }
 }
 
-// MARK: - GET /livetv/dvrs/{dvrKey}/channels
+// MARK: - GET /livetv/epg/channels?lineup=...
 
 struct PlexChannelListResponse: Codable {
     let mediaContainer: MediaContainer
 
     struct MediaContainer: Codable {
-        let metadata: [PlexChannel]?
+        let channel: [PlexChannel]?
 
         private enum CodingKeys: String, CodingKey {
-            case metadata = "Metadata"
+            case channel = "Channel"
         }
     }
 
     private enum CodingKeys: String, CodingKey {
         case mediaContainer = "MediaContainer"
     }
+
+    var channels: [PlexChannel] {
+        mediaContainer.channel ?? []
+    }
 }
 
 struct PlexChannel: Codable, Identifiable {
-    let ratingKey: String?
-    let key: String
+    let key: String?
+    let identifier: String?
+    let channelVcn: String?
     let title: String?
+    let callSign: String?
     let thumb: String?
-    let year: Int?
+    let hd: Bool?
+    let language: String?
 
-    var id: String { ratingKey ?? key }
-    var displayName: String { title ?? key }
+    var id: String { identifier ?? key ?? UUID().uuidString }
+    var displayName: String { title ?? callSign ?? "Unknown" }
+    var channelNumber: String { channelVcn ?? identifier ?? "" }
+    /// The identifier to pass to the tune endpoint.
+    var tuneIdentifier: String { identifier ?? key ?? "" }
 }
 
-// MARK: - POST /livetv/dvrs/{dvrKey}/channels/{channelKey}/tune
+// MARK: - POST /livetv/dvrs/{dvrKey}/tune
 
 struct PlexTuneResponse: Codable {
     let mediaContainer: MediaContainer
 
     struct MediaContainer: Codable {
+        let size: Int?
+        let status: Int?
+        let message: String?
         let metadata: [PlexTuneMetadata]?
 
         private enum CodingKeys: String, CodingKey {
+            case size, status, message
             case metadata = "Metadata"
         }
     }
@@ -169,6 +183,7 @@ struct PlexEPGGridResponse: Codable {
 struct PlexEPGProgram: Codable, Identifiable {
     let ratingKey: String?
     let key: String?
+    let guid: String?
     let type: String?
     let title: String?
     let grandparentTitle: String?
@@ -176,7 +191,7 @@ struct PlexEPGProgram: Codable, Identifiable {
     let year: Int?
     let beginsAt: Int?
     let endsAt: Int?
-    let onAir: Int?
+    let onAir: Bool?
     let thumb: String?
     let media: [PlexEPGMedia]?
 
@@ -191,7 +206,7 @@ struct PlexEPGProgram: Codable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case ratingKey, key, type, title, grandparentTitle, summary, year
+        case ratingKey, key, guid, type, title, grandparentTitle, summary, year
         case beginsAt, endsAt, onAir, thumb
         case media = "Media"
     }
@@ -202,10 +217,37 @@ struct PlexEPGMedia: Codable {
     let channelIdentifier: String?
     let channelThumb: String?
     let channelTitle: String?
+    let beginsAt: Int?
+    let endsAt: Int?
 
     private enum CodingKeys: String, CodingKey {
         case channelCallSign, channelIdentifier, channelThumb, channelTitle
+        case beginsAt, endsAt
     }
+}
+
+// MARK: - GET /media/subscriptions/template
+
+struct PlexSubscriptionTemplateResponse: Codable {
+    let mediaContainer: MediaContainer
+
+    struct MediaContainer: Codable {
+        let mediaSubscription: [PlexMediaSubscription]?
+
+        private enum CodingKeys: String, CodingKey {
+            case mediaSubscription = "MediaSubscription"
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case mediaContainer = "MediaContainer"
+    }
+}
+
+struct PlexMediaSubscription: Codable {
+    let type: String?
+    let targetLibrarySectionID: String?
+    let parameters: String?
 }
 
 // MARK: - NowPlaying (view-layer convenience)

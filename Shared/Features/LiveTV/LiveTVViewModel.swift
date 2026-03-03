@@ -7,15 +7,38 @@ final class LiveTVViewModel {
     private(set) var channels: [PlexChannel] = []
     private(set) var isLoading = false
     private(set) var errorMessage: String?
+    /// Error message shown as an alert after a failed tune attempt.
+    var tuneError: String?
+    /// Error message shown after a failed recording attempt.
+    var recordingError: String?
     private(set) var dvrKey: String?
+    private(set) var lineup: String?
 
-    /// Now-playing info keyed by channel identifier (e.g. channel call sign or identifier).
+    /// Now-playing info keyed by channel identifier / call sign / title.
     private(set) var nowPlaying: [String: NowPlaying] = [:]
+
+    /// EPG grid rows for the guide view.
+    private(set) var epgRows: [EPGGridRow] = []
+    /// The time window currently loaded in the EPG grid.
+    private(set) var epgTimeWindow: (start: Date, end: Date)?
+    private(set) var isLoadingGrid = false
+
+    var settingsManager: SettingsManager?
 
     private let context: PlexAPIContext
 
     init(context: PlexAPIContext) {
         self.context = context
+    }
+
+    /// Channels sorted with favorites first, preserving server order within each group.
+    var sortedChannels: [PlexChannel] {
+        guard let favoriteIds = settingsManager?.interface.favoriteChannelIds,
+              !favoriteIds.isEmpty else { return channels }
+        let favoriteSet = Set(favoriteIds)
+        let favorites = channels.filter { favoriteSet.contains($0.id) }
+        let rest = channels.filter { !favoriteSet.contains($0.id) }
+        return favorites + rest
     }
 
     func load() async {
@@ -39,8 +62,14 @@ final class LiveTVViewModel {
 
             dvrKey = dvr.key
 
-            let channelResponse = try await repo.getChannels(dvrKey: dvr.key)
-            channels = channelResponse.mediaContainer.metadata ?? []
+            guard let lineupURI = dvr.lineup else {
+                errorMessage = "No lineup configured on this DVR"
+                return
+            }
+            lineup = lineupURI
+
+            let channelResponse = try await repo.getChannels(lineup: lineupURI)
+            channels = channelResponse.channels
 
             if channels.isEmpty {
                 errorMessage = "No channels found"
@@ -55,37 +84,43 @@ final class LiveTVViewModel {
 
     /// Look up what's currently on a given channel.
     func nowPlaying(for channel: PlexChannel) -> NowPlaying? {
-        // Try matching by title (channel name), key, and ratingKey
-        nowPlaying[channel.displayName]
-            ?? nowPlaying[channel.key]
-            ?? channel.ratingKey.flatMap { nowPlaying[$0] }
+        if let id = channel.identifier, let np = nowPlaying[id] { return np }
+        if let cs = channel.callSign, let np = nowPlaying[cs] { return np }
+        if let t = channel.title, let np = nowPlaying[t] { return np }
+        if let k = channel.key, let np = nowPlaying[k] { return np }
+        return nil
     }
 
     func tune(channel: PlexChannel) async -> (url: URL, channelName: String)? {
+        tuneError = nil
         guard let dvrKey else { return nil }
 
         do {
             let repo = try LiveTVRepository(context: context)
-            let response = try await repo.tuneChannel(dvrKey: dvrKey, channelKey: channel.key)
+            let response = try await repo.tuneChannel(
+                dvrKey: dvrKey,
+                channelIdentifier: channel.tuneIdentifier
+            )
+
+            if response.mediaContainer.status == -1 {
+                tuneError = "Tuner device is offline or unreachable"
+                return nil
+            }
 
             guard let metadata = response.mediaContainer.metadata?.first,
                   let media = metadata.media?.first,
                   let part = media.part?.first,
-                  let partKey = part.key
+                  let partKey = part.key,
+                  let url = repo.streamURL(partKey: partKey)
             else {
-                errorMessage = "Failed to tune channel"
-                return nil
-            }
-
-            guard let url = repo.streamURL(partKey: partKey) else {
-                errorMessage = "Failed to build stream URL"
+                tuneError = "Failed to tune channel"
                 return nil
             }
 
             let name = media.channelTitle ?? media.channelCallSign ?? channel.displayName
             return (url: url, channelName: name)
         } catch {
-            errorMessage = "Tune failed: \(error.localizedDescription)"
+            tuneError = "Tuner device is offline or unreachable"
             return nil
         }
     }
@@ -101,19 +136,121 @@ final class LiveTVViewModel {
         }
     }
 
+    /// Schedule a DVR recording for a non-airing program.
+    func scheduleRecording(program: EPGGridProgram) async -> Bool {
+        recordingError = nil
+        guard let ratingKey = program.ratingKey else {
+            recordingError = "Program cannot be recorded"
+            return false
+        }
+
+        do {
+            let repo = try LiveTVRepository(context: context)
+            let template = try await repo.getRecordingTemplate(key: "/library/metadata/\(ratingKey)")
+            guard let parameters = template.mediaContainer.mediaSubscription?.first?.parameters else {
+                recordingError = "No recording template available"
+                return false
+            }
+            try await repo.scheduleRecording(parameters: parameters)
+            return true
+        } catch {
+            recordingError = "Failed to schedule recording"
+            return false
+        }
+    }
+
+    /// Load a 3-hour EPG grid window starting at the current hour.
+    func loadEPGGrid() async {
+        guard !channels.isEmpty else { return }
+        isLoadingGrid = true
+        defer { isLoadingGrid = false }
+
+        do {
+            let repo = try LiveTVRepository(context: context)
+            guard let epgKey = try await repo.getEPGProviderKey() else { return }
+
+            let now = Date()
+            let calendar = Calendar.current
+            let windowStart = calendar.dateInterval(of: .hour, for: now)?.start ?? now
+            let windowEnd = windowStart.addingTimeInterval(3 * 60 * 60) // 3 hours forward
+            let from = Int(windowStart.timeIntervalSince1970)
+            let to = Int(windowEnd.timeIntervalSince1970)
+
+            let grid = try await repo.getEPGGrid(epgKey: epgKey, from: from, to: to)
+            let programs = grid.mediaContainer.metadata ?? []
+
+            // Group programs by channel identifier, reading times from Media objects
+            var channelPrograms: [String: [EPGGridProgram]] = [:]
+            for program in programs {
+                for media in program.media ?? [] {
+                    let beginsAt: Date = media.beginsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) } ?? windowStart
+                    let endsAt: Date = media.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) } ?? windowEnd
+                    let gridProgram = EPGGridProgram(
+                        title: program.displayTitle,
+                        beginsAt: beginsAt,
+                        endsAt: endsAt,
+                        ratingKey: program.ratingKey
+                    )
+                    if let id = media.channelIdentifier {
+                        channelPrograms[id, default: []].append(gridProgram)
+                    }
+                    if let cs = media.channelCallSign {
+                        channelPrograms[cs, default: []].append(gridProgram)
+                    }
+                    if let t = media.channelTitle {
+                        channelPrograms[t, default: []].append(gridProgram)
+                    }
+                }
+            }
+
+            // Build rows matching the channel order (favorites first), deduplicating by time
+            var rows: [EPGGridRow] = []
+            for channel in sortedChannels {
+                let matches = findPrograms(for: channel, in: channelPrograms)
+                let sorted = matches.sorted { $0.beginsAt < $1.beginsAt }
+                // Remove duplicates (same start time)
+                var deduped: [EPGGridProgram] = []
+                for program in sorted {
+                    if let last = deduped.last, last.beginsAt == program.beginsAt {
+                        continue
+                    }
+                    deduped.append(program)
+                }
+                rows.append(EPGGridRow(channel: channel, programs: deduped))
+            }
+
+            epgRows = rows
+            epgTimeWindow = (start: windowStart, end: windowEnd)
+        } catch {
+            guard !Task.isCancelled else { return }
+        }
+    }
+
     // MARK: - Private
+
+    /// Find programs for a channel by trying all known identifiers.
+    private func findPrograms(for channel: PlexChannel, in map: [String: [EPGGridProgram]]) -> [EPGGridProgram] {
+        if let id = channel.identifier, let programs = map[id] { return programs }
+        if let cs = channel.callSign, let programs = map[cs] { return programs }
+        if let t = channel.title, let programs = map[t] { return programs }
+        if let k = channel.key, let programs = map[k] { return programs }
+        return []
+    }
 
     private func loadNowPlaying(repo: LiveTVRepository) async {
         do {
             guard let epgKey = try await repo.getEPGProviderKey() else { return }
             let grid = try await repo.getNowPlaying(epgKey: epgKey)
 
+            let now = Int(Date().timeIntervalSince1970)
             var map: [String: NowPlaying] = [:]
             for program in grid.mediaContainer.metadata ?? [] {
+                if let begins = program.beginsAt, begins > now { continue }
+                if let ends = program.endsAt, ends < now { continue }
+
                 let endsAt = program.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
                 let np = NowPlaying(title: program.displayTitle, endsAt: endsAt)
 
-                // Index by every channel identifier we can find on this program
                 for media in program.media ?? [] {
                     if let callSign = media.channelCallSign {
                         map[callSign] = np
@@ -128,7 +265,7 @@ final class LiveTVViewModel {
             }
             nowPlaying = map
         } catch {
-            // EPG is best-effort — don't surface errors for it
+            // Silently fail — now-playing is supplementary
         }
     }
 }
@@ -139,4 +276,21 @@ struct LiveStreamInfo: Identifiable {
     let id = UUID()
     let url: URL
     let channelName: String
+}
+
+// MARK: - EPG Grid Types
+
+struct EPGGridRow: Identifiable {
+    let channel: PlexChannel
+    let programs: [EPGGridProgram]
+
+    var id: String { channel.id }
+}
+
+struct EPGGridProgram: Identifiable {
+    let id = UUID()
+    let title: String
+    let beginsAt: Date
+    let endsAt: Date
+    let ratingKey: String?
 }
