@@ -103,8 +103,29 @@ final class SettingsManager {
         persist()
     }
 
+    func toggleFavoriteChannel(_ channelId: String) {
+        var ids = settings.interface.favoriteChannelIds
+        if let index = ids.firstIndex(of: channelId) {
+            ids.remove(at: index)
+        } else {
+            ids.append(channelId)
+        }
+        settings.interface.favoriteChannelIds = ids
+        persist()
+    }
+
     func setDownloadWiFiOnly(_ enabled: Bool) {
         settings.downloads.wifiOnly = enabled
+        persist()
+    }
+
+    func setAccentColor(_ color: AccentColorOption) {
+        settings.interface.accentColor = color
+        persist()
+    }
+
+    func setAppearance(_ mode: AppearanceMode) {
+        settings.interface.appearance = mode
         persist()
     }
 

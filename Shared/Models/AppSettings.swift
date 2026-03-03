@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct PlaybackSettings: Codable, Equatable {
     var autoPlayNextEpisode = true
@@ -26,6 +27,9 @@ struct InterfaceSettings: Codable, Equatable {
     var displayPlaylists = true
     var displaySeerrDiscoverTab = true
     var offlineMode = false
+    var favoriteChannelIds: [String] = []
+    var accentColor: AccentColorOption = .blue
+    var appearance: AppearanceMode = .system
 
     init() {}
 
@@ -37,6 +41,44 @@ struct InterfaceSettings: Codable, Equatable {
         displayPlaylists = try container.decodeIfPresent(Bool.self, forKey: .displayPlaylists) ?? true
         displaySeerrDiscoverTab = try container.decodeIfPresent(Bool.self, forKey: .displaySeerrDiscoverTab) ?? true
         offlineMode = try container.decodeIfPresent(Bool.self, forKey: .offlineMode) ?? false
+        favoriteChannelIds = try container.decodeIfPresent([String].self, forKey: .favoriteChannelIds) ?? []
+        accentColor = try container.decodeIfPresent(AccentColorOption.self, forKey: .accentColor) ?? .blue
+        appearance = try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance) ?? .system
+    }
+}
+
+enum AccentColorOption: String, Codable, CaseIterable {
+    case blue, purple, green, orange, red, pink
+
+    var color: Color {
+        switch self {
+        case .blue: .blue
+        case .purple: .purple
+        case .green: .green
+        case .orange: .orange
+        case .red: .red
+        case .pink: .pink
+        }
+    }
+
+    var displayName: String {
+        rawValue.capitalized
+    }
+}
+
+enum AppearanceMode: String, Codable, CaseIterable {
+    case system, dark, light
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .dark: .dark
+        case .light: .light
+        }
+    }
+
+    var displayName: String {
+        rawValue.capitalized
     }
 }
 

@@ -44,7 +44,8 @@ struct StrimrApp: App {
                 .environment(seerrStore)
                 .environment(watchTogetherViewModel)
                 .environment(watchSyncManager)
-                .preferredColorScheme(.dark)
+                .tint(settingsManager.interface.accentColor.color)
+                .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
                 .onChange(of: sessionManager.status, initial: true) { _, newStatus in
                     if newStatus == .ready,
                        let token = sessionManager.authToken

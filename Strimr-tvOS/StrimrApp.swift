@@ -39,7 +39,8 @@ struct StrimrApp: App {
                 .environment(seerrStore)
                 .environment(seerrFocusModel)
                 .environment(watchTogetherViewModel)
-                .preferredColorScheme(.dark)
+                .tint(settingsManager.interface.accentColor.color)
+                .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
         }
     }
 }

@@ -35,6 +35,8 @@ struct StrimrWatchApp: App {
                 .environment(settingsManager)
                 .environment(libraryStore)
                 .environment(downloadManager)
+                .tint(settingsManager.interface.accentColor.color)
+                .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
         }
     }
 }
