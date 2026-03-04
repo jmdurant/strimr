@@ -4,6 +4,7 @@ import SwiftUI
 
 struct WatchLivePlayerView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
     @Environment(\.dismiss) private var dismiss
 
     let streamURL: URL
@@ -32,9 +33,10 @@ struct WatchLivePlayerView: View {
                 GeometryReader { geo in
                     let w = isLandscape ? geo.size.height : geo.size.width
                     let h = isLandscape ? geo.size.width : geo.size.height
+                    let zoomEnabled = settingsManager.playback.zoomVideo
                     let screenRatio = w / h
                     let videoRatio: CGFloat = 16.0 / 9.0
-                    let scale = videoRatio / screenRatio
+                    let scale = zoomEnabled ? videoRatio / screenRatio : 1.0
                     VideoPlayer(player: avPlayer)
                         .scaleEffect(y: scale)
                         .frame(width: w, height: h)

@@ -43,8 +43,7 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        maxVideoBitrate: Int = 720,
-        videoResolution: String = "480x320"
+        quality: StreamQuality = .low
     ) -> URL? {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.path = "/video/:/transcode/universal/start.m3u8"
@@ -55,9 +54,9 @@ final class TranscodeRepository {
             URLQueryItem(name: "directPlay", value: "0"),
             URLQueryItem(name: "directStream", value: "1"),
             URLQueryItem(name: "hasMDE", value: "1"),
-            URLQueryItem(name: "maxVideoBitrate", value: String(maxVideoBitrate)),
+            URLQueryItem(name: "maxVideoBitrate", value: quality.maxBitrate),
             URLQueryItem(name: "videoQuality", value: "75"),
-            URLQueryItem(name: "videoResolution", value: videoResolution),
+            URLQueryItem(name: "videoResolution", value: quality.resolution),
             URLQueryItem(name: "mediaIndex", value: String(mediaIndex)),
             URLQueryItem(name: "partIndex", value: String(partIndex)),
             URLQueryItem(name: "offset", value: String(offset)),
@@ -87,8 +86,7 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        maxVideoBitrate: Int = 720,
-        videoResolution: String = "480x320"
+        quality: StreamQuality = .low
     ) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/decision",
@@ -99,9 +97,9 @@ final class TranscodeRepository {
                 URLQueryItem(name: "directPlay", value: "0"),
                 URLQueryItem(name: "directStream", value: "1"),
                 URLQueryItem(name: "hasMDE", value: "1"),
-                URLQueryItem(name: "maxVideoBitrate", value: String(maxVideoBitrate)),
+                URLQueryItem(name: "maxVideoBitrate", value: quality.maxBitrate),
                 URLQueryItem(name: "videoQuality", value: "75"),
-                URLQueryItem(name: "videoResolution", value: videoResolution),
+                URLQueryItem(name: "videoResolution", value: quality.resolution),
                 URLQueryItem(name: "mediaIndex", value: String(mediaIndex)),
                 URLQueryItem(name: "partIndex", value: String(partIndex)),
                 URLQueryItem(name: "offset", value: String(offset)),

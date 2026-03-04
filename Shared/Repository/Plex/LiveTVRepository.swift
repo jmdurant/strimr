@@ -147,7 +147,7 @@ final class LiveTVRepository {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
-    private func liveTVQueryItems(sessionPath: String, session: String, quality: LiveTVQuality = .low) -> [URLQueryItem] {
+    private func liveTVQueryItems(sessionPath: String, session: String, quality: StreamQuality = .low) -> [URLQueryItem] {
         [
             URLQueryItem(name: "path", value: sessionPath),
             URLQueryItem(name: "session", value: session),
@@ -177,7 +177,7 @@ final class LiveTVRepository {
     }
 
     /// Call the decision endpoint to warm up the live TV transcoder.
-    func startLiveTVSession(sessionPath: String, session: String, quality: LiveTVQuality = .low) async throws {
+    func startLiveTVSession(sessionPath: String, session: String, quality: StreamQuality = .low) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/decision",
             queryItems: liveTVQueryItems(sessionPath: sessionPath, session: session, quality: quality)
@@ -185,7 +185,7 @@ final class LiveTVRepository {
     }
 
     /// Build the HLS stream URL for a live TV transcode session.
-    func liveTVStreamURL(sessionPath: String, session: String, quality: LiveTVQuality = .low) -> URL? {
+    func liveTVStreamURL(sessionPath: String, session: String, quality: StreamQuality = .low) -> URL? {
         guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             return nil
         }

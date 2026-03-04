@@ -39,6 +39,7 @@ final class PlayerViewModel {
     @ObservationIgnored private var streamsByFFIndex: [Int: PlexPartStream] = [:]
     @ObservationIgnored private let sessionIdentifier = UUID().uuidString
     @ObservationIgnored private var didReceiveTermination = false
+    var settingsManager: SettingsManager?
     var terminationMessage: String?
 
     func plexStream(forFFIndex ffIndex: Int?) -> PlexPartStream? {
@@ -273,10 +274,12 @@ final class PlayerViewModel {
                     return nil
                 }
                 let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
+                let quality = settingsManager?.playback.streamQuality ?? .low
                 return transcodeRepo.transcodeURL(
                     path: metadataPath,
                     session: sessionIdentifier,
-                    offset: offset
+                    offset: offset,
+                    quality: quality
                 )
             }
         #endif

@@ -12,12 +12,18 @@ struct WatchSettingsView: View {
                 Text("Only show downloaded content. No network requests.")
             }
 
-            Section("Live TV") {
-                Picker("Stream Quality", selection: liveTVQualityBinding) {
-                    ForEach(LiveTVQuality.allCases) { quality in
+            Section {
+                Picker("Stream Quality", selection: streamQualityBinding) {
+                    ForEach(StreamQuality.allCases) { quality in
                         Text(quality.displayName).tag(quality)
                     }
                 }
+
+                Toggle("Zoom Video", isOn: zoomVideoBinding)
+            } header: {
+                Text("Streaming")
+            } footer: {
+                Text("Zoom crops black bars by filling the screen.")
             }
 
             Section("Storage") {
@@ -39,10 +45,17 @@ struct WatchSettingsView: View {
         .navigationTitle("Settings")
     }
 
-    private var liveTVQualityBinding: Binding<LiveTVQuality> {
+    private var zoomVideoBinding: Binding<Bool> {
         Binding(
-            get: { settingsManager.playback.liveTVQuality },
-            set: { settingsManager.setLiveTVQuality($0) }
+            get: { settingsManager.playback.zoomVideo },
+            set: { settingsManager.setZoomVideo($0) }
+        )
+    }
+
+    private var streamQualityBinding: Binding<StreamQuality> {
+        Binding(
+            get: { settingsManager.playback.streamQuality },
+            set: { settingsManager.setStreamQuality($0) }
         )
     }
 

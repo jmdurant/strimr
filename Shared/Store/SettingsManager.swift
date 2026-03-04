@@ -57,8 +57,13 @@ final class SettingsManager {
         persist()
     }
 
-    func setLiveTVQuality(_ quality: LiveTVQuality) {
-        settings.playback.liveTVQuality = quality
+    func setStreamQuality(_ quality: StreamQuality) {
+        settings.playback.streamQuality = quality
+        persist()
+    }
+
+    func setZoomVideo(_ enabled: Bool) {
+        settings.playback.zoomVideo = enabled
         persist()
     }
 

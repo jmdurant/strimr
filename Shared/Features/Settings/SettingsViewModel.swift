@@ -48,10 +48,10 @@ final class SettingsViewModel {
         )
     }
 
-    var liveTVQualityBinding: Binding<LiveTVQuality> {
+    var streamQualityBinding: Binding<StreamQuality> {
         Binding(
-            get: { self.settingsManager.playback.liveTVQuality },
-            set: { self.settingsManager.setLiveTVQuality($0) }
+            get: { self.settingsManager.playback.streamQuality },
+            set: { self.settingsManager.setStreamQuality($0) }
         )
     }
 }

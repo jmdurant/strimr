@@ -55,9 +55,9 @@ struct SettingsPlaybackView: View {
                 .pickerStyle(.navigationLink)
             }
 
-            Section("Live TV") {
-                Picker("Stream Quality", selection: viewModel.liveTVQualityBinding) {
-                    ForEach(LiveTVQuality.allCases) { quality in
+            Section("Streaming") {
+                Picker("Stream Quality", selection: viewModel.streamQualityBinding) {
+                    ForEach(StreamQuality.allCases) { quality in
                         Text(quality.displayName).tag(quality)
                     }
                 }

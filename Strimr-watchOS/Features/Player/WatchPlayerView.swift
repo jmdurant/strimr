@@ -28,6 +28,7 @@ extension WatchVLCPlayerController: PlayerCallbackProviding {}
 
 struct WatchPlayerView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
     @Environment(\.dismiss) private var dismiss
 
     let playQueue: PlayQueueState
@@ -64,9 +65,10 @@ struct WatchPlayerView: View {
                     GeometryReader { geo in
                         let w = isLandscape ? geo.size.height : geo.size.width
                         let h = isLandscape ? geo.size.width : geo.size.height
+                        let zoomEnabled = settingsManager.playback.zoomVideo
                         let screenRatio = w / h
                         let videoRatio: CGFloat = 16.0 / 9.0
-                        let scale = videoRatio / screenRatio
+                        let scale = zoomEnabled ? videoRatio / screenRatio : 1.0
                         VideoPlayer(player: avPlayer)
                             .scaleEffect(y: scale)
                             .frame(width: w, height: h)
@@ -262,6 +264,7 @@ struct WatchPlayerView: View {
                 context: plexApiContext,
                 shouldResumeFromOffset: shouldResumeFromOffset
             )
+            vm.settingsManager = settingsManager
             viewModel = vm
         } else {
             // Streaming playback
@@ -271,6 +274,7 @@ struct WatchPlayerView: View {
                 context: plexApiContext,
                 shouldResumeFromOffset: shouldResumeFromOffset
             )
+            vm.settingsManager = settingsManager
             viewModel = vm
             writeDebug("[WatchPlayer] calling vm.load()")
             await vm.load()
