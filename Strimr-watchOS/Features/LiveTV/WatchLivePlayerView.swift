@@ -11,6 +11,7 @@ struct WatchLivePlayerView: View {
 
     @State private var coordinator: WatchAVPlayerController?
     @State private var avPlayer: AVPlayer?
+    @State private var isLandscape = false
     @State private var showControls = true
     @State private var controlsTask: Task<Void, Never>?
     @State private var errorMessage: String?
@@ -29,11 +30,15 @@ struct WatchLivePlayerView: View {
                 .padding()
             } else if let avPlayer {
                 GeometryReader { geo in
-                    let screenRatio = geo.size.width / geo.size.height
+                    let w = isLandscape ? geo.size.height : geo.size.width
+                    let h = isLandscape ? geo.size.width : geo.size.height
+                    let screenRatio = w / h
                     let videoRatio: CGFloat = 16.0 / 9.0
                     let scale = videoRatio / screenRatio
                     VideoPlayer(player: avPlayer)
                         .scaleEffect(y: scale)
+                        .frame(width: w, height: h)
+                        .rotationEffect(isLandscape ? .degrees(90) : .zero)
                         .frame(width: geo.size.width, height: geo.size.height)
                         .overlay {
                             let buttonOpacity: Double = showControls ? 0.7 : 0
@@ -51,6 +56,20 @@ struct WatchLivePlayerView: View {
                                 }
                                 Spacer()
                                 HStack {
+                                    Button {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            isLandscape.toggle()
+                                        }
+                                        scheduleControlsHide()
+                                    } label: {
+                                        Image(systemName: "crop.rotate")
+                                            .font(.caption2)
+                                            .foregroundStyle(.white)
+                                            .padding(6)
+                                            .background(.black.opacity(0.4), in: Circle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    Spacer()
                                     Text(channelName)
                                         .font(.caption2)
                                         .fontWeight(.semibold)
@@ -58,7 +77,6 @@ struct WatchLivePlayerView: View {
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(.black.opacity(0.4), in: Capsule())
-                                    Spacer()
                                 }
                             }
                             .padding(8)
@@ -102,8 +120,13 @@ struct WatchLivePlayerView: View {
 
         let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
         coordinator = playerCoordinator
+
+        // Wait for readyToPlay before attaching to VideoPlayer
+        playerCoordinator.onMediaLoaded = { [playerCoordinator] in
+            avPlayer = playerCoordinator.player
+        }
+
         playerCoordinator.play(playURL)
-        avPlayer = playerCoordinator.player
     }
 
     private func scheduleControlsHide() {

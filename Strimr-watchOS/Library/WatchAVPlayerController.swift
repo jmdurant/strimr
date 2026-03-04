@@ -161,6 +161,16 @@ final class WatchAVPlayerController: PlayerCoordinating {
                 case .readyToPlay:
                     let duration = CMTimeGetSeconds(item.duration)
                     writeDebug("[WatchAVPlayer] readyToPlay, duration=\(duration)")
+                    let tracks = item.tracks
+                    for track in tracks {
+                        let mediaType = track.assetTrack?.mediaType.rawValue ?? "nil"
+                        let enabled = track.isEnabled
+                        let format = track.assetTrack?.formatDescriptions.first.map { String(describing: $0) } ?? "nil"
+                        writeDebug("[WatchAVPlayer] track: type=\(mediaType) enabled=\(enabled) format=\(format)")
+                    }
+                    if tracks.isEmpty {
+                        writeDebug("[WatchAVPlayer] WARNING: no tracks found in player item")
+                    }
                     if duration.isFinite {
                         self?.onPropertyChange?(.duration, duration)
                     }

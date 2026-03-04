@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let netLogger = Logger(subsystem: "com.doctordurant.strimr", category: "PlexNetwork")
 
 final class PlexServerNetworkClient {
     private let session: URLSession = PlexURLSession.shared
@@ -35,6 +38,22 @@ final class PlexServerNetworkClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw PlexAPIError.requestFailed(statusCode: -1)
         }
+
+        // Log response details for tune requests
+        if path.contains("/tune") {
+            let bodyStr = String(data: data.prefix(3000), encoding: .utf8) ?? "(not utf8)"
+            // Write to file-based debug log (watchOS suppresses os_log info)
+            let logLine = "HTTP \(httpResponse.statusCode), \(data.count) bytes\n\(bodyStr)"
+            let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let logURL = dir.appendingPathComponent("debug.log")
+            if let logData = "\(logLine)\n".data(using: .utf8),
+               let handle = try? FileHandle(forWritingTo: logURL) {
+                handle.seekToEndOfFile()
+                handle.write(logData)
+                handle.closeFile()
+            }
+        }
+
         guard 200 ..< 300 ~= httpResponse.statusCode else {
             throw PlexAPIError.requestFailed(statusCode: httpResponse.statusCode)
         }
@@ -121,6 +140,18 @@ final class PlexServerNetworkClient {
         }
         guard let url = components.url else {
             throw PlexAPIError.invalidURL
+        }
+
+        // File-based debug log for tune requests
+        if path.contains("/tune") {
+            let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let logURL = dir.appendingPathComponent("debug.log")
+            let msg = "[NET] \(method) \(url.absoluteString)\n[NET] clientId=\(clientIdentifier ?? "(nil)") baseURL=\(baseURL.absoluteString)\n"
+            if let data = msg.data(using: .utf8), let handle = try? FileHandle(forWritingTo: logURL) {
+                handle.seekToEndOfFile()
+                handle.write(data)
+                handle.closeFile()
+            }
         }
 
         NSLog("[PlexNetwork] %@ %@", method, url.absoluteString)

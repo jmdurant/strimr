@@ -78,8 +78,8 @@ struct PlexChannel: Codable, Identifiable {
     var id: String { identifier ?? key ?? UUID().uuidString }
     var displayName: String { title ?? callSign ?? "Unknown" }
     var channelNumber: String { channelVcn ?? identifier ?? "" }
-    /// The identifier to pass to the tune endpoint.
-    var tuneIdentifier: String { identifier ?? key ?? "" }
+    /// The channel key to pass to the tune endpoint (NOT the VCN).
+    var tuneIdentifier: String { key ?? identifier ?? "" }
 }
 
 // MARK: - POST /livetv/dvrs/{dvrKey}/tune
@@ -91,40 +91,75 @@ struct PlexTuneResponse: Codable {
         let size: Int?
         let status: Int?
         let message: String?
-        let metadata: [PlexTuneMetadata]?
+        let mediaSubscription: [PlexTuneSubscription]?
 
         private enum CodingKeys: String, CodingKey {
             case size, status, message
-            case metadata = "Metadata"
+            case mediaSubscription = "MediaSubscription"
         }
     }
 
     private enum CodingKeys: String, CodingKey {
         case mediaContainer = "MediaContainer"
     }
+
+    /// Extract the session path from the nested response structure.
+    var sessionPath: String? {
+        mediaContainer.mediaSubscription?.first?
+            .mediaGrabOperation?.first?
+            .metadata?.key
+    }
+
+    /// Extract the channel name from the grab operation metadata.
+    var channelName: String? {
+        guard let metadata = mediaContainer.mediaSubscription?.first?
+            .mediaGrabOperation?.first?.metadata else { return nil }
+        return metadata.grandparentTitle ?? metadata.title
+    }
+}
+
+struct PlexTuneSubscription: Codable {
+    let key: String?
+    let type: Int?
+    let channelIdentifier: String?
+    let mediaGrabOperation: [PlexMediaGrabOperation]?
+
+    private enum CodingKeys: String, CodingKey {
+        case key, type, channelIdentifier
+        case mediaGrabOperation = "MediaGrabOperation"
+    }
+}
+
+struct PlexMediaGrabOperation: Codable {
+    let key: String?
+    let status: String?
+    let metadata: PlexTuneMetadata?
+
+    private enum CodingKeys: String, CodingKey {
+        case key, status
+        case metadata = "Metadata"
+    }
 }
 
 struct PlexTuneMetadata: Codable {
-    let sessionKey: String?
     let key: String?
     let title: String?
+    let grandparentTitle: String?
     let media: [PlexTuneMedia]?
 
     private enum CodingKeys: String, CodingKey {
-        case sessionKey, key, title
+        case key, title, grandparentTitle
         case media = "Media"
     }
 }
 
 struct PlexTuneMedia: Codable {
-    let channelCallSign: String?
     let channelIdentifier: String?
-    let channelThumb: String?
-    let channelTitle: String?
+    let uuid: String?
     let part: [PlexTunePart]?
 
     private enum CodingKeys: String, CodingKey {
-        case channelCallSign, channelIdentifier, channelThumb, channelTitle
+        case channelIdentifier, uuid
         case part = "Part"
     }
 }

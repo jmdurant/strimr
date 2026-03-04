@@ -75,7 +75,7 @@ final class HLSProxyServer: @unchecked Sendable {
         components.host = "127.0.0.1"
         components.port = Int(port)
         components.path = originalURL.path
-        components.query = originalURL.query
+        components.percentEncodedQuery = originalURL.query
         return components.url
     }
 
@@ -168,6 +168,7 @@ final class HLSProxyServer: @unchecked Sendable {
 
                 var urlRequest = URLRequest(url: forwardURL)
                 urlRequest.httpMethod = request.method
+                urlRequest.cachePolicy = .reloadIgnoringLocalCacheData
                 // Forward X-Plex headers from the original request
                 for (key, value) in request.headers where key.hasPrefix("X-Plex") {
                     urlRequest.setValue(value, forHTTPHeaderField: key)

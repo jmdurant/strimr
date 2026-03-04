@@ -1,5 +1,36 @@
 import Foundation
 import Observation
+import os
+
+private let logger = Logger(subsystem: "com.doctordurant.strimr", category: "LiveTV")
+
+/// Simple file logger for debugging on watchOS where os_log info messages are suppressed.
+enum DebugLog {
+    private static let fileURL: URL = {
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return dir.appendingPathComponent("debug.log")
+    }()
+
+    static func write(_ message: String) {
+        let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"
+        logger.warning("\(message)")
+        if let data = line.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                if let handle = try? FileHandle(forWritingTo: fileURL) {
+                    handle.seekToEndOfFile()
+                    handle.write(data)
+                    handle.closeFile()
+                }
+            } else {
+                try? data.write(to: fileURL)
+            }
+        }
+    }
+
+    static func clear() {
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+}
 
 @MainActor
 @Observable
@@ -93,33 +124,57 @@ final class LiveTVViewModel {
 
     func tune(channel: PlexChannel) async -> (url: URL, channelName: String)? {
         tuneError = nil
-        guard let dvrKey else { return nil }
+        DebugLog.clear()
+        guard let dvrKey else {
+            DebugLog.write("tune: no dvrKey available")
+            return nil
+        }
+
+        DebugLog.write("tune: channel=\(channel.displayName) key=\(channel.tuneIdentifier) dvrKey=\(dvrKey)")
 
         do {
             let repo = try LiveTVRepository(context: context)
+
+            // Step 1: Tune the channel — server allocates a tuner and creates a session
             let response = try await repo.tuneChannel(
                 dvrKey: dvrKey,
                 channelIdentifier: channel.tuneIdentifier
             )
 
+            DebugLog.write("tune response: status=\(response.mediaContainer.status ?? -999) size=\(response.mediaContainer.size ?? -1) message=\(response.mediaContainer.message ?? "(none)")")
+
             if response.mediaContainer.status == -1 {
-                tuneError = "Tuner device is offline or unreachable"
+                let msg = response.mediaContainer.message ?? "Could not tune channel"
+                DebugLog.write("tune failed: \(msg)")
+                tuneError = msg
                 return nil
             }
 
-            guard let metadata = response.mediaContainer.metadata?.first,
-                  let media = metadata.media?.first,
-                  let part = media.part?.first,
-                  let partKey = part.key,
-                  let url = repo.streamURL(partKey: partKey)
-            else {
+            guard let sessionPath = response.sessionPath else {
+                DebugLog.write("tune: no session path in response")
                 tuneError = "Failed to tune channel"
                 return nil
             }
 
-            let name = media.channelTitle ?? media.channelCallSign ?? channel.displayName
+            DebugLog.write("tune session: \(sessionPath)")
+
+            // Step 2: Call decision endpoint to warm up the transcoder
+            let clientSession = UUID().uuidString
+            try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession)
+            DebugLog.write("decision OK")
+
+            // Step 3: Build the HLS stream URL
+            guard let url = repo.liveTVStreamURL(sessionPath: sessionPath, session: clientSession) else {
+                DebugLog.write("tune: could not build stream URL")
+                tuneError = "Failed to build stream URL"
+                return nil
+            }
+
+            let name = response.channelName ?? channel.displayName
+            DebugLog.write("tune SUCCESS: \(url.absoluteString)")
             return (url: url, channelName: name)
         } catch {
+            DebugLog.write("tune ERROR: \(error)")
             tuneError = "Tuner device is offline or unreachable"
             return nil
         }
