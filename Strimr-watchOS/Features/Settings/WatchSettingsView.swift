@@ -12,6 +12,14 @@ struct WatchSettingsView: View {
                 Text("Only show downloaded content. No network requests.")
             }
 
+            Section("Live TV") {
+                Picker("Stream Quality", selection: liveTVQualityBinding) {
+                    ForEach(LiveTVQuality.allCases) { quality in
+                        Text(quality.displayName).tag(quality)
+                    }
+                }
+            }
+
             Section("Storage") {
                 let summary = downloadManager.storageSummary
                 let downloadsText = ByteCountFormatter.string(
@@ -29,6 +37,13 @@ struct WatchSettingsView: View {
             }
         }
         .navigationTitle("Settings")
+    }
+
+    private var liveTVQualityBinding: Binding<LiveTVQuality> {
+        Binding(
+            get: { settingsManager.playback.liveTVQuality },
+            set: { settingsManager.setLiveTVQuality($0) }
+        )
     }
 
     private var offlineModeBinding: Binding<Bool> {

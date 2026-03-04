@@ -147,7 +147,7 @@ final class LiveTVRepository {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
-    private func liveTVQueryItems(sessionPath: String, session: String) -> [URLQueryItem] {
+    private func liveTVQueryItems(sessionPath: String, session: String, quality: LiveTVQuality = .low) -> [URLQueryItem] {
         [
             URLQueryItem(name: "path", value: sessionPath),
             URLQueryItem(name: "session", value: session),
@@ -160,9 +160,9 @@ final class LiveTVRepository {
             URLQueryItem(name: "partIndex", value: "0"),
             URLQueryItem(name: "hasMDE", value: "1"),
             URLQueryItem(name: "videoQuality", value: "75"),
-            URLQueryItem(name: "videoResolution", value: "480x320"),
+            URLQueryItem(name: "videoResolution", value: quality.resolution),
             URLQueryItem(name: "audioBoost", value: "100"),
-            URLQueryItem(name: "maxVideoBitrate", value: "720"),
+            URLQueryItem(name: "maxVideoBitrate", value: quality.maxBitrate),
             URLQueryItem(name: "location", value: "wan"),
             URLQueryItem(name: "X-Plex-Token", value: authToken),
             URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
@@ -177,20 +177,20 @@ final class LiveTVRepository {
     }
 
     /// Call the decision endpoint to warm up the live TV transcoder.
-    func startLiveTVSession(sessionPath: String, session: String) async throws {
+    func startLiveTVSession(sessionPath: String, session: String, quality: LiveTVQuality = .low) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/decision",
-            queryItems: liveTVQueryItems(sessionPath: sessionPath, session: session)
+            queryItems: liveTVQueryItems(sessionPath: sessionPath, session: session, quality: quality)
         )
     }
 
     /// Build the HLS stream URL for a live TV transcode session.
-    func liveTVStreamURL(sessionPath: String, session: String) -> URL? {
+    func liveTVStreamURL(sessionPath: String, session: String, quality: LiveTVQuality = .low) -> URL? {
         guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
             return nil
         }
         components.path = "/video/:/transcode/universal/start.m3u8"
-        components.queryItems = liveTVQueryItems(sessionPath: sessionPath, session: session)
+        components.queryItems = liveTVQueryItems(sessionPath: sessionPath, session: session, quality: quality)
         return components.url
     }
 }

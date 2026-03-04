@@ -160,11 +160,12 @@ final class LiveTVViewModel {
 
             // Step 2: Call decision endpoint to warm up the transcoder
             let clientSession = UUID().uuidString
-            try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession)
-            DebugLog.write("decision OK")
+            let quality = settingsManager?.playback.liveTVQuality ?? .low
+            try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession, quality: quality)
+            DebugLog.write("decision OK (quality=\(quality.resolution))")
 
             // Step 3: Build the HLS stream URL
-            guard let url = repo.liveTVStreamURL(sessionPath: sessionPath, session: clientSession) else {
+            guard let url = repo.liveTVStreamURL(sessionPath: sessionPath, session: clientSession, quality: quality) else {
                 DebugLog.write("tune: could not build stream URL")
                 tuneError = "Failed to build stream URL"
                 return nil

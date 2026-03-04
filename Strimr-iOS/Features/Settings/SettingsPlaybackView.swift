@@ -50,6 +50,14 @@ struct SettingsPlaybackView: View {
                     }
                 }
             }
+
+            Section("Live TV") {
+                Picker("Stream Quality", selection: viewModel.liveTVQualityBinding) {
+                    ForEach(LiveTVQuality.allCases) { quality in
+                        Text(quality.displayName).tag(quality)
+                    }
+                }
+            }
         }
         .listStyle(.insetGrouped)
         .navigationTitle("settings.playback.title")

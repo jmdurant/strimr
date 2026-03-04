@@ -57,6 +57,11 @@ final class SettingsManager {
         persist()
     }
 
+    func setLiveTVQuality(_ quality: LiveTVQuality) {
+        settings.playback.liveTVQuality = quality
+        persist()
+    }
+
     func updatePlayback(_ transform: (inout PlaybackSettings) -> Void) {
         transform(&settings.playback)
         persist()

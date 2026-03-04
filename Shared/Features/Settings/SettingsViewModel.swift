@@ -47,4 +47,11 @@ final class SettingsViewModel {
             set: { self.settingsManager.setSubtitleScale($0) },
         )
     }
+
+    var liveTVQualityBinding: Binding<LiveTVQuality> {
+        Binding(
+            get: { self.settingsManager.playback.liveTVQuality },
+            set: { self.settingsManager.setLiveTVQuality($0) }
+        )
+    }
 }

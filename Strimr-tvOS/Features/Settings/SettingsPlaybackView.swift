@@ -54,6 +54,15 @@ struct SettingsPlaybackView: View {
                 }
                 .pickerStyle(.navigationLink)
             }
+
+            Section("Live TV") {
+                Picker("Stream Quality", selection: viewModel.liveTVQualityBinding) {
+                    ForEach(LiveTVQuality.allCases) { quality in
+                        Text(quality.displayName).tag(quality)
+                    }
+                }
+                .pickerStyle(.navigationLink)
+            }
         }
         .navigationTitle("settings.playback.title")
         .alert("settings.playback.player.externalWarning.title", isPresented: $showingExternalPlayerWarning) {

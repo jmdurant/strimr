@@ -7,6 +7,7 @@ struct PlaybackSettings: Codable, Equatable {
     var seekForwardSeconds = 10
     var player = PlaybackPlayer.mpv
     var subtitleScale = 100
+    var liveTVQuality: LiveTVQuality = .low
 
     init() {}
 
@@ -17,6 +18,7 @@ struct PlaybackSettings: Codable, Equatable {
         seekForwardSeconds = try container.decodeIfPresent(Int.self, forKey: .seekForwardSeconds) ?? 10
         player = try container.decodeIfPresent(PlaybackPlayer.self, forKey: .player) ?? .mpv
         subtitleScale = try container.decodeIfPresent(Int.self, forKey: .subtitleScale) ?? 100
+        liveTVQuality = try container.decodeIfPresent(LiveTVQuality.self, forKey: .liveTVQuality) ?? .low
     }
 }
 
@@ -63,6 +65,32 @@ enum AccentColorOption: String, Codable, CaseIterable {
 
     var displayName: String {
         rawValue.capitalized
+    }
+}
+
+enum LiveTVQuality: String, Codable, CaseIterable, Identifiable {
+    case low = "320x240"
+    case medium = "480x320"
+    case high = "640x360"
+
+    var id: String { rawValue }
+
+    var resolution: String { rawValue }
+
+    var maxBitrate: String {
+        switch self {
+        case .low: "500"
+        case .medium: "720"
+        case .high: "1500"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .low: "Low (320x240)"
+        case .medium: "Medium (480x320)"
+        case .high: "High (640x360)"
+        }
     }
 }
 
