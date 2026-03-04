@@ -1,0 +1,373 @@
+name: Strimr
+
+options:
+  xcodeVersion: "1600"
+  createIntermediateGroups: true
+  defaultConfig: Release
+  deploymentTarget:
+    iOS: "18.0"
+    tvOS: "26.0"
+    watchOS: "26.2"
+
+configFiles:
+  Debug: Config/Config.xcconfig
+  Release: Config/Config.xcconfig
+
+settings:
+  base:
+    ALWAYS_SEARCH_USER_PATHS: NO
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    CLANG_ANALYZER_NONNULL: YES
+    CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION: YES_AGGRESSIVE
+    CLANG_CXX_LANGUAGE_STANDARD: "gnu++20"
+    CLANG_ENABLE_MODULES: YES
+    CLANG_ENABLE_OBJC_ARC: YES
+    CLANG_ENABLE_OBJC_WEAK: YES
+    CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING: YES
+    CLANG_WARN_BOOL_CONVERSION: YES
+    CLANG_WARN_COMMA: YES
+    CLANG_WARN_CONSTANT_CONVERSION: YES
+    CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS: YES
+    CLANG_WARN_DIRECT_OBJC_ISA_USAGE: YES_ERROR
+    CLANG_WARN_DOCUMENTATION_COMMENTS: YES
+    CLANG_WARN_EMPTY_BODY: YES
+    CLANG_WARN_ENUM_CONVERSION: YES
+    CLANG_WARN_INFINITE_RECURSION: YES
+    CLANG_WARN_INT_CONVERSION: YES
+    CLANG_WARN_NON_LITERAL_NULL_CONVERSION: YES
+    CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF: YES
+    CLANG_WARN_OBJC_LITERAL_CONVERSION: YES
+    CLANG_WARN_OBJC_ROOT_CLASS: YES_ERROR
+    CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER: YES
+    CLANG_WARN_RANGE_LOOP_ANALYSIS: YES
+    CLANG_WARN_STRICT_PROTOTYPES: YES
+    CLANG_WARN_SUSPICIOUS_MOVE: YES
+    CLANG_WARN_UNGUARDED_AVAILABILITY: YES_AGGRESSIVE
+    CLANG_WARN_UNREACHABLE_CODE: YES
+    CLANG_WARN__DUPLICATE_METHOD_MATCH: YES
+    COPY_PHASE_STRIP: NO
+    ENABLE_STRICT_OBJC_MSGSEND: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    GCC_C_LANGUAGE_STANDARD: gnu17
+    GCC_NO_COMMON_BLOCKS: YES
+    GCC_WARN_64_TO_32_BIT_CONVERSION: YES
+    GCC_WARN_ABOUT_RETURN_TYPE: YES_ERROR
+    GCC_WARN_UNDECLARED_SELECTOR: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
+    GCC_WARN_UNUSED_FUNCTION: YES
+    GCC_WARN_UNUSED_VARIABLE: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    MTL_FAST_MATH: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+  debug:
+    DEBUG_INFORMATION_FORMAT: dwarf
+    ENABLE_TESTABILITY: YES
+    GCC_DYNAMIC_NO_PIC: NO
+    GCC_OPTIMIZATION_LEVEL: "0"
+    GCC_PREPROCESSOR_DEFINITIONS:
+      - "DEBUG=1"
+      - "$(inherited)"
+    MTL_ENABLE_DEBUG_INFO: INCLUDE_SOURCE
+    ONLY_ACTIVE_ARCH: YES
+    SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG $(inherited)"
+    SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+  release:
+    DEBUG_INFORMATION_FORMAT: "dwarf-with-dsym"
+    ENABLE_NS_ASSERTIONS: NO
+    MTL_ENABLE_DEBUG_INFO: NO
+    SWIFT_COMPILATION_MODE: wholemodule
+
+packages:
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa.git
+    majorVersion: "9.1.0"
+  MPVKit:
+    url: https://github.com/wunax/MPVKit
+    exactVersion: "0.41.2"
+
+targets:
+  Strimr-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    configFiles:
+      Debug: Config/Config.xcconfig
+      Release: Config/Config.xcconfig
+    sources:
+      - path: Strimr-iOS
+        excludes:
+          - Info.plist
+      - path: Shared
+    resources:
+      - path: Localizable.xcstrings
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "20"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_PREVIEWS: YES
+        ENABLE_USER_SELECTED_FILES: readonly
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Strimr-iOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
+        "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]": NO
+        "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]": NO
+        "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]": YES
+        "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]": YES
+        "INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]": YES
+        "INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]": YES
+        "INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]": UIStatusBarStyleDefault
+        "INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]": UIStatusBarStyleDefault
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/Frameworks"
+        "LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]": "@executable_path/../Frameworks"
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        MARKETING_VERSION: "1.1.0"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        REGISTER_APP_GROUPS: YES
+        SDKROOT: auto
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        SUPPORTS_MACCATALYST: NO
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        XROS_DEPLOYMENT_TARGET: "26.0"
+      release:
+        VALIDATE_PRODUCT: YES
+    dependencies:
+      - package: Sentry
+      - package: MPVKit
+        product: MPVKit-GPL
+      - framework: Carthage/Build/MobileVLCKit.xcframework
+        embed: true
+        codeSign: true
+
+  Strimr-tvOS:
+    type: application
+    platform: tvOS
+    deploymentTarget: "26.0"
+    configFiles:
+      Debug: Config/Config.xcconfig
+      Release: Config/Config.xcconfig
+    sources:
+      - path: Strimr-tvOS
+        excludes:
+          - Info.plist
+    resources:
+      - path: Localizable.xcstrings
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "20"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        ENABLE_PREVIEWS: YES
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Strimr-tvOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+        MARKETING_VERSION: "1.1.0"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SDKROOT: appletvos
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "3"
+        TVOS_DEPLOYMENT_TARGET: "26.0"
+      release:
+        VALIDATE_PRODUCT: YES
+    dependencies:
+      - package: Sentry
+      - package: MPVKit
+        product: MPVKit-GPL
+      - framework: Carthage/Build/TVVLCKit.xcframework
+        embed: true
+        codeSign: true
+
+  Strimr-watchOS:
+    type: application
+    platform: watchOS
+    deploymentTarget: "26.2"
+    configFiles:
+      Debug: Config/Config.xcconfig
+      Release: Config/Config.xcconfig
+    sources:
+      - path: Strimr-watchOS
+        excludes:
+          - Info.plist
+      - path: Shared
+        excludes:
+          - AppDependencies.swift
+          - Extensions/ImageCornerColorSampler.swift
+          - Features/Integrations/SeerrPermissionService.swift
+          - Features/Integrations/SeerrSessionService.swift
+          - Features/Integrations/SeerrViewModel.swift
+          - Features/Library/LibraryBrowseControlsView.swift
+          - Features/MainCoordinator.swift
+          - Features/MediaDetail/CastSection.swift
+          - Features/MediaDetail/RelatedHubsSection.swift
+          - Features/Player/Controls/PlayerBadge.swift
+          - Features/Player/Controls/PlayerTimelineView.swift
+          - Features/Player/ExternalPlaybackLauncher.swift
+          - Features/Player/PlaybackLauncher.swift
+          - Features/Search/SearchResultCard.swift
+          - Features/Seerr/SeerrDiscoverViewModel.swift
+          - Features/Seerr/SeerrManageRequestsViewModel.swift
+          - Features/Seerr/SeerrMediaDetailViewModel.swift
+          - Features/Seerr/SeerrMediaRequestAvailability.swift
+          - Features/Seerr/SeerrMediaRequestType.swift
+          - Features/Seerr/SeerrMediaRequestViewModel.swift
+          - Features/Seerr/SeerrPendingRequestsViewModel.swift
+          - Features/Seerr/SeerrSearchViewModel.swift
+          - Features/Settings/DisplayedLibrariesSectionView.swift
+          - Features/Settings/DisplayedLibrariesViewModel.swift
+          - Features/Settings/NavigationLibrariesSectionView.swift
+          - Features/Settings/NavigationLibrariesViewModel.swift
+          - Features/Settings/SettingsViewModel.swift
+          - Features/WatchTogether/Playback/WatchTogetherPlaybackSyncEngine.swift
+          - Features/WatchTogether/Playback/WatchTogetherPlayerEvent.swift
+          - Features/WatchTogether/WatchTogetherModels.swift
+          - Features/WatchTogether/WatchTogetherProtocol.swift
+          - Features/WatchTogether/WatchTogetherViewModel.swift
+          - Features/WatchTogether/WatchTogetherWebSocketClient.swift
+          - Library/MPV/MetalLayer.swift
+          - Library/MPV/MPVPlayerDelegate.swift
+          - Library/MPV/MPVPlayerView.swift
+          - Library/MPV/MPVPlayerViewController.swift
+          - Library/MPV/MPVProperty.swift
+          - Library/Player/PlayerFactory.swift
+          - Library/VLC/VLCPlayerDelegate.swift
+          - Library/VLC/VLCPlayerView.swift
+          - Library/VLC/VLCPlayerViewController.swift
+          - Models/Seerr/SeerrAuthRequests.swift
+          - Models/Seerr/SeerrMedia.swift
+          - Models/Seerr/SeerrPaginatedResponse.swift
+          - Models/Seerr/SeerrQuota.swift
+          - Models/Seerr/SeerrRequest.swift
+          - Models/Seerr/SeerrRequestCount.swift
+          - Models/Seerr/SeerrRequestPageResponse.swift
+          - Models/Seerr/SeerrRequestPayloads.swift
+          - Models/Seerr/SeerrServiceModels.swift
+          - Models/Seerr/SeerrSettings.swift
+          - Models/Seerr/SeerrUser.swift
+          - Networking/Seerr/SeerrAPI.swift
+          - Networking/Seerr/SeerrNetworkClient.swift
+          - Networking/Seerr/TMDBImageService.swift
+          - Repository/Seerr/SeerrAuthRepository.swift
+          - Repository/Seerr/SeerrDiscoverRepository.swift
+          - Repository/Seerr/SeerrMediaRepository.swift
+          - Repository/Seerr/SeerrRequestRepository.swift
+          - Repository/Seerr/SeerrServiceRepository.swift
+          - Repository/Seerr/SeerrSettingsRepository.swift
+          - Store/SeerrStore.swift
+          - Views/FolderCard.swift
+          - Views/Media/Card/LandscapeMediaCard.swift
+          - Views/Media/Card/MediaCard.swift
+          - Views/Media/Card/PortraitMediaCard.swift
+          - Views/Media/EpisodeArtworkView.swift
+          - Views/Media/MediaBackdropGradient.swift
+          - Views/Media/MediaCarousel.swift
+          - Views/Media/MediaHubSection.swift
+          - Views/Media/MediaImageView.swift
+          - Views/Media/MediaImageViewModel.swift
+          - Views/Media/WatchStatusBadge.swift
+          - Views/Seerr/SeerrAvailabilityBadgeView.swift
+          - Views/Seerr/SeerrCastSection.swift
+          - Views/Seerr/SeerrEpisodeCardView.swift
+          - Views/Seerr/SeerrMediaArtworkView.swift
+          - Views/Seerr/SeerrMediaCard.swift
+          - Views/Seerr/SeerrMediaCarousel.swift
+          - Views/Seerr/SeerrMediaSection.swift
+          - Views/Seerr/SeerrRelatedSection.swift
+          - Views/Seerr/SeerrSearchCard.swift
+          - Views/Seerr/SeerrSeasonAvailabilityBadgeView.swift
+          - Views/Toast/ToastOverlay.swift
+    resources:
+      - path: Localizable.xcstrings
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "20"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        ENABLE_PREVIEWS: YES
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Strimr-watchOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.doctordurant.strimr
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+        MARKETING_VERSION: "1.1.0"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(IOS_BUNDLE_IDENTIFIER).watchos"
+        "PRODUCT_BUNDLE_IDENTIFIER[sdk=watchos*]": "$(IOS_BUNDLE_IDENTIFIER).watchos"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SDKROOT: watchos
+        SKIP_INSTALL: YES
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SUPPORTED_PLATFORMS: "watchos watchsimulator"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_OBJC_BRIDGING_HEADER: Strimr-watchOS/Strimr-watchOS-Bridging-Header.h
+        SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "4"
+        WATCHOS_DEPLOYMENT_TARGET: "26.2"
+      release:
+        VALIDATE_PRODUCT: YES
+    dependencies:
+      - package: Sentry
+      - framework: Carthage/Build/VLCKit.xcframework
+        embed: true
+        codeSign: true
+      - target: StrimrWidgetExtension
+
+  StrimrWidgetExtension:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "26.2"
+    sources:
+      - path: StrimrWidgetExtension
+        excludes:
+          - Info.plist
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "20"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: StrimrWidgetExtension/Info.plist
+        MARKETING_VERSION: "1.1.0"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(IOS_BUNDLE_IDENTIFIER).watchos.widget"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SDKROOT: watchos
+        SKIP_INSTALL: YES
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SUPPORTED_PLATFORMS: "watchos watchsimulator"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_EMIT_LOC_STRINGS: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "4"
+        WATCHOS_DEPLOYMENT_TARGET: "26.2"

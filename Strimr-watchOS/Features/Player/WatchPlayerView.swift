@@ -133,6 +133,15 @@ struct WatchPlayerView: View {
                     .simultaneousGesture(
                         TapGesture().onEnded { scheduleControlsHide() }
                     )
+                } else if viewModel.media?.type == .movie || viewModel.media?.type == .episode {
+                    VStack(spacing: 8) {
+                        ProgressView()
+                        Text(viewModel.media?.title ?? "Loading...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                    }
                 } else {
                     audioPlayerView(viewModel: viewModel)
                 }
@@ -328,9 +337,12 @@ struct WatchPlayerView: View {
             setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
             playerCoordinator.play(playURL)
 
-            // Only set avPlayer for video — audio uses the audio player UI
+            // Only set avPlayer for video — audio uses the audio player UI.
+            // Wait for readyToPlay before attaching to VideoPlayer to avoid black screen.
             if isVideo {
-                avPlayer = playerCoordinator.player
+                playerCoordinator.onMediaLoaded = { [playerCoordinator] in
+                    avPlayer = playerCoordinator.player
+                }
             }
 
             if vm.shouldResumeFromOffset, let offset = vm.resumePosition, offset > 0 {
