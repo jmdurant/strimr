@@ -46,7 +46,6 @@ struct SeerrMediaDetailView: View {
             }
         }
         .ignoresSafeArea(edges: .top)
-        .toolbar(.hidden, for: .tabBar)
         .task {
             await bindableViewModel.loadDetails()
             await bindableViewModel.loadRelatedContent()

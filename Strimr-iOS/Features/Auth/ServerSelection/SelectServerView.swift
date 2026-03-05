@@ -11,6 +11,8 @@ struct SelectServerView: View {
             content
         }
         .padding(24)
+        .navigationTitle("serverSelection.title")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(role: .destructive) {

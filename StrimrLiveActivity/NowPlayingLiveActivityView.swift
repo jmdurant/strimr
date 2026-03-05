@@ -9,6 +9,7 @@ struct NowPlayingLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: NowPlayingAttributes.self) { context in
             lockScreenView(context: context)
+                .widgetURL(URL(string: "strimr://nowplaying"))
                 .activityBackgroundTint(.black.opacity(0.8))
         } dynamicIsland: { context in
             DynamicIsland {

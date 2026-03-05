@@ -12,7 +12,9 @@ struct WatchContentView: View {
         case .needsProfileSelection:
             WatchProfileSelectionView()
         case .needsServerSelection:
-            WatchServerSelectionView()
+            NavigationStack {
+                WatchServerSelectionView()
+            }
         case .ready:
             WatchMainTabView()
         }

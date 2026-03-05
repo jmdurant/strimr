@@ -90,6 +90,11 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "26.0"
+    entitlements:
+      path: Strimr-iOS/Strimr-iOS.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.doctordurant.strimr
     configFiles:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
@@ -383,10 +388,16 @@ targets:
     type: app-extension
     platform: iOS
     deploymentTarget: "26.0"
+    entitlements:
+      path: StrimrLiveActivity/StrimrLiveActivity.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.doctordurant.strimr
     sources:
       - path: StrimrLiveActivity
         excludes:
           - Info.plist
+      - path: Shared/Widget/WidgetData.swift
     settings:
       base:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor

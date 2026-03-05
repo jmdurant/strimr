@@ -7,9 +7,8 @@ struct LibraryView: View {
     let onSelectMedia: (MediaDisplayItem) -> Void
     private let cardMinHeight: CGFloat = 120
     private let cardMaxHeight: CGFloat = 160
+    @Environment(LibraryStore.self) private var libraryStore
     @State private var isHiddenExpanded = false
-    @State private var hasLiveTV = false
-    @State private var showLiveTV = false
 
     init(
         viewModel: LibraryViewModel,
@@ -21,7 +20,7 @@ struct LibraryView: View {
 
     var body: some View {
         List {
-            if hasLiveTV {
+            if libraryStore.hasLiveTV {
                 Section {
                     ZStack {
                         NavigationLink { LiveTVView() } label: { EmptyView() }.opacity(0)
@@ -72,7 +71,6 @@ struct LibraryView: View {
         .userMenuToolbar()
         .task {
             await viewModel.load()
-            await checkLiveTV()
         }
     }
 
@@ -116,11 +114,6 @@ struct LibraryView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
         .padding(.vertical, 4)
-    }
-
-    private func checkLiveTV() async {
-        let vm = LiveTVViewModel(context: plexApiContext)
-        hasLiveTV = await vm.checkAvailability()
     }
 
     private var hiddenLibraryIds: Set<String> {

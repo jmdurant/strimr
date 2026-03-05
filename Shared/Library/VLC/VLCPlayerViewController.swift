@@ -24,6 +24,12 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
     private(set) var isPipActive = false
     private(set) var spectrumData: SpectrumData?
     private var audioBridge: VLCAudioBridge?
+    private var rendererDiscoverer: VLCRendererDiscoverer?
+    private var vlcRenderers: [VLCRendererItem] = []
+    private(set) var activeRenderer: VLCRendererItem?
+    private(set) var rendererDevices: [RendererDevice] = []
+    private(set) var activeRendererDeviceName: String?
+    var onRenderersChanged: (() -> Void)?
     #endif
 
     init(options: PlayerOptions) {
@@ -37,6 +43,10 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
     }
 
     deinit {
+        #if os(iOS)
+        audioBridge?.stop()
+        audioBridge = nil
+        #endif
         mediaPlayer.stop()
         mediaPlayer.delegate = nil
         updateIdleTimer(isPlaying: false)
@@ -86,6 +96,10 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
         installAudioBridgeIfNeeded()
         #endif
         mediaPlayer.play()
+    }
+
+    var isPaused: Bool {
+        !mediaPlayer.isPlaying
     }
 
     func togglePause() {
@@ -188,14 +202,18 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
     }
 
     func destruct() {
+        NSLog("[VLC] destruct() called")
         #if os(iOS)
         pipWindowController?.stopPictureInPicture()
         pipWindowController = nil
-        // Detach audio callbacks before stopping the player so VLC's
-        // teardown thread doesn't invoke freed callback context.
         audioBridge?.stop()
         audioBridge = nil
         spectrumData?.reset()
+        stopRendererDiscovery()
+        if activeRenderer != nil {
+            mediaPlayer.setRendererItem(nil)
+            activeRenderer = nil
+        }
         #endif
         mediaPlayer.stop()
         mediaPlayer.delegate = nil
@@ -221,6 +239,53 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
         let spectrum = SpectrumData()
         spectrumData = spectrum
         audioBridge = VLCAudioBridge(player: mediaPlayer, spectrumData: spectrum)
+    }
+
+    func startRendererDiscovery() {
+        guard rendererDiscoverer == nil else { return }
+        // Use microdns for Chromecast discovery
+        guard let discoverer = VLCRendererDiscoverer(name: "microdns_renderer") else {
+            NSLog("[Chromecast] Failed to create renderer discoverer")
+            return
+        }
+        discoverer.delegate = self
+        rendererDiscoverer = discoverer
+        if discoverer.start() {
+            NSLog("[Chromecast] Discovery started")
+        } else {
+            NSLog("[Chromecast] Discovery failed to start")
+        }
+    }
+
+    func stopRendererDiscovery() {
+        rendererDiscoverer?.stop()
+        rendererDiscoverer = nil
+        vlcRenderers = []
+        rendererDevices = []
+    }
+
+    func selectRendererByName(_ name: String?) {
+        guard let name else {
+            mediaPlayer.setRendererItem(nil)
+            activeRenderer = nil
+            activeRendererDeviceName = nil
+            NSLog("[Chromecast] Disconnected")
+            return
+        }
+        guard let item = vlcRenderers.first(where: { $0.name == name }) else { return }
+        if mediaPlayer.setRendererItem(item) {
+            activeRenderer = item
+            activeRendererDeviceName = item.name
+            NSLog("[Chromecast] Casting to: %@", item.name)
+        } else {
+            NSLog("[Chromecast] Failed to set renderer")
+        }
+    }
+
+    private func syncRendererDevices() {
+        rendererDevices = vlcRenderers.map { item in
+            RendererDevice(id: item.name, name: item.name, type: item.type)
+        }
     }
     #endif
 
@@ -359,6 +424,34 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
         return min(max(0, time), maxSeekTime)
     }
 }
+
+// MARK: - Renderer Discovery (iOS)
+
+#if os(iOS)
+extension VLCPlayerViewController: VLCRendererDiscovererDelegate {
+    func rendererDiscovererItemAdded(_ rendererDiscoverer: VLCRendererDiscoverer, item: VLCRendererItem) {
+        DispatchQueue.main.async {
+            NSLog("[Chromecast] Device found: %@ (type: %@)", item.name, item.type)
+            self.vlcRenderers.append(item)
+            self.syncRendererDevices()
+            self.onRenderersChanged?()
+        }
+    }
+
+    func rendererDiscovererItemDeleted(_ rendererDiscoverer: VLCRendererDiscoverer, item: VLCRendererItem) {
+        DispatchQueue.main.async {
+            NSLog("[Chromecast] Device removed: %@", item.name)
+            self.vlcRenderers.removeAll { $0.name == item.name }
+            if self.activeRenderer?.name == item.name {
+                self.activeRenderer = nil
+                self.activeRendererDeviceName = nil
+            }
+            self.syncRendererDevices()
+            self.onRenderersChanged?()
+        }
+    }
+}
+#endif
 
 // MARK: - Picture in Picture (iOS)
 

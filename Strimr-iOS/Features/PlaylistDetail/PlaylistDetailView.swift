@@ -63,7 +63,6 @@ struct PlaylistDetailView: View {
                 )
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         .task {
             await bindableViewModel.load()
         }

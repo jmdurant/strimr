@@ -30,9 +30,11 @@ struct PlayerView: View {
     @State private var isRotationLocked = false
     @State private var isPipActive = false
     @State private var showVisualization = false
+    @State private var showChromecastPicker = false
     @State private var isShowingWatchTogetherExitPrompt = false
     @State private var wasInWatchTogetherSession = false
     @State private var activePlaybackURL: URL?
+    @State private var isResumingFromBackground: Bool
 
     private let controlsHideDelay: TimeInterval = 3.0
     private var seekBackwardInterval: Double {
@@ -43,10 +45,28 @@ struct PlayerView: View {
         Double(settingsManager.playback.seekForwardSeconds)
     }
 
+    @State private var isForceClosing = false
+
     init(viewModel: PlayerViewModel, initialPlayer: InternalPlaybackPlayer, options: PlayerOptions) {
         _viewModel = State(initialValue: viewModel)
         activePlayer = initialPlayer
-        _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer, options: options))
+        // Reuse existing coordinator if available (player kept alive in background)
+        if let existing = LiveActivityManager.shared.activePlayerCoordinator,
+           LiveActivityManager.shared.activePlayer == initialPlayer,
+           LiveActivityManager.shared.activePlayerViewModel === viewModel
+        {
+            _playerCoordinator = State(initialValue: existing)
+            _isResumingFromBackground = State(initialValue: true)
+            // Pre-populate so startPlaybackIfNeeded won't restart
+            _activePlaybackURL = State(initialValue: viewModel.playbackURL)
+        } else {
+            // Stop any existing background player before starting new content
+            if LiveActivityManager.shared.hasBackgroundPlayer {
+                LiveActivityManager.shared.stopNowPlaying()
+            }
+            _playerCoordinator = State(initialValue: PlayerFactory.makeCoordinator(for: initialPlayer, options: options))
+            _isResumingFromBackground = State(initialValue: false)
+        }
     }
 
     var body: some View {
@@ -139,6 +159,9 @@ struct PlayerView: View {
                         isVisualizationAvailable: activePlayer == .vlc,
                         isVisualizationActive: showVisualization,
                         onToggleVisualization: toggleVisualization,
+                        isChromecastAvailable: activePlayer == .vlc && !playerCoordinator.discoveredRenderers.isEmpty,
+                        isCasting: playerCoordinator.activeRendererName != nil,
+                        onChromecast: { showChromecastPicker = true },
                         isWatchTogether: watchTogetherViewModel.isInSession,
                     )
                     .transition(.opacity)
@@ -162,27 +185,46 @@ struct PlayerView: View {
             }
         }
         .onAppear {
+            NSLog("[Player] onAppear — isResumingFromBackground=%d", isResumingFromBackground ? 1 : 0)
             showControls(temporarily: true)
-            playerCoordinator.setPlaybackRate(playbackRate)
-            startPlaybackIfNeeded(url: bindableViewModel.playbackURL)
-            LiveActivityManager.shared.startNowPlaying(viewModel: viewModel, coordinator: playerCoordinator, context: context)
+            if isResumingFromBackground {
+                // Player is already playing — just re-register the Live Activity bridge
+                isResumingFromBackground = false
+            } else {
+                playerCoordinator.setPlaybackRate(playbackRate)
+                startPlaybackIfNeeded(url: bindableViewModel.playbackURL)
+            }
+            LiveActivityManager.shared.startNowPlaying(viewModel: viewModel, coordinator: playerCoordinator, player: activePlayer, context: context)
+            if activePlayer == .vlc {
+                playerCoordinator.startRendererDiscovery()
+            }
             if watchTogetherViewModel.isInSession {
                 watchTogetherViewModel.attachPlayerCoordinator(playerCoordinator)
                 wasInWatchTogetherSession = true
             }
         }
         .onDisappear {
-            LiveActivityManager.shared.stopNowPlaying()
-            viewModel.handleStop()
+            NSLog("[Player] onDisappear: isForceClosing=%d", isForceClosing ? 1 : 0)
             hideControlsWorkItem?.cancel()
-            playerCoordinator.destruct()
+            playerCoordinator.stopRendererDiscovery()
             AppDelegate.orientationLock = .all
             isRotationLocked = false
             if wasInWatchTogetherSession {
                 watchTogetherViewModel.detachPlayerCoordinator()
             }
+
+            if isForceClosing {
+                NSLog("[Player] force closing — destructing player")
+                viewModel.handleStop()
+                LiveActivityManager.shared.stopNowPlaying()
+            } else {
+                NSLog("[Player] manual dismiss — retaining player for background")
+                playerCoordinator.retainForBackground()
+            }
         }
         .task {
+            // Skip re-fetching metadata when resuming — viewModel already has it
+            guard activePlaybackURL == nil || viewModel.media == nil else { return }
             await bindableViewModel.load()
         }
         .onChange(of: bindableViewModel.playbackURL) { _, newURL in
@@ -221,6 +263,23 @@ struct PlayerView: View {
                 onSelectSubtitle: selectSubtitleTrack(_:),
                 onSelectPlaybackRate: selectPlaybackRate(_:),
                 onClose: { showingSettings = false },
+            )
+            .presentationDetents([.medium])
+            .presentationBackground(.ultraThinMaterial)
+        }
+        .sheet(isPresented: $showChromecastPicker) {
+            ChromecastPickerView(
+                renderers: playerCoordinator.discoveredRenderers,
+                activeRendererName: playerCoordinator.activeRendererName,
+                onSelect: { id in
+                    playerCoordinator.selectRenderer(id: id)
+                    showChromecastPicker = false
+                },
+                onDisconnect: {
+                    playerCoordinator.selectRenderer(id: nil)
+                    showChromecastPicker = false
+                },
+                onClose: { showChromecastPicker = false },
             )
             .presentationDetents([.medium])
             .presentationBackground(.ultraThinMaterial)
@@ -423,6 +482,10 @@ struct PlayerView: View {
         if watchTogetherViewModel.isInSession, !force {
             isShowingWatchTogetherExitPrompt = true
         } else {
+            if force {
+                isForceClosing = true
+                NotificationCenter.default.post(name: Notification.Name("strimr.player.finished"), object: nil)
+            }
             dismiss()
         }
     }

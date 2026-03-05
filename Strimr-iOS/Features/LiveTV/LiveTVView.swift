@@ -3,10 +3,10 @@ import SwiftUI
 struct LiveTVView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
     @Environment(SettingsManager.self) private var settingsManager
+    @EnvironmentObject private var coordinator: MainCoordinator
     @Environment(\.dismiss) private var dismiss
 
     @State private var viewModel: LiveTVViewModel?
-    @State private var activeStream: LiveStreamInfo?
     @State private var tuningChannelKey: String?
     @State private var viewMode: ViewMode = .list
     @State private var programToRecord: EPGGridProgram?
@@ -69,9 +69,6 @@ struct LiveTVView: View {
         }
         .refreshable {
             await viewModel?.reload()
-        }
-        .fullScreenCover(item: $activeStream) { info in
-            LiveTVPlayerView(streamURL: info.url, channelName: info.channelName)
         }
         .alert("Unable to Tune", isPresented: Binding(
             get: { viewModel?.tuneError != nil },
@@ -210,6 +207,11 @@ struct LiveTVView: View {
         defer { tuningChannelKey = nil }
 
         guard let result = await viewModel?.tune(channel: channel) else { return }
-        activeStream = LiveStreamInfo(url: result.url, channelName: result.channelName)
+        // Try EPG grid data first (has beginsAt/endsAt), fall back to nowPlaying
+        let airing = viewModel?.airingProgram(for: channel)
+        let np = viewModel?.nowPlaying(for: channel)
+        let title = result.programTitle ?? airing?.title ?? np?.title
+        let endsAt = airing?.endsAt ?? np?.endsAt
+        coordinator.showLiveTV(streamURL: result.url, channelName: result.channelName, programTitle: title, programEndsAt: endsAt)
     }
 }

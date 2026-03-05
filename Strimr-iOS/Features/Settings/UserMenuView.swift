@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct UserMenuView: View {
     @Environment(SessionManager.self) private var sessionManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
     @State private var isShowingLogoutConfirmation = false
 
     var body: some View {
@@ -26,19 +27,27 @@ struct UserMenuView: View {
                     Label("watchTogether.title", systemImage: "person.2.fill")
                 }
 
-                Button {
-                    Task { await sessionManager.requestProfileSelection() }
+                NavigationLink {
+                    ProfileSwitcherView(
+                        viewModel: ProfileSwitcherViewModel(
+                            context: plexApiContext,
+                            sessionManager: sessionManager,
+                        ),
+                    )
                 } label: {
                     Label("common.actions.switchProfile", systemImage: "person.2.circle")
                 }
-                .buttonStyle(.plain)
 
-                Button {
-                    Task { await sessionManager.requestServerSelection() }
+                NavigationLink {
+                    SelectServerView(
+                        viewModel: ServerSelectionViewModel(
+                            sessionManager: sessionManager,
+                            context: plexApiContext,
+                        ),
+                    )
                 } label: {
                     Label("common.actions.switchServer", systemImage: "server.rack")
                 }
-                .buttonStyle(.plain)
 
                 Button {
                     isShowingLogoutConfirmation = true

@@ -108,6 +108,8 @@ final class SessionManager {
             plexServer = server
             UserDefaults.standard.set(server.clientIdentifier, forKey: serverIdDefaultsKey)
             if authToken != nil {
+                // Cycle through hydrating to force ContentView to recreate all view models
+                status = .hydrating
                 try? await libraryStore.reloadLibraries()
                 status = .ready
             }

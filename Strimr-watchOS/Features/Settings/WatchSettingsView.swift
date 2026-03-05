@@ -2,7 +2,11 @@ import SwiftUI
 
 struct WatchSettingsView: View {
     @Environment(SettingsManager.self) private var settingsManager
+    @Environment(SessionManager.self) private var sessionManager
+    @Environment(PlexAPIContext.self) private var plexApiContext
     @Environment(WatchDownloadManager.self) private var downloadManager
+
+    @State private var isShowingLogoutConfirmation = false
 
     var body: some View {
         List {
@@ -41,8 +45,30 @@ struct WatchSettingsView: View {
                 LabeledContent("Available", value: availableText)
                 LabeledContent("Items", value: "\(completedCount)")
             }
+
+            Section {
+                NavigationLink {
+                    WatchServerSelectionView()
+                } label: {
+                    Label("Switch Server", systemImage: "server.rack")
+                }
+
+                Button(role: .destructive) {
+                    isShowingLogoutConfirmation = true
+                } label: {
+                    Label("Log Out", systemImage: "arrow.backward.circle")
+                }
+            }
         }
         .navigationTitle("Settings")
+        .confirmationDialog("Log Out", isPresented: $isShowingLogoutConfirmation) {
+            Button("Log Out", role: .destructive) {
+                Task { await sessionManager.signOut() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to log out?")
+        }
     }
 
     private var zoomVideoBinding: Binding<Bool> {

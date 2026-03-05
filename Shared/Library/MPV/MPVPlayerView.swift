@@ -5,6 +5,11 @@ struct MPVPlayerView: UIViewControllerRepresentable {
     var coordinator: Coordinator
 
     func makeUIViewController(context: Context) -> some UIViewController {
+        // Reuse the retained player when resuming from background playback
+        if let existing = coordinator.reuseRetainedPlayer() {
+            existing.playDelegate = coordinator
+            return existing
+        }
         let mpv = MPVPlayerViewController(options: coordinator.options)
         mpv.playDelegate = coordinator
         mpv.playUrl = coordinator.playUrl
@@ -46,6 +51,7 @@ struct MPVPlayerView: UIViewControllerRepresentable {
     @Observable
     final class Coordinator: MPVPlayerDelegate, PlayerCoordinating {
         weak var player: MPVPlayerViewController?
+        private var retainedPlayer: MPVPlayerViewController?
 
         @ObservationIgnored var playUrl: URL?
         @ObservationIgnored var options = PlayerOptions()
@@ -53,6 +59,10 @@ struct MPVPlayerView: UIViewControllerRepresentable {
         @ObservationIgnored var onPropertyChange: ((MPVPlayerViewController, PlayerProperty, Any?) -> Void)?
         @ObservationIgnored var onPlaybackEnded: (() -> Void)?
         @ObservationIgnored var onMediaLoaded: (() -> Void)?
+
+        var isPaused: Bool {
+            player?.isPaused ?? false
+        }
 
         func play(_ url: URL) {
             player?.loadFile(url)
@@ -95,8 +105,29 @@ struct MPVPlayerView: UIViewControllerRepresentable {
             player?.trackList() ?? []
         }
 
+        func retainForBackground() {
+            retainedPlayer = player
+            NSLog("[MPV Coordinator] retainForBackground — player retained")
+        }
+
+        func releaseFromBackground() {
+            retainedPlayer = nil
+            NSLog("[MPV Coordinator] releaseFromBackground")
+        }
+
+        func reuseRetainedPlayer() -> MPVPlayerViewController? {
+            guard let retained = retainedPlayer else { return nil }
+            retainedPlayer = nil
+            player = retained
+            NSLog("[MPV Coordinator] reuseRetainedPlayer — reattached existing VC")
+            return retained
+        }
+
         func destruct() {
-            player?.destruct()
+            NSLog("[MPV Coordinator] destruct() called")
+            let playerToDestruct = retainedPlayer ?? player
+            playerToDestruct?.destruct()
+            retainedPlayer = nil
         }
 
         func propertyChange(mpv _: OpaquePointer, property: PlayerProperty, data: Any?) {

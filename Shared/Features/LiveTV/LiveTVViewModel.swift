@@ -122,7 +122,14 @@ final class LiveTVViewModel {
         return nil
     }
 
-    func tune(channel: PlexChannel) async -> (url: URL, channelName: String)? {
+    /// Look up the currently airing EPG program for a channel from grid data.
+    func airingProgram(for channel: PlexChannel) -> EPGGridProgram? {
+        guard let row = epgRows.first(where: { $0.channel.id == channel.id }) else { return nil }
+        let now = Date()
+        return row.programs.first(where: { $0.beginsAt <= now && $0.endsAt >= now })
+    }
+
+    func tune(channel: PlexChannel) async -> (url: URL, channelName: String, programTitle: String?)? {
         tuneError = nil
         DebugLog.clear()
         guard let dvrKey else {
@@ -171,9 +178,9 @@ final class LiveTVViewModel {
                 return nil
             }
 
-            let name = response.channelName ?? channel.displayName
+            let programTitle = response.channelName
             DebugLog.write("tune SUCCESS: \(url.absoluteString)")
-            return (url: url, channelName: name)
+            return (url: url, channelName: channel.displayName, programTitle: programTitle)
         } catch {
             DebugLog.write("tune ERROR: \(error)")
             tuneError = "Tuner device is offline or unreachable"
@@ -304,22 +311,33 @@ final class LiveTVViewModel {
                 if let begins = program.beginsAt, begins > now { continue }
                 if let ends = program.endsAt, ends < now { continue }
 
-                let endsAt = program.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
-                let np = NowPlaying(title: program.displayTitle, endsAt: endsAt)
+                // Check program-level endsAt first, then fall back to media-level
+                let programEndsAt: Date? = program.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
+                    ?? program.media?.compactMap({ $0.endsAt }).first.map { Date(timeIntervalSince1970: TimeInterval($0)) }
+                let np = NowPlaying(title: program.displayTitle, endsAt: programEndsAt)
 
                 for media in program.media ?? [] {
+                    // Also use media-level endsAt if it's more specific
+                    let mediaEndsAt = media.endsAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
+                    let mediaNp = mediaEndsAt != nil ? NowPlaying(title: program.displayTitle, endsAt: mediaEndsAt) : np
+
                     if let callSign = media.channelCallSign {
-                        map[callSign] = np
+                        map[callSign] = mediaNp
                     }
                     if let identifier = media.channelIdentifier {
-                        map[identifier] = np
+                        map[identifier] = mediaNp
                     }
                     if let title = media.channelTitle {
-                        map[title] = np
+                        map[title] = mediaNp
                     }
                 }
             }
             nowPlaying = map
+
+            // Also load EPG grid in background so airingProgram(for:) works from list view
+            if epgRows.isEmpty {
+                await loadEPGGrid()
+            }
         } catch {
             // Silently fail — now-playing is supplementary
         }

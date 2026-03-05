@@ -1,10 +1,12 @@
 import Foundation
 import Observation
+import WidgetKit
 
 @MainActor
 @Observable
 final class LibraryStore {
     var libraries: [Library] = []
+    var hasLiveTV = false
     var isLoading = false
     var loadFailed = false
 
@@ -29,6 +31,11 @@ final class LibraryStore {
             libraries = sections
                 .filter(\.type.isSupported)
                 .map(Library.init)
+
+            // Check Live TV availability alongside libraries
+            await checkLiveTV()
+
+            writeWidgetData()
         } catch {
             loadFailed = true
             throw error
@@ -37,6 +44,36 @@ final class LibraryStore {
 
     func reloadLibraries() async throws {
         libraries = []
+        hasLiveTV = false
         try await loadLibraries()
+    }
+
+    private func writeWidgetData() {
+        let items = libraries.map { lib in
+            WidgetLibraryItem(
+                id: lib.id,
+                title: lib.title,
+                type: lib.type.rawValue,
+                sectionId: lib.sectionId
+            )
+        }
+        let data = WidgetData(
+            libraries: items,
+            hasLiveTV: hasLiveTV,
+            bannerText: "Strimr",
+            updatedAt: Date()
+        )
+        WidgetData.write(data)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private func checkLiveTV() async {
+        do {
+            let repo = try LiveTVRepository(context: context)
+            let response = try await repo.getDVRs()
+            hasLiveTV = response.mediaContainer.dvr?.isEmpty == false
+        } catch {
+            hasLiveTV = false
+        }
     }
 }

@@ -29,6 +29,9 @@ struct PlayerControlsView: View {
     var isVisualizationAvailable: Bool
     var isVisualizationActive: Bool
     var onToggleVisualization: () -> Void
+    var isChromecastAvailable: Bool
+    var isCasting: Bool
+    var onChromecast: () -> Void
     var isWatchTogether: Bool
     private var playbackBadges: [PlayerControlBadge] {
         var badges: [PlayerControlBadge] = []
@@ -78,6 +81,9 @@ struct PlayerControlsView: View {
                         isVisualizationAvailable: isVisualizationAvailable,
                         isVisualizationActive: isVisualizationActive,
                         onToggleVisualization: onToggleVisualization,
+                        isChromecastAvailable: isChromecastAvailable,
+                        isCasting: isCasting,
+                        onChromecast: onChromecast,
                         skipMarkerTitle: skipMarkerTitle,
                         onSkipMarker: onSkipMarker,
                         badges: playbackBadges,
@@ -130,6 +136,9 @@ private struct PlayerAuxiliaryControlsRow: View {
     var isVisualizationAvailable: Bool
     var isVisualizationActive: Bool
     var onToggleVisualization: () -> Void
+    var isChromecastAvailable: Bool
+    var isCasting: Bool
+    var onChromecast: () -> Void
     var skipMarkerTitle: String?
     var onSkipMarker: (() -> Void)?
     var badges: [PlayerControlBadge]
@@ -144,6 +153,10 @@ private struct PlayerAuxiliaryControlsRow: View {
 
             if isVisualizationAvailable {
                 VisualizationButton(isActive: isVisualizationActive, action: onToggleVisualization)
+            }
+
+            if isChromecastAvailable {
+                ChromecastButton(isCasting: isCasting, action: onChromecast)
             }
 
             AudioRoutePickerButton()

@@ -236,6 +236,10 @@ final class MPVPlayerViewController: UIViewController {
         return tracks
     }
 
+    var isPaused: Bool {
+        getFlag(MPVProperty.pause)
+    }
+
     private func getFlag(_ name: String) -> Bool {
         guard let mpv else { return false }
         var data = Int64()

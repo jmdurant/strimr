@@ -34,6 +34,9 @@ struct InterfaceSettings: Codable, Equatable {
     var favoriteChannelIds: [String] = []
     var accentColor: AccentColorOption = .blue
     var appearance: AppearanceMode = .system
+    var customBannerEnabled = true
+    var customBannerText = "Welcome to Plex!"
+    var customBannerVersion = 0
 
     init() {}
 
@@ -48,6 +51,9 @@ struct InterfaceSettings: Codable, Equatable {
         favoriteChannelIds = try container.decodeIfPresent([String].self, forKey: .favoriteChannelIds) ?? []
         accentColor = try container.decodeIfPresent(AccentColorOption.self, forKey: .accentColor) ?? .blue
         appearance = try container.decodeIfPresent(AppearanceMode.self, forKey: .appearance) ?? .system
+        customBannerEnabled = try container.decodeIfPresent(Bool.self, forKey: .customBannerEnabled) ?? true
+        customBannerText = try container.decodeIfPresent(String.self, forKey: .customBannerText) ?? "Welcome to Plex!"
+        customBannerVersion = try container.decodeIfPresent(Int.self, forKey: .customBannerVersion) ?? 0
     }
 }
 

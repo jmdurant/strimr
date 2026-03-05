@@ -39,6 +39,7 @@ struct LiveTVLiveActivity: Widget {
                 }
             }
             .padding(16)
+            .widgetURL(URL(string: "strimr://nowplaying"))
             .activityBackgroundTint(.black.opacity(0.8))
         } dynamicIsland: { context in
             DynamicIsland {

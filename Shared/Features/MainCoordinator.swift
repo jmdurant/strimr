@@ -5,6 +5,7 @@ import SwiftUI
 final class MainCoordinator: ObservableObject {
     enum Tab: Hashable {
         case home
+        case nowPlaying
         case search
         case library
         case more
@@ -29,6 +30,15 @@ final class MainCoordinator: ObservableObject {
     @Published var selectedPlayQueue: PlayQueueState?
     @Published var isPresentingPlayer = false
     @Published var shouldResumeFromOffset = true
+    @Published var isResumingPlayer = false
+
+    // Live TV
+    @Published var isPresentingLiveTV = false
+    @Published var liveTVStreamURL: URL?
+    @Published var liveTVChannelName: String?
+    @Published var liveTVProgramTitle: String?
+    @Published var liveTVProgramEndsAt: Date?
+    @Published var isResumingLiveTV = false
 
     func pathBinding(for tab: Tab) -> Binding<NavigationPath> {
         Binding(
@@ -36,6 +46,8 @@ final class MainCoordinator: ObservableObject {
                 switch tab {
                 case .home:
                     self.homePath
+                case .nowPlaying:
+                    NavigationPath()
                 case .search:
                     self.searchPath
                 case .library:
@@ -52,6 +64,8 @@ final class MainCoordinator: ObservableObject {
                 switch tab {
                 case .home:
                     self.homePath = newValue
+                case .nowPlaying:
+                    break
                 case .search:
                     self.searchPath = newValue
                 case .library:
@@ -77,7 +91,7 @@ final class MainCoordinator: ObservableObject {
             searchPath.append(route)
         case .library:
             libraryPath.append(route)
-        case .more:
+        case .nowPlaying, .more:
             break
         case .seerrDiscover:
             break
@@ -115,7 +129,7 @@ final class MainCoordinator: ObservableObject {
             searchPath.append(route)
         case .library:
             libraryPath.append(route)
-        case .more:
+        case .nowPlaying, .more:
             break
         case .seerrDiscover:
             break
@@ -136,7 +150,7 @@ final class MainCoordinator: ObservableObject {
             searchPath.append(route)
         case .library:
             libraryPath.append(route)
-        case .more:
+        case .nowPlaying, .more:
             break
         case .seerrDiscover:
             break
@@ -151,7 +165,7 @@ final class MainCoordinator: ObservableObject {
         switch tab {
         case .seerrDiscover:
             seerrDiscoverPath.append(media)
-        case .home, .search, .library, .more:
+        case .home, .nowPlaying, .search, .library, .more:
             break
         case .libraryDetail:
             break
@@ -159,8 +173,20 @@ final class MainCoordinator: ObservableObject {
     }
 
     func showPlayer(for playQueue: PlayQueueState, shouldResumeFromOffset: Bool = true) {
+        isResumingPlayer = false
         selectedPlayQueue = playQueue
         self.shouldResumeFromOffset = shouldResumeFromOffset
+        isPresentingPlayer = true
+    }
+
+    func dismissPlayer() {
+        isPresentingPlayer = false
+    }
+
+    func resumePlayer() {
+        guard selectedPlayQueue != nil else { return }
+        isResumingPlayer = true
+        shouldResumeFromOffset = true
         isPresentingPlayer = true
     }
 
@@ -168,5 +194,34 @@ final class MainCoordinator: ObservableObject {
         selectedPlayQueue = nil
         isPresentingPlayer = false
         shouldResumeFromOffset = true
+    }
+
+    // MARK: - Live TV
+
+    func showLiveTV(streamURL: URL, channelName: String, programTitle: String? = nil, programEndsAt: Date? = nil) {
+        isResumingLiveTV = false
+        liveTVStreamURL = streamURL
+        liveTVChannelName = channelName
+        liveTVProgramTitle = programTitle
+        liveTVProgramEndsAt = programEndsAt
+        isPresentingLiveTV = true
+    }
+
+    func dismissLiveTV() {
+        isPresentingLiveTV = false
+    }
+
+    func resumeLiveTV() {
+        guard liveTVStreamURL != nil else { return }
+        isResumingLiveTV = true
+        isPresentingLiveTV = true
+    }
+
+    func resetLiveTV() {
+        liveTVStreamURL = nil
+        liveTVChannelName = nil
+        liveTVProgramTitle = nil
+        liveTVProgramEndsAt = nil
+        isPresentingLiveTV = false
     }
 }

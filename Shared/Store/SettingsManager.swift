@@ -139,6 +139,40 @@ final class SettingsManager {
         persist()
     }
 
+    // MARK: - Custom Banner
+
+    func setCustomBannerText(_ text: String) {
+        settings.interface.customBannerText = text
+        persist()
+    }
+
+    func setCustomBanner(enabled: Bool) {
+        settings.interface.customBannerEnabled = enabled
+        persist()
+    }
+
+    func setCustomBanner(imageData: Data?) {
+        if let imageData {
+            try? imageData.write(to: Self.customBannerURL)
+            settings.interface.customBannerEnabled = true
+        } else {
+            try? FileManager.default.removeItem(at: Self.customBannerURL)
+            settings.interface.customBannerEnabled = false
+        }
+        settings.interface.customBannerVersion += 1
+        persist()
+    }
+
+    func loadCustomBannerData() -> Data? {
+        guard settings.interface.customBannerEnabled else { return nil }
+        return try? Data(contentsOf: Self.customBannerURL)
+    }
+
+    static var customBannerURL: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("custom_banner.jpg")
+    }
+
     private func persist() {
         guard let data = try? JSONEncoder().encode(settings) else { return }
         defaults.set(data, forKey: storageKey)
