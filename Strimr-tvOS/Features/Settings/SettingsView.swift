@@ -25,6 +25,14 @@ struct SettingsView: View {
                     IntegrationsView()
                 }
             }
+
+            Section {
+                NavigationLink {
+                    AboutView()
+                } label: {
+                    Label("About", systemImage: "info.circle")
+                }
+            }
         }
         .navigationTitle("settings.title")
     }

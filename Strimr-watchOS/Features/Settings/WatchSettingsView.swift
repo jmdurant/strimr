@@ -59,6 +59,14 @@ struct WatchSettingsView: View {
                     Label("Log Out", systemImage: "arrow.backward.circle")
                 }
             }
+
+            Section {
+                NavigationLink {
+                    AboutView()
+                } label: {
+                    Label("About", systemImage: "info.circle")
+                }
+            }
         }
         .navigationTitle("Settings")
         .confirmationDialog("Log Out", isPresented: $isShowingLogoutConfirmation) {

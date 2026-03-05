@@ -173,6 +173,14 @@ targets:
       - path: Strimr-tvOS
         excludes:
           - Info.plist
+      - path: Shared
+        excludes:
+          - AppDependencies.swift
+          - Intents/StrimrAppIntents.swift
+          - Intents/StrimrShortcuts.swift
+          - Widget/WidgetData.swift
+          - Library/Audio/VLCAudioBridge.h
+          - Library/Audio/VLCAudioBridge.m
       - path: Localizable.xcstrings
         buildPhase: resources
     settings:
@@ -228,6 +236,8 @@ targets:
         excludes:
           - AppDependencies.swift
           - Extensions/ImageCornerColorSampler.swift
+          - Intents/StrimrAppIntents.swift
+          - Intents/StrimrShortcuts.swift
           - Features/Integrations/SeerrPermissionService.swift
           - Features/Integrations/SeerrSessionService.swift
           - Features/Integrations/SeerrViewModel.swift

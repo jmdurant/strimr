@@ -1,6 +1,8 @@
 import Foundation
 import Observation
+#if canImport(WidgetKit)
 import WidgetKit
+#endif
 
 @MainActor
 @Observable
@@ -49,6 +51,7 @@ final class LibraryStore {
     }
 
     private func writeWidgetData() {
+        #if canImport(WidgetKit)
         let items = libraries.map { lib in
             WidgetLibraryItem(
                 id: lib.id,
@@ -65,6 +68,7 @@ final class LibraryStore {
         )
         WidgetData.write(data)
         WidgetCenter.shared.reloadAllTimelines()
+        #endif
     }
 
     private func checkLiveTV() async {

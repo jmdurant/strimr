@@ -1,19 +1,29 @@
 import SwiftUI
 
+private extension Color {
+    static var backdropBackground: Color {
+        #if os(tvOS) || os(watchOS)
+        Color.black
+        #else
+        Color(.systemBackground)
+        #endif
+    }
+}
+
 struct MediaBackdropGradient: View {
     let colors: [Color]
 
     var body: some View {
         let gradientColors = colors.count == 4 ? colors : [
-            Color(.systemBackground).opacity(0.85),
-            Color(.systemBackground).opacity(0.7),
-            Color(.systemBackground).opacity(0.55),
-            Color(.systemBackground).opacity(0.4),
+            Color.backdropBackground.opacity(0.85),
+            Color.backdropBackground.opacity(0.7),
+            Color.backdropBackground.opacity(0.55),
+            Color.backdropBackground.opacity(0.4),
         ]
 
         GeometryReader { geo in
             ZStack {
-                Color(.systemBackground)
+                Color.backdropBackground
                     .ignoresSafeArea()
 
                 // Top Left
