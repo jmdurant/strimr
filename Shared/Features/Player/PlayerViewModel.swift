@@ -274,7 +274,7 @@ final class PlayerViewModel {
                     return nil
                 }
                 let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
-                let quality = settingsManager?.playback.streamQuality ?? .low
+                let quality = settingsManager?.playback.streamQuality ?? .q720
                 return transcodeRepo.transcodeURL(
                     path: metadataPath,
                     session: sessionIdentifier,

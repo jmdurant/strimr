@@ -160,7 +160,7 @@ final class LiveTVViewModel {
 
             // Step 2: Call decision endpoint to warm up the transcoder
             let clientSession = UUID().uuidString
-            let quality = settingsManager?.playback.streamQuality ?? .low
+            let quality = settingsManager?.playback.streamQuality ?? .q720
             try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession, quality: quality)
             DebugLog.write("decision OK (quality=\(quality.resolution))")
 

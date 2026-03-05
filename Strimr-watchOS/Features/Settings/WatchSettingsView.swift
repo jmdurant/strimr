@@ -14,7 +14,7 @@ struct WatchSettingsView: View {
 
             Section {
                 Picker("Stream Quality", selection: streamQualityBinding) {
-                    ForEach(StreamQuality.allCases) { quality in
+                    ForEach(StreamQuality.watchCases) { quality in
                         Text(quality.displayName).tag(quality)
                     }
                 }

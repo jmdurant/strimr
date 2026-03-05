@@ -7,7 +7,7 @@ struct PlaybackSettings: Codable, Equatable {
     var seekForwardSeconds = 10
     var player = PlaybackPlayer.mpv
     var subtitleScale = 100
-    var streamQuality: StreamQuality = .low
+    var streamQuality: StreamQuality = .q720
     var zoomVideo = false
 
     init() {}
@@ -19,7 +19,7 @@ struct PlaybackSettings: Codable, Equatable {
         seekForwardSeconds = try container.decodeIfPresent(Int.self, forKey: .seekForwardSeconds) ?? 10
         player = try container.decodeIfPresent(PlaybackPlayer.self, forKey: .player) ?? .mpv
         subtitleScale = try container.decodeIfPresent(Int.self, forKey: .subtitleScale) ?? 100
-        streamQuality = try container.decodeIfPresent(StreamQuality.self, forKey: .streamQuality) ?? .low
+        streamQuality = try container.decodeIfPresent(StreamQuality.self, forKey: .streamQuality) ?? .q720
         zoomVideo = try container.decodeIfPresent(Bool.self, forKey: .zoomVideo) ?? false
     }
 }
@@ -71,9 +71,14 @@ enum AccentColorOption: String, Codable, CaseIterable {
 }
 
 enum StreamQuality: String, Codable, CaseIterable, Identifiable {
-    case low = "320x240"
-    case medium = "480x320"
-    case high = "640x360"
+    case q320 = "320x240"
+    case q480 = "480x320"
+    case q720_2 = "720x480"
+    case q720 = "1280x720"
+    case q1080 = "1920x1080"
+    case q1440 = "2560x1440"
+    case q4k = "3840x2160"
+    case original = "original"
 
     var id: String { rawValue }
 
@@ -81,19 +86,32 @@ enum StreamQuality: String, Codable, CaseIterable, Identifiable {
 
     var maxBitrate: String {
         switch self {
-        case .low: "500"
-        case .medium: "720"
-        case .high: "1500"
+        case .q320: "500"
+        case .q480: "720"
+        case .q720_2: "1500"
+        case .q720: "4000"
+        case .q1080: "8000"
+        case .q1440: "16000"
+        case .q4k: "40000"
+        case .original: "200000"
         }
     }
 
     var displayName: String {
         switch self {
-        case .low: "Low (320x240)"
-        case .medium: "Medium (480x320)"
-        case .high: "High (640x360)"
+        case .q320: "0.5 Mbps (320p)"
+        case .q480: "0.7 Mbps (480p)"
+        case .q720_2: "1.5 Mbps (480p)"
+        case .q720: "4 Mbps (720p)"
+        case .q1080: "8 Mbps (1080p)"
+        case .q1440: "16 Mbps (1440p)"
+        case .q4k: "40 Mbps (4K)"
+        case .original: "Original"
         }
     }
+
+    /// Subset suitable for watchOS (limited bandwidth/screen)
+    static let watchCases: [StreamQuality] = [.q320, .q480, .q720_2]
 }
 
 enum AppearanceMode: String, Codable, CaseIterable {

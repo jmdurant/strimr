@@ -1,4 +1,3 @@
-import AVKit
 import SwiftUI
 
 struct LiveTVPlayerView: View {
@@ -7,29 +6,67 @@ struct LiveTVPlayerView: View {
     let streamURL: URL
     let channelName: String
 
-    @State private var player: AVPlayer?
+    @State private var playerCoordinator: any PlayerCoordinating = PlayerFactory.makeCoordinator(
+        for: .mpv,
+        options: PlayerOptions()
+    )
     @State private var showControls = true
     @State private var controlsTask: Task<Void, Never>?
+    @State private var isBuffering = false
+    @State private var mediaLoaded = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if let player {
-                VideoPlayer(player: player)
-                    .ignoresSafeArea()
-                    .onTapGesture { toggleControls() }
-                    .overlay { controlsOverlay }
-            } else {
+            PlayerFactory.makeView(
+                selection: .mpv,
+                coordinator: playerCoordinator,
+                onPropertyChange: { property, data in
+                    if property == .pausedForCache {
+                        isBuffering = (data as? Bool) ?? false
+                    }
+                },
+                onPlaybackEnded: {
+                    dismiss()
+                },
+                onMediaLoaded: {
+                    mediaLoaded = true
+                }
+            )
+            .ignoresSafeArea()
+            .onTapGesture { toggleControls() }
+            .overlay { controlsOverlay }
+
+            if !mediaLoaded {
                 ProgressView("Tuning...")
                     .tint(.white)
                     .foregroundStyle(.white)
             }
+
+            if mediaLoaded, isBuffering {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                    Text("Buffering...")
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 20)
+            }
         }
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
-        .task { setupPlayer() }
-        .onDisappear { teardown() }
+        .onAppear {
+            playerCoordinator.play(streamURL)
+            scheduleControlsHide()
+        }
+        .onDisappear {
+            controlsTask?.cancel()
+            playerCoordinator.destruct()
+        }
     }
 
     @ViewBuilder
@@ -66,13 +103,6 @@ struct LiveTVPlayerView: View {
         .allowsHitTesting(showControls)
     }
 
-    private func setupPlayer() {
-        let avPlayer = AVPlayer(url: streamURL)
-        avPlayer.play()
-        player = avPlayer
-        scheduleControlsHide()
-    }
-
     private func toggleControls() {
         if showControls {
             withAnimation { showControls = false }
@@ -92,11 +122,5 @@ struct LiveTVPlayerView: View {
                 showControls = false
             }
         }
-    }
-
-    private func teardown() {
-        controlsTask?.cancel()
-        player?.pause()
-        player = nil
     }
 }

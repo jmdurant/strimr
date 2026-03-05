@@ -43,7 +43,7 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        quality: StreamQuality = .low
+        quality: StreamQuality = .q720
     ) -> URL? {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.path = "/video/:/transcode/universal/start.m3u8"
@@ -86,7 +86,7 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        quality: StreamQuality = .low
+        quality: StreamQuality = .q720
     ) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/decision",

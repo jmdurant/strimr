@@ -98,8 +98,8 @@ targets:
         excludes:
           - Info.plist
       - path: Shared
-    resources:
       - path: Localizable.xcstrings
+        buildPhase: resources
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -162,8 +162,8 @@ targets:
       - path: Strimr-tvOS
         excludes:
           - Info.plist
-    resources:
       - path: Localizable.xcstrings
+        buildPhase: resources
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
@@ -300,8 +300,8 @@ targets:
           - Views/Seerr/SeerrSearchCard.swift
           - Views/Seerr/SeerrSeasonAvailabilityBadgeView.swift
           - Views/Toast/ToastOverlay.swift
-    resources:
       - path: Localizable.xcstrings
+        buildPhase: resources
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
