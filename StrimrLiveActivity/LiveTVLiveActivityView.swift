@@ -103,5 +103,6 @@ struct LiveTVLiveActivity: Widget {
                     .foregroundStyle(.red)
             }
         }
+        .supplementalActivityFamilies([.small, .medium])
     }
 }

@@ -100,6 +100,7 @@ targets:
       - path: Shared
       - path: StrimrLiveActivity/NowPlayingAttributes.swift
       - path: StrimrLiveActivity/LiveTVAttributes.swift
+      - path: StrimrLiveActivity/PlaybackIntents.swift
       - path: Localizable.xcstrings
         buildPhase: resources
     settings:
@@ -403,6 +404,7 @@ targets:
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: WIDGET_EXTENSION
         SWIFT_EMIT_LOC_STRINGS: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1,2"

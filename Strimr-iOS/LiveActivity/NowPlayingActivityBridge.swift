@@ -9,8 +9,9 @@ final class NowPlayingActivityBridge {
     private var activity: Activity<NowPlayingAttributes>?
     private var updateTimer: Timer?
     private var isStarted = false
+    private var waitTask: Task<Void, Never>?
 
-    private let updateInterval: TimeInterval = 3.0
+    private let updateInterval: TimeInterval = 1.0
 
     init(viewModel: PlayerViewModel, context: PlexAPIContext) {
         self.viewModel = viewModel
@@ -20,11 +21,23 @@ final class NowPlayingActivityBridge {
     func start() {
         guard !isStarted else { return }
         isStarted = true
-        observeMediaLoad()
+
+        let authInfo = ActivityAuthorizationInfo()
+        NSLog("[LiveActivity] Bridge start — activitiesEnabled: %d, media: %@",
+              authInfo.areActivitiesEnabled ? 1 : 0,
+              viewModel.media?.title ?? "nil")
+
+        if viewModel.media != nil {
+            Task { await createActivity() }
+        } else {
+            waitForMedia()
+        }
     }
 
     func stop() {
         isStarted = false
+        waitTask?.cancel()
+        waitTask = nil
         updateTimer?.invalidate()
         updateTimer = nil
 
@@ -45,28 +58,32 @@ final class NowPlayingActivityBridge {
         }
     }
 
-    private func observeMediaLoad() {
-        withObservationTracking {
-            _ = viewModel.media
-        } onChange: { [weak self] in
-            Task { @MainActor [weak self] in
-                guard let self, self.isStarted else { return }
+    private func waitForMedia() {
+        waitTask = Task { [weak self] in
+            NSLog("[LiveActivity] Waiting for media to load...")
+            // Poll for media availability — more reliable than one-shot withObservationTracking
+            for _ in 0..<150 { // Up to 15 seconds
+                try? await Task.sleep(for: .milliseconds(100))
+                guard let self, self.isStarted, !Task.isCancelled else { return }
                 if self.viewModel.media != nil {
+                    NSLog("[LiveActivity] Media became available: %@", self.viewModel.media?.title ?? "?")
                     await self.createActivity()
-                } else {
-                    self.observeMediaLoad()
+                    return
                 }
             }
+            NSLog("[LiveActivity] Timed out waiting for media")
         }
     }
 
     private func createActivity() async {
         guard let media = viewModel.media else { return }
+        NSLog("[LiveActivity] Creating activity for: %@ type: %@", media.title, media.type.rawValue)
 
         let artworkData = await LiveActivityImageLoader.loadCompressedThumbnail(
             path: media.preferredThumbPath ?? media.thumbPath,
             context: context
         )
+        NSLog("[LiveActivity] Artwork loaded: %d bytes", artworkData?.count ?? 0)
 
         let title: String
         let subtitle: String?
@@ -88,7 +105,7 @@ final class NowPlayingActivityBridge {
             subtitle = media.year.map(String.init)
         }
 
-        let durationSeconds = (media.duration ?? viewModel.duration ?? 0) / 1000
+        let durationSeconds = media.duration ?? viewModel.duration ?? 0
 
         let attributes = NowPlayingAttributes(
             title: title,
@@ -112,9 +129,11 @@ final class NowPlayingActivityBridge {
                 content: ActivityContent(state: initialState, staleDate: nil),
                 pushType: nil
             )
+            NSLog("[LiveActivity] Started successfully — id: %@, duration: %.0fs, position: %.0fs, artworkBytes: %d",
+                  activity?.id ?? "?", durationSeconds, viewModel.position, artworkData?.count ?? 0)
             startPeriodicUpdates()
         } catch {
-            debugPrint("Failed to start Live Activity:", error)
+            NSLog("[LiveActivity] Failed to start: %@", String(describing: error))
         }
     }
 

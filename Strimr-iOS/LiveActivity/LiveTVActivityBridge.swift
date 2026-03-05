@@ -17,6 +17,10 @@ final class LiveTVActivityBridge {
         guard !isStarted else { return }
         isStarted = true
 
+        let authInfo = ActivityAuthorizationInfo()
+        NSLog("[LiveActivity-TV] Starting — channel: %@, activitiesEnabled: %d",
+              channelName, authInfo.areActivitiesEnabled ? 1 : 0)
+
         let attributes = LiveTVAttributes(
             channelName: channelName,
             channelNumber: channelNumber
@@ -34,8 +38,9 @@ final class LiveTVActivityBridge {
                 content: ActivityContent(state: initialState, staleDate: nil),
                 pushType: nil
             )
+            NSLog("[LiveActivity-TV] Started successfully — id: %@", activity?.id ?? "?")
         } catch {
-            debugPrint("Failed to start Live TV activity:", error)
+            NSLog("[LiveActivity-TV] Failed to start: %@", String(describing: error))
         }
     }
 

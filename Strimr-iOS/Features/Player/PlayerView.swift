@@ -165,7 +165,7 @@ struct PlayerView: View {
             showControls(temporarily: true)
             playerCoordinator.setPlaybackRate(playbackRate)
             startPlaybackIfNeeded(url: bindableViewModel.playbackURL)
-            LiveActivityManager.shared.startNowPlaying(viewModel: viewModel, context: context)
+            LiveActivityManager.shared.startNowPlaying(viewModel: viewModel, coordinator: playerCoordinator, context: context)
             if watchTogetherViewModel.isInSession {
                 watchTogetherViewModel.attachPlayerCoordinator(playerCoordinator)
                 wasInWatchTogetherSession = true

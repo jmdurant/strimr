@@ -342,6 +342,7 @@
 		D2CE62440F618687690CE00D /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E2E3F71F5F96912470BEC2 /* Color+Hex.swift */; };
 		D43BEE2D5C275DBE47206D3D /* LibraryBrowseControlsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D943F64AF010AB589BE5C436 /* LibraryBrowseControlsViewModel.swift */; };
 		D452440DDFEC5C1800E3AE1E /* CarPlaySearchHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9E97CA65C720229396F6D0 /* CarPlaySearchHandler.swift */; };
+		D54B290227676C9907B40187 /* PlaybackIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E312AA4CA2A4F066AB36459 /* PlaybackIntents.swift */; };
 		D5526EEE1C653E3256711489 /* Hub+Mapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A93FF990063878D4E77169 /* Hub+Mapping.swift */; };
 		D573ADA3FB4608CC1CB42B25 /* PlaybackSpeedOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8096221B3BBE1EDC2F51E306 /* PlaybackSpeedOption.swift */; };
 		D644AF1DEBC357279A610377 /* WatchVLCPlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8F9B64C96EDA128B0C4780 /* WatchVLCPlayerController.swift */; };
@@ -351,6 +352,7 @@
 		D877C0D04C6DE77C2A627746 /* LibraryBrowseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6412E2E97479691C3D2DBBF8 /* LibraryBrowseViewModel.swift */; };
 		D99E81ADD8263D82A1781BDB /* MediaCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E6E52928999CA3F5911A3E /* MediaCard.swift */; };
 		D9A5516471E511C82708B4EF /* CarPlayPlaylistDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF233275B8162E13961F8896 /* CarPlayPlaylistDataSource.swift */; };
+		DA060B2F6A2B209800709314 /* PlaybackIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E312AA4CA2A4F066AB36459 /* PlaybackIntents.swift */; };
 		DA6319BC448C098A3D5FADDA /* SeerrView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C43027873AA78FD2AF31C29 /* SeerrView.swift */; };
 		DA798C59A6E35B2C82933465 /* PlayQueueState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FC0E3D10F6495186F91FB7 /* PlayQueueState.swift */; };
 		DA8A99A4F0A8B4DCD36DDAEE /* PlayerCoordinating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59823933D1CE87CDC2C7187F /* PlayerCoordinating.swift */; };
@@ -729,6 +731,7 @@
 		9C243B6169F3564DA280D678 /* Strimr-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Strimr-iOS.entitlements"; sourceTree = "<group>"; };
 		9C4649EC089513E928719E9A /* MPVProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPVProperty.swift; sourceTree = "<group>"; };
 		9E0225C60939176E03188B4A /* MediaDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDetailView.swift; sourceTree = "<group>"; };
+		9E312AA4CA2A4F066AB36459 /* PlaybackIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackIntents.swift; sourceTree = "<group>"; };
 		9EBBD9AA3728670F42FD3C91 /* PlayerTVView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTVView.swift; sourceTree = "<group>"; };
 		9F0F74BE3E19D8A1FE9099CB /* WatchPhotoBrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPhotoBrowseView.swift; sourceTree = "<group>"; };
 		9FB63DC70B986D32CFD09265 /* SeerrMediaRequestAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrMediaRequestAvailability.swift; sourceTree = "<group>"; };
@@ -1548,6 +1551,7 @@
 				8BF698F0F117EF642D9B8E42 /* LiveTVLiveActivityView.swift */,
 				460217154D134E93C12AFFB6 /* NowPlayingAttributes.swift */,
 				1A48627FB158F7CA77A75DC2 /* NowPlayingLiveActivityView.swift */,
+				9E312AA4CA2A4F066AB36459 /* PlaybackIntents.swift */,
 				6C1BC0E68E85B838ED054A08 /* StrimrLiveActivityBundle.swift */,
 			);
 			path = StrimrLiveActivity;
@@ -2358,6 +2362,7 @@
 				C2A2F6CDD063354BAD9D94BC /* LiveTVLiveActivityView.swift in Sources */,
 				813F7BBE02958339E67F7162 /* NowPlayingAttributes.swift in Sources */,
 				1EA93FDA6275EAB2FC496AF1 /* NowPlayingLiveActivityView.swift in Sources */,
+				D54B290227676C9907B40187 /* PlaybackIntents.swift in Sources */,
 				E819F5D21EAF460CDFBF50D4 /* StrimrLiveActivityBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2586,6 +2591,7 @@
 				3BE23FFD82A46E7A5DF6A444 /* PlayQueueRepository.swift in Sources */,
 				DA798C59A6E35B2C82933465 /* PlayQueueState.swift in Sources */,
 				92D4D93A27DC9D18C4C413C4 /* PlayableMediaItem.swift in Sources */,
+				DA060B2F6A2B209800709314 /* PlaybackIntents.swift in Sources */,
 				EF2237567365021495870191 /* PlaybackLauncher.swift in Sources */,
 				D18464FEC281BBBC3E27D40A /* PlaybackPlayer.swift in Sources */,
 				87E4AAFB6DA3B458252E4FE4 /* PlaybackRepository.swift in Sources */,
@@ -2995,6 +3001,7 @@
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET_EXTENSION;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -3025,6 +3032,7 @@
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET_EXTENSION;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;

@@ -1,4 +1,5 @@
 import ActivityKit
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -33,18 +34,33 @@ struct NowPlayingLiveActivity: Widget {
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
-                        .font(.title3)
-                        .foregroundStyle(.white)
+                    Button(intent: TogglePlaybackIntent()) {
+                        Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 DynamicIslandExpandedRegion(.bottom) {
                     if context.attributes.durationSeconds > 0 {
-                        ProgressView(
-                            value: context.state.positionSeconds,
-                            total: context.attributes.durationSeconds
-                        )
-                        .tint(.white)
+                        VStack(spacing: 2) {
+                            ProgressView(
+                                value: context.state.positionSeconds,
+                                total: context.attributes.durationSeconds
+                            )
+                            .tint(.white)
+
+                            HStack {
+                                Text(NowPlayingLiveActivity.formatTime(context.state.positionSeconds))
+                                    .font(.system(size: 9).monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text("-" + NowPlayingLiveActivity.formatTime(max(0, context.attributes.durationSeconds - context.state.positionSeconds)))
+                                    .font(.system(size: 9).monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                         .padding(.horizontal, 4)
                     }
                 }
@@ -70,44 +86,102 @@ struct NowPlayingLiveActivity: Widget {
                     .foregroundStyle(.blue)
             }
         }
+        .supplementalActivityFamilies([.small, .medium])
     }
 
     @ViewBuilder
     private func lockScreenView(context: ActivityViewContext<NowPlayingAttributes>) -> some View {
-        HStack(spacing: 12) {
-            artworkImage(data: context.attributes.artworkData)
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                artworkImage(data: context.attributes.artworkData)
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(context.attributes.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-
-                if let subtitle = context.attributes.subtitle {
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.7))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(context.attributes.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
                         .lineLimit(1)
+
+                    if let subtitle = context.attributes.subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .lineLimit(1)
+                    }
                 }
 
-                if context.attributes.durationSeconds > 0 {
-                    ProgressView(
-                        value: context.state.positionSeconds,
-                        total: context.attributes.durationSeconds
-                    )
-                    .tint(.white)
-                }
+                Spacer()
             }
 
-            Spacer()
+            if context.attributes.durationSeconds > 0 {
+                VStack(spacing: 4) {
+                    GeometryReader { geo in
+                        let fraction = context.state.positionSeconds / context.attributes.durationSeconds
+                        let clampedFraction = min(max(fraction, 0), 1)
 
-            Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
-                .font(.title2)
-                .foregroundStyle(.white)
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(.white.opacity(0.2))
+                                .frame(height: 4)
+
+                            Capsule()
+                                .fill(.white)
+                                .frame(width: geo.size.width * clampedFraction, height: 4)
+                        }
+                    }
+                    .frame(height: 4)
+
+                    HStack {
+                        Text(Self.formatTime(context.state.positionSeconds))
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.7))
+                            .contentTransition(.identity)
+                        Spacer()
+                        Text("-" + Self.formatTime(max(0, context.attributes.durationSeconds - context.state.positionSeconds)))
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.white.opacity(0.7))
+                            .contentTransition(.identity)
+                    }
+                }
+                .animation(.none, value: context.state.positionSeconds)
+            }
+
+            HStack(spacing: 32) {
+                Button(intent: SkipBackwardIntent()) {
+                    Image(systemName: "gobackward.10")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+
+                Button(intent: TogglePlaybackIntent()) {
+                    Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+
+                Button(intent: SkipForwardIntent()) {
+                    Image(systemName: "goforward.10")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(16)
+    }
+
+    static func formatTime(_ totalSeconds: Double) -> String {
+        let total = Int(max(0, totalSeconds))
+        let hours = total / 3600
+        let minutes = (total % 3600) / 60
+        let seconds = total % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%d:%02d", minutes, seconds)
     }
 
     @ViewBuilder
