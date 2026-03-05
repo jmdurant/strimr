@@ -31,13 +31,22 @@ struct MediaImageView: View {
     }
 
     private var placeholder: some View {
-        VStack {
-            Image(systemName: "film")
-                .font(.title2)
-                .foregroundStyle(.secondary)
+        let iconName: String = switch viewModel.media.type {
+        case .artist, .album, .track:
+            "music.note"
+        case .photo:
+            "photo"
+        default:
+            "film"
+        }
+
+        return VStack(spacing: 8) {
+            Image(systemName: iconName)
+                .font(.system(size: 48))
+                .foregroundStyle(.tertiary)
             Text("media.placeholder.noArtwork")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

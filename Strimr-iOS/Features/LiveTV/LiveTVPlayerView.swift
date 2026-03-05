@@ -62,8 +62,10 @@ struct LiveTVPlayerView: View {
         .onAppear {
             playerCoordinator.play(streamURL)
             scheduleControlsHide()
+            LiveActivityManager.shared.startLiveTV(channelName: channelName)
         }
         .onDisappear {
+            LiveActivityManager.shared.stopLiveTV()
             controlsTask?.cancel()
             playerCoordinator.destruct()
         }

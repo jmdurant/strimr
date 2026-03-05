@@ -5,6 +5,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Accelerate/Accelerate.h>
 #import <os/lock.h>
+#import <stdatomic.h>
 
 // ---------------------------------------------------------------------------
 // Forward-declare the libvlc C types and functions we need.
@@ -43,9 +44,11 @@ extern int libvlc_audio_output_set(libvlc_media_player_t *mp,
 // ---------------------------------------------------------------------------
 // Forward-declare the Swift SpectrumData class so we can call it from ObjC.
 // The bridging header makes the Swift class visible, but we also need the
-// watchOS target module header.  We import it via the auto-generated header.
+// target module header.  We import it via the auto-generated header.
 // ---------------------------------------------------------------------------
-#if __has_include("Strimr_watchOS-Swift.h")
+#if __has_include("Strimr_iOS-Swift.h")
+#import "Strimr_iOS-Swift.h"
+#elif __has_include("Strimr_watchOS-Swift.h")
 #import "Strimr_watchOS-Swift.h"
 #elif __has_include("Strimr-watchOS-Swift.h")
 #import "Strimr-watchOS-Swift.h"
@@ -64,6 +67,9 @@ static const int          kDisplayBins  = 32;    // output bins for visualizatio
 // Context passed through the libvlc opaque pointer.
 // ---------------------------------------------------------------------------
 typedef struct {
+    // Set to 1 during teardown — callbacks check this and bail out.
+    atomic_int stopped;
+
     // AVAudioEngine playback
     __unsafe_unretained AVAudioEngine      *engine;
     __unsafe_unretained AVAudioPlayerNode  *playerNode;
@@ -88,7 +94,7 @@ typedef struct {
 /// of frames (not bytes, not total samples).
 static void play_cb(void *opaque, const void *samples, unsigned count, int64_t pts) {
     AudioContext *ctx = (AudioContext *)opaque;
-    if (!ctx || !ctx->engine || !ctx->playerNode || !ctx->format) return;
+    if (!ctx || atomic_load(&ctx->stopped) || !ctx->engine || !ctx->playerNode || !ctx->format) return;
 
     const float *floatSamples = (const float *)samples;
     const unsigned totalSamples = count * kChannels;
@@ -178,19 +184,19 @@ static void play_cb(void *opaque, const void *samples, unsigned count, int64_t p
 
 static void pause_cb(void *opaque, int64_t pts) {
     AudioContext *ctx = (AudioContext *)opaque;
-    if (!ctx || !ctx->playerNode) return;
+    if (!ctx || atomic_load(&ctx->stopped) || !ctx->playerNode) return;
     [ctx->playerNode pause];
 }
 
 static void resume_cb(void *opaque, int64_t pts) {
     AudioContext *ctx = (AudioContext *)opaque;
-    if (!ctx || !ctx->playerNode) return;
+    if (!ctx || atomic_load(&ctx->stopped) || !ctx->playerNode) return;
     [ctx->playerNode play];
 }
 
 static void flush_cb(void *opaque, int64_t pts) {
     AudioContext *ctx = (AudioContext *)opaque;
-    if (!ctx || !ctx->playerNode) return;
+    if (!ctx || atomic_load(&ctx->stopped) || !ctx->playerNode) return;
     [ctx->playerNode stop];
     [ctx->playerNode play];
 }
@@ -204,6 +210,7 @@ static void flush_cb(void *opaque, int64_t pts) {
     AVAudioEngine *_engine;
     AVAudioPlayerNode *_playerNode;
     AVAudioFormat *_format;
+    libvlc_media_player_t *_mp;
 }
 
 - (instancetype)initWithPlayer:(VLCMediaPlayer *)player
@@ -247,14 +254,14 @@ static void flush_cb(void *opaque, int64_t pts) {
     _ctx->splitComplex.imagp = (float *)calloc(kFFTSize / 2, sizeof(float));
 
     // --- Install libvlc audio callbacks ---
-    libvlc_media_player_t *mp = [player playerInstance];
+    _mp = [player playerInstance];
 
     // Force the "amem" audio output module — the default "avsamplebuffer" module
     // fails on watchOS (AVAudioEngine can't associate with audio session).
-    libvlc_audio_output_set(mp, "amem");
+    libvlc_audio_output_set(_mp, "amem");
 
-    libvlc_audio_set_format(mp, "FL32", kSampleRate, kChannels);
-    libvlc_audio_set_callbacks(mp,
+    libvlc_audio_set_format(_mp, "FL32", kSampleRate, kChannels);
+    libvlc_audio_set_callbacks(_mp,
                                play_cb,
                                pause_cb,
                                resume_cb,
@@ -267,6 +274,22 @@ static void flush_cb(void *opaque, int64_t pts) {
 
 - (void)stop {
     if (_ctx) {
+        // Signal callbacks to bail out immediately.
+        atomic_store(&_ctx->stopped, 1);
+
+        // Detach libvlc audio callbacks so VLC stops invoking them.
+        if (_mp) {
+            libvlc_audio_set_callbacks(_mp, NULL, NULL, NULL, NULL, NULL, NULL);
+            _mp = NULL;
+        }
+
+        // NULL out the unsafe_unretained pointers so any in-flight callback
+        // that already passed the stopped check still sees NULL and returns.
+        _ctx->engine = nil;
+        _ctx->playerNode = nil;
+        _ctx->format = nil;
+        _ctx->spectrumData = nil;
+
         // Free FFT resources
         if (_ctx->fftSetup) {
             vDSP_destroy_fftsetup(_ctx->fftSetup);

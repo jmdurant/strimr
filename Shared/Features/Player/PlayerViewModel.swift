@@ -188,17 +188,16 @@ final class PlayerViewModel {
     }
 
     private func stopTranscodeSession() {
-        #if os(watchOS)
-            let session = sessionIdentifier
-            Task {
-                do {
-                    let repo = try TranscodeRepository(context: context)
-                    try await repo.stopSession(id: session)
-                } catch {
-                    debugPrint("Failed to stop transcode session:", error)
-                }
+        guard useTranscode else { return }
+        let session = sessionIdentifier
+        Task {
+            do {
+                let repo = try TranscodeRepository(context: context)
+                try await repo.stopSession(id: session)
+            } catch {
+                debugPrint("Failed to stop transcode session:", error)
             }
-        #endif
+        }
     }
 
     func nextItemInQueue() async -> PlexItem? {
@@ -258,32 +257,41 @@ final class PlayerViewModel {
         }
     }
 
+    private var useTranscode: Bool {
+        #if os(watchOS)
+            return true
+        #else
+            return context.isRelayConnection
+        #endif
+    }
+
     private func resolvePlaybackURL(from metadata: PlexItem?) -> URL? {
-        guard let partPath = metadata?.media?.first?.parts.first?.key else {
+        guard metadata?.media?.first?.parts.first?.key != nil else {
             return nil
         }
 
-        #if os(watchOS)
-            if let type = metadata?.type, type == .movie || type == .episode {
-                // Plex transcode API expects the metadata key (/library/metadata/XX),
-                // not the part key (/library/parts/XX/...)
-                guard let metadataPath = metadata?.key else {
-                    return nil
-                }
-                guard let transcodeRepo = try? TranscodeRepository(context: context) else {
-                    return nil
-                }
-                let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
-                let quality = settingsManager?.playback.streamQuality ?? .q720
-                return transcodeRepo.transcodeURL(
-                    path: metadataPath,
-                    session: sessionIdentifier,
-                    offset: offset,
-                    quality: quality
-                )
+        if useTranscode, let type = metadata?.type, type == .movie || type == .episode {
+            guard let metadataPath = metadata?.key else {
+                return nil
             }
-        #endif
+            guard let transcodeRepo = try? TranscodeRepository(context: context) else {
+                return nil
+            }
+            let offset = metadata?.viewOffset.map { $0 / 1000 } ?? 0
+            let quality = settingsManager?.playback.streamQuality ?? .q720
+            let location = context.isRelayConnection ? "wan" : "lan"
+            return transcodeRepo.transcodeURL(
+                path: metadataPath,
+                session: sessionIdentifier,
+                offset: offset,
+                quality: quality,
+                location: location
+            )
+        }
 
+        guard let partPath = metadata?.media?.first?.parts.first?.key else {
+            return nil
+        }
         guard let mediaRepository = try? MediaRepository(context: context) else {
             return nil
         }

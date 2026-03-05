@@ -5,7 +5,7 @@ options:
   createIntermediateGroups: true
   defaultConfig: Release
   deploymentTarget:
-    iOS: "18.0"
+    iOS: "26.0"
     tvOS: "26.0"
     watchOS: "26.2"
 
@@ -89,7 +89,7 @@ targets:
   Strimr-iOS:
     type: application
     platform: iOS
-    deploymentTarget: "18.0"
+    deploymentTarget: "26.0"
     configFiles:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
@@ -98,6 +98,8 @@ targets:
         excludes:
           - Info.plist
       - path: Shared
+      - path: StrimrLiveActivity/NowPlayingAttributes.swift
+      - path: StrimrLiveActivity/LiveTVAttributes.swift
       - path: Localizable.xcstrings
         buildPhase: resources
     settings:
@@ -135,8 +137,10 @@ targets:
         STRING_CATALOG_GENERATE_SYMBOLS: YES
         SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
         SUPPORTS_MACCATALYST: NO
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/Shared/Library/Audio"
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_OBJC_BRIDGING_HEADER: Strimr-iOS/Strimr-iOS-Bridging-Header.h
         SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -147,9 +151,10 @@ targets:
       - package: Sentry
       - package: MPVKit
         product: MPVKit-GPL
-      - framework: Carthage/Build/MobileVLCKit.xcframework
+      - framework: Carthage/Build/VLCKit.xcframework
         embed: true
         codeSign: true
+      - target: StrimrLiveActivity
 
   Strimr-tvOS:
     type: application
@@ -326,6 +331,7 @@ targets:
         SKIP_INSTALL: YES
         STRING_CATALOG_GENERATE_SYMBOLS: YES
         SUPPORTED_PLATFORMS: "watchos watchsimulator"
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/Shared/Library/Audio"
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
         SWIFT_OBJC_BRIDGING_HEADER: Strimr-watchOS/Strimr-watchOS-Bridging-Header.h
@@ -371,3 +377,32 @@ targets:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "4"
         WATCHOS_DEPLOYMENT_TARGET: "26.2"
+
+  StrimrLiveActivity:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: StrimrLiveActivity
+        excludes:
+          - Info.plist
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        CURRENT_PROJECT_VERSION: "20"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: StrimrLiveActivity/Info.plist
+        MARKETING_VERSION: "1.1.0"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(IOS_BUNDLE_IDENTIFIER).liveactivity"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SDKROOT: iphoneos
+        SKIP_INSTALL: YES
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_EMIT_LOC_STRINGS: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"

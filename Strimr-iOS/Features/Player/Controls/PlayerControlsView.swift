@@ -23,6 +23,12 @@ struct PlayerControlsView: View {
     var onSkipMarker: (() -> Void)?
     var isRotationLocked: Bool
     var onToggleRotationLock: () -> Void
+    var isPipAvailable: Bool
+    var isPipActive: Bool
+    var onTogglePiP: () -> Void
+    var isVisualizationAvailable: Bool
+    var isVisualizationActive: Bool
+    var onToggleVisualization: () -> Void
     var isWatchTogether: Bool
     private var playbackBadges: [PlayerControlBadge] {
         var badges: [PlayerControlBadge] = []
@@ -66,6 +72,12 @@ struct PlayerControlsView: View {
                     PlayerAuxiliaryControlsRow(
                         isRotationLocked: isRotationLocked,
                         onToggleRotationLock: onToggleRotationLock,
+                        isPipAvailable: isPipAvailable,
+                        isPipActive: isPipActive,
+                        onTogglePiP: onTogglePiP,
+                        isVisualizationAvailable: isVisualizationAvailable,
+                        isVisualizationActive: isVisualizationActive,
+                        onToggleVisualization: onToggleVisualization,
                         skipMarkerTitle: skipMarkerTitle,
                         onSkipMarker: onSkipMarker,
                         badges: playbackBadges,
@@ -112,6 +124,12 @@ private struct PlayerControlBadge: Identifiable {
 private struct PlayerAuxiliaryControlsRow: View {
     var isRotationLocked: Bool
     var onToggleRotationLock: () -> Void
+    var isPipAvailable: Bool
+    var isPipActive: Bool
+    var onTogglePiP: () -> Void
+    var isVisualizationAvailable: Bool
+    var isVisualizationActive: Bool
+    var onToggleVisualization: () -> Void
     var skipMarkerTitle: String?
     var onSkipMarker: (() -> Void)?
     var badges: [PlayerControlBadge]
@@ -119,6 +137,25 @@ private struct PlayerAuxiliaryControlsRow: View {
     var body: some View {
         HStack(alignment: .bottom, spacing: 16) {
             RotationLockButton(isLocked: isRotationLocked, action: onToggleRotationLock)
+
+            if isPipAvailable {
+                PictureInPictureButton(isActive: isPipActive, action: onTogglePiP)
+            }
+
+            if isVisualizationAvailable {
+                VisualizationButton(isActive: isVisualizationActive, action: onToggleVisualization)
+            }
+
+            AudioRoutePickerButton()
+                .frame(width: 42, height: 42)
+                .background(
+                    .white.opacity(0.12),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous),
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1),
+                )
 
             Spacer(minLength: 12)
 

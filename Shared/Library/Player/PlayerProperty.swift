@@ -7,4 +7,5 @@ public enum PlayerProperty: String {
     case duration
     case demuxerCacheDuration = "demuxer-cache-duration"
     case videoParamsSigPeak = "video-params/sig-peak"
+    case pipActive = "pip-active"
 }

@@ -5,7 +5,7 @@ struct PlaybackSettings: Codable, Equatable {
     var autoPlayNextEpisode = true
     var seekBackwardSeconds = 10
     var seekForwardSeconds = 10
-    var player = PlaybackPlayer.mpv
+    var player = PlaybackPlayer.vlc
     var subtitleScale = 100
     var streamQuality: StreamQuality = .q720
     var zoomVideo = false
@@ -17,7 +17,7 @@ struct PlaybackSettings: Codable, Equatable {
         autoPlayNextEpisode = try container.decodeIfPresent(Bool.self, forKey: .autoPlayNextEpisode) ?? true
         seekBackwardSeconds = try container.decodeIfPresent(Int.self, forKey: .seekBackwardSeconds) ?? 10
         seekForwardSeconds = try container.decodeIfPresent(Int.self, forKey: .seekForwardSeconds) ?? 10
-        player = try container.decodeIfPresent(PlaybackPlayer.self, forKey: .player) ?? .mpv
+        player = try container.decodeIfPresent(PlaybackPlayer.self, forKey: .player) ?? .vlc
         subtitleScale = try container.decodeIfPresent(Int.self, forKey: .subtitleScale) ?? 100
         streamQuality = try container.decodeIfPresent(StreamQuality.self, forKey: .streamQuality) ?? .q720
         zoomVideo = try container.decodeIfPresent(Bool.self, forKey: .zoomVideo) ?? false

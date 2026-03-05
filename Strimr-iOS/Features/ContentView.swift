@@ -13,7 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            Color("Background").ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
             if downloadManager.shouldForceOfflineDownloads {
                 OfflineDownloadsRootView()

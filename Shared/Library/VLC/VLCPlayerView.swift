@@ -1,3 +1,4 @@
+import AVKit
 import Foundation
 import SwiftUI
 
@@ -96,6 +97,32 @@ struct VLCPlayerView: UIViewControllerRepresentable {
         func destruct() {
             player?.destruct()
         }
+
+        #if os(iOS)
+        func startPictureInPicture() {
+            player?.startPiP()
+        }
+
+        func stopPictureInPicture() {
+            player?.stopPiP()
+        }
+
+        var isPictureInPictureSupported: Bool {
+            AVPictureInPictureController.isPictureInPictureSupported()
+        }
+
+        var isPictureInPictureActive: Bool {
+            player?.isPipActive ?? false
+        }
+
+        var spectrumData: SpectrumData? {
+            player?.spectrumData
+        }
+
+        func enableAudioVisualization() {
+            player?.enableAudioVisualization()
+        }
+        #endif
 
         func propertyChange(player: VLCPlayerViewController, property: PlayerProperty, data: Any?) {
             onPropertyChange?(player, property, data)

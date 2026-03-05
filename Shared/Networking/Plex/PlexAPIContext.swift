@@ -7,6 +7,7 @@ final class PlexAPIContext {
     private var resource: PlexCloudResource?
     private(set) var baseURLServer: URL?
     private(set) var authTokenServer: String?
+    private(set) var isRelayConnection = false
     @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
 
     @ObservationIgnored private let keychain = Keychain(service: Bundle.main.bundleIdentifier!)
@@ -62,6 +63,7 @@ final class PlexAPIContext {
         resource = nil
         baseURLServer = nil
         authTokenServer = nil
+        isRelayConnection = false
     }
 
     @discardableResult
@@ -78,6 +80,7 @@ final class PlexAPIContext {
            try await isConnectionReachable(matchingConnection, accessToken: resource.accessToken)
         {
             baseURLServer = matchingConnection.uri
+            isRelayConnection = matchingConnection.isRelay
             return matchingConnection.uri
         }
 
@@ -86,6 +89,7 @@ final class PlexAPIContext {
         }
 
         baseURLServer = connection.uri
+        isRelayConnection = connection.isRelay
         storeConnection(connection.uri, for: resource)
         return connection.uri
     }
@@ -139,6 +143,7 @@ final class PlexAPIContext {
         authTokenCloud = nil
         baseURLServer = nil
         authTokenServer = nil
+        isRelayConnection = false
     }
 
     private func connectionKey(for resource: PlexCloudResource) -> String {

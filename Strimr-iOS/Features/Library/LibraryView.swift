@@ -23,9 +23,8 @@ struct LibraryView: View {
         List {
             if hasLiveTV {
                 Section {
-                    NavigationLink {
-                        LiveTVView()
-                    } label: {
+                    ZStack {
+                        NavigationLink { LiveTVView() } label: { EmptyView() }.opacity(0)
                         liveTVRow
                     }
                     .listRowSeparator(.hidden)
@@ -137,7 +136,9 @@ struct LibraryView: View {
     }
 
     private func libraryRow(for library: Library) -> some View {
-        NavigationLink(value: library) {
+        ZStack {
+            NavigationLink(value: library) { EmptyView() }.opacity(0)
+
             ZStack(alignment: .bottomLeading) {
                 if let artwork = viewModel.artworkURL(for: library) {
                     AsyncImage(url: artwork) { phase in

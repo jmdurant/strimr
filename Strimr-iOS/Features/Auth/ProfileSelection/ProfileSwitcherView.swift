@@ -15,12 +15,8 @@ struct ProfileSwitcherView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.black, Color(red: 0.08, green: 0.05, blue: 0.07)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing,
-            )
-            .ignoresSafeArea()
+            Color(.systemBackground)
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 24) {
@@ -105,9 +101,9 @@ struct ProfileSwitcherView: View {
         VStack(spacing: 8) {
             Text("auth.profile.header.title")
                 .font(.largeTitle.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
             Text("auth.profile.header.subtitle")
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -128,15 +124,14 @@ struct ProfileSwitcherView: View {
         if viewModel.isLoading {
             HStack(spacing: 12) {
                 ProgressView()
-                    .tint(.white)
                 Text("auth.profile.loading")
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
         } else {
             Text("auth.profile.empty")
-                .foregroundStyle(.white.opacity(0.7))
+                .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
@@ -158,7 +153,7 @@ struct ProfileSwitcherView: View {
                     .overlay(alignment: .topTrailing) {
                         if requiresPin(for: user) {
                             Image(systemName: "lock.fill")
-                                .foregroundStyle(.white.opacity(0.9))
+                                .foregroundStyle(.primary.opacity(0.9))
                                 .padding(8)
                         } else if viewModel.activeUserUUID == user.uuid {
                             Image(systemName: "checkmark.circle.fill")
@@ -169,7 +164,7 @@ struct ProfileSwitcherView: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
                             .stroke(
-                                Color.white.opacity(viewModel.activeUserUUID == user.uuid ? 0.8 : 0.25),
+                                Color.primary.opacity(viewModel.activeUserUUID == user.uuid ? 0.8 : 0.25),
                                 lineWidth: viewModel.activeUserUUID == user.uuid ? 2 : 1,
                             ),
                     )
@@ -178,11 +173,11 @@ struct ProfileSwitcherView: View {
                 VStack(spacing: 4) {
                     Text(user.friendlyName ?? user.title ?? "?")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                     Text(user.username ?? user.email ?? "")
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
@@ -234,7 +229,7 @@ struct ProfileSwitcherView: View {
     private func errorCard(_ message: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(message)
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
 
             Button {
                 Task { await viewModel.loadUsers() }
@@ -249,7 +244,7 @@ struct ProfileSwitcherView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.04))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .frame(maxWidth: .infinity, alignment: .leading)
     }

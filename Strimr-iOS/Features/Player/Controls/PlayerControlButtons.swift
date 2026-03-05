@@ -1,3 +1,4 @@
+import AVKit
 import SwiftUI
 
 struct PlayerIconButton: View {
@@ -117,6 +118,79 @@ struct PlayerSettingsButton: View {
                 )
         }
         .accessibilityLabel(String(localized: "settings.title"))
+    }
+}
+
+struct PictureInPictureButton: View {
+    var isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isActive ? "pip.exit" : "pip.enter")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 42, height: 42)
+                .background(
+                    .white.opacity(isActive ? 0.24 : 0.12),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous),
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1),
+                )
+        }
+        .accessibilityLabel(String(localized: isActive ? "player.controls.pip.stop" :
+                "player.controls.pip.start"))
+    }
+}
+
+struct AudioRoutePickerButton: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .clear
+
+        let picker = AVRoutePickerView()
+        picker.tintColor = .white
+        picker.activeTintColor = .white
+        picker.prioritizesVideoDevices = false
+        picker.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(picker)
+        NSLayoutConstraint.activate([
+            picker.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            picker.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            picker.widthAnchor.constraint(equalToConstant: 42),
+            picker.heightAnchor.constraint(equalToConstant: 42),
+        ])
+
+        return container
+    }
+
+    func updateUIView(_: UIView, context: Context) {}
+}
+
+struct VisualizationButton: View {
+    var isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "waveform.path.ecg")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 42, height: 42)
+                .background(
+                    .white.opacity(isActive ? 0.24 : 0.12),
+                    in: RoundedRectangle(cornerRadius: 14, style: .continuous),
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1),
+                )
+        }
+        .accessibilityLabel(String(localized: isActive ? "player.controls.visualization.hide" :
+                "player.controls.visualization.show"))
     }
 }
 

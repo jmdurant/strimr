@@ -13,4 +13,19 @@ protocol PlayerCoordinating: AnyObject {
     func selectSubtitleTrack(id: Int?)
     func trackList() -> [PlayerTrack]
     func destruct()
+    func startPictureInPicture()
+    func stopPictureInPicture()
+    var isPictureInPictureSupported: Bool { get }
+    var isPictureInPictureActive: Bool { get }
+    var spectrumData: SpectrumData? { get }
+    func enableAudioVisualization()
+}
+
+extension PlayerCoordinating {
+    func startPictureInPicture() {}
+    func stopPictureInPicture() {}
+    var isPictureInPictureSupported: Bool { false }
+    var isPictureInPictureActive: Bool { false }
+    var spectrumData: SpectrumData? { nil }
+    func enableAudioVisualization() {}
 }

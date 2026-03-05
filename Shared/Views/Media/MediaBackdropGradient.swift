@@ -5,15 +5,15 @@ struct MediaBackdropGradient: View {
 
     var body: some View {
         let gradientColors = colors.count == 4 ? colors : [
-            Color.background.opacity(0.85),
-            Color.background.opacity(0.7),
-            Color.background.opacity(0.55),
-            Color.background.opacity(0.4),
+            Color(.systemBackground).opacity(0.85),
+            Color(.systemBackground).opacity(0.7),
+            Color(.systemBackground).opacity(0.55),
+            Color(.systemBackground).opacity(0.4),
         ]
 
         GeometryReader { geo in
             ZStack {
-                Color(.background)
+                Color(.systemBackground)
                     .ignoresSafeArea()
 
                 // Top Left

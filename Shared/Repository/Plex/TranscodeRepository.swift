@@ -43,7 +43,8 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        quality: StreamQuality = .q720
+        quality: StreamQuality = .q720,
+        location: String = "lan"
     ) -> URL? {
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.path = "/video/:/transcode/universal/start.m3u8"
@@ -64,7 +65,7 @@ final class TranscodeRepository {
             URLQueryItem(name: "fastSeek", value: "1"),
             URLQueryItem(name: "X-Plex-Token", value: authToken),
             URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
-            URLQueryItem(name: "location", value: "lan"),
+            URLQueryItem(name: "location", value: location),
             URLQueryItem(name: "X-Plex-Product", value: "Strimr"),
             URLQueryItem(name: "X-Plex-Platform", value: platform),
             URLQueryItem(name: "X-Plex-Version", value: appVersion),
@@ -86,7 +87,8 @@ final class TranscodeRepository {
         partIndex: Int = 0,
         videoCodec: String = "h264",
         audioCodec: String = "aac",
-        quality: StreamQuality = .q720
+        quality: StreamQuality = .q720,
+        location: String = "lan"
     ) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/decision",
@@ -107,7 +109,7 @@ final class TranscodeRepository {
                 URLQueryItem(name: "fastSeek", value: "1"),
                 URLQueryItem(name: "X-Plex-Token", value: authToken),
                 URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
-                URLQueryItem(name: "location", value: "lan"),
+                URLQueryItem(name: "location", value: location),
                 URLQueryItem(name: "X-Plex-Product", value: "Strimr"),
                 URLQueryItem(name: "X-Plex-Platform", value: platform),
                 URLQueryItem(name: "X-Plex-Version", value: appVersion),

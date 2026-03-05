@@ -28,6 +28,8 @@ struct PlayerView: View {
     @State private var showingTerminationAlert = false
     @State private var terminationAlertMessage = ""
     @State private var isRotationLocked = false
+    @State private var isPipActive = false
+    @State private var showVisualization = false
     @State private var isShowingWatchTogetherExitPrompt = false
     @State private var wasInWatchTogetherSession = false
     @State private var activePlaybackURL: URL?
@@ -72,6 +74,10 @@ struct PlayerView: View {
                     if propertyName == .videoParamsSigPeak {
                         let supportsHdr = (data as? Double ?? 1.0) > 1.0
                         supportsHDR = supportsHdr
+                    }
+
+                    if propertyName == .pipActive {
+                        isPipActive = (data as? Bool) ?? false
                     }
                 },
                 onPlaybackEnded: {
@@ -127,6 +133,12 @@ struct PlayerView: View {
                         },
                         isRotationLocked: isRotationLocked,
                         onToggleRotationLock: toggleRotationLock,
+                        isPipAvailable: playerCoordinator.isPictureInPictureSupported,
+                        isPipActive: isPipActive,
+                        onTogglePiP: togglePictureInPicture,
+                        isVisualizationAvailable: activePlayer == .vlc,
+                        isVisualizationActive: showVisualization,
+                        onToggleVisualization: toggleVisualization,
                         isWatchTogether: watchTogetherViewModel.isInSession,
                     )
                     .transition(.opacity)
@@ -137,6 +149,14 @@ struct PlayerView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 }
 
+                if showVisualization, let spectrum = playerCoordinator.spectrumData {
+                    VisualizationOverlayView(spectrumData: spectrum) {
+                        showVisualization = false
+                        showControls(temporarily: true)
+                    }
+                    .transition(.opacity)
+                }
+
                 ToastOverlay(toasts: watchTogetherViewModel.toasts)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
@@ -145,12 +165,14 @@ struct PlayerView: View {
             showControls(temporarily: true)
             playerCoordinator.setPlaybackRate(playbackRate)
             startPlaybackIfNeeded(url: bindableViewModel.playbackURL)
+            LiveActivityManager.shared.startNowPlaying(viewModel: viewModel, context: context)
             if watchTogetherViewModel.isInSession {
                 watchTogetherViewModel.attachPlayerCoordinator(playerCoordinator)
                 wasInWatchTogetherSession = true
             }
         }
         .onDisappear {
+            LiveActivityManager.shared.stopNowPlaying()
             viewModel.handleStop()
             hideControlsWorkItem?.cancel()
             playerCoordinator.destruct()
@@ -265,6 +287,23 @@ struct PlayerView: View {
         refreshTracks()
         showingSettings = true
         hideControlsWorkItem?.cancel()
+    }
+
+    private func togglePictureInPicture() {
+        if isPipActive {
+            playerCoordinator.stopPictureInPicture()
+        } else {
+            playerCoordinator.startPictureInPicture()
+        }
+    }
+
+    private func toggleVisualization() {
+        if showVisualization {
+            showVisualization = false
+        } else {
+            showVisualization = true
+            hideControls()
+        }
     }
 
     private func toggleRotationLock() {
