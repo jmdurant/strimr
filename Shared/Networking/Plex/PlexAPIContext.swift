@@ -75,16 +75,7 @@ final class PlexAPIContext {
             return baseURLServer
         }
 
-        if let savedConnection = loadSavedConnection(for: resource),
-           let matchingConnection = resource.connections?.first(where: { $0.uri == savedConnection }),
-           try await isConnectionReachable(matchingConnection, accessToken: resource.accessToken)
-        {
-            baseURLServer = matchingConnection.uri
-            isRelayConnection = matchingConnection.isRelay
-            return matchingConnection.uri
-        }
-
-        guard let connection = try await resolveConnection(using: resource) else {
+        guard let connection = await resolveConnection(using: resource) else {
             throw PlexAPIError.unreachableServer
         }
 
@@ -94,33 +85,64 @@ final class PlexAPIContext {
         return connection.uri
     }
 
-    private func resolveConnection(using resource: PlexCloudResource) async throws -> PlexCloudResource.Connection? {
+    /// Race all connections concurrently, preferring local over remote over relay.
+    /// If a non-local connection wins first, wait a brief grace period for a local
+    /// one to come in before settling.
+    private func resolveConnection(using resource: PlexCloudResource) async -> PlexCloudResource.Connection? {
         guard let connections = resource.connections, !connections.isEmpty else {
             return nil
         }
-        let sortedConnections = connections.sorted { lhs, rhs in
-            if lhs.isRelay != rhs.isRelay {
-                return rhs.isRelay // non-relay first
-            }
-            if lhs.isLocal != rhs.isLocal {
-                return lhs.isLocal // local first
-            }
-            return false
-        }
 
-        for connection in sortedConnections {
-            if try await isConnectionReachable(connection, accessToken: resource.accessToken) {
-                return connection
+        let accessToken = resource.accessToken
+
+        return await withCheckedContinuation { continuation in
+            let state = ConnectionRaceState(connections: connections)
+
+            for connection in connections {
+                Task {
+                    let reachable = await self.checkReachability(connection, accessToken: accessToken)
+                    guard reachable else {
+                        if state.recordFailure() {
+                            // All connections failed
+                            continuation.resume(returning: nil)
+                        }
+                        return
+                    }
+
+                    let action = state.recordSuccess(connection)
+                    switch action {
+                    case let .resolve(winner):
+                        continuation.resume(returning: winner)
+                    case .waitForLocal:
+                        // A non-local connection won, but wait briefly for a local one
+                        Task {
+                            try? await Task.sleep(nanoseconds: 1_000_000_000)
+                            if let winner = state.settleWithBest() {
+                                continuation.resume(returning: winner)
+                            }
+                        }
+                    case .none:
+                        break
+                    }
+                }
+            }
+
+            // Overall timeout
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                if let winner = state.settleWithBest() {
+                    continuation.resume(returning: winner)
+                } else if state.recordTimeout() {
+                    continuation.resume(returning: nil)
+                }
             }
         }
-
-        return nil
     }
 
-    private func isConnectionReachable(
+    private func checkReachability(
         _ connection: PlexCloudResource.Connection,
         accessToken: String?,
-    ) async throws -> Bool {
+    ) async -> Bool {
         var request = URLRequest(url: connection.uri)
         if let accessToken {
             request.setValue(accessToken, forHTTPHeaderField: "X-Plex-Token")
@@ -167,5 +189,91 @@ final class PlexAPIContext {
         } catch {
             return
         }
+    }
+}
+
+// MARK: - Connection Race
+
+private final class ConnectionRaceState: @unchecked Sendable {
+    enum Action {
+        case resolve(PlexCloudResource.Connection)
+        case waitForLocal
+        case none
+    }
+
+    private let lock = NSLock()
+    private let totalCount: Int
+    private var failureCount = 0
+    private var resolved = false
+    private var gracePeriodStarted = false
+    private var bestConnection: PlexCloudResource.Connection?
+
+    init(connections: [PlexCloudResource.Connection]) {
+        totalCount = connections.count
+    }
+
+    /// Record a successful connection. Returns the action the caller should take.
+    func recordSuccess(_ connection: PlexCloudResource.Connection) -> Action {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !resolved else { return .none }
+
+        // Track the best connection seen so far (local > remote > relay)
+        if let current = bestConnection {
+            if isBetter(connection, than: current) {
+                bestConnection = connection
+            }
+        } else {
+            bestConnection = connection
+        }
+
+        if connection.isLocal {
+            // Local connection — resolve immediately, this is the best we can get
+            resolved = true
+            return .resolve(connection)
+        }
+
+        if !gracePeriodStarted {
+            // First non-local success — give local connections a grace period
+            gracePeriodStarted = true
+            return .waitForLocal
+        }
+
+        return .none
+    }
+
+    /// Record a failed connection. Returns true if all connections have failed.
+    func recordFailure() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        failureCount += 1
+        guard !resolved, failureCount >= totalCount else { return false }
+        resolved = true
+        return true
+    }
+
+    /// Record overall timeout. Returns true if we should resolve with nil.
+    func recordTimeout() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !resolved else { return false }
+        resolved = true
+        return true
+    }
+
+    /// Settle with whatever the best connection is after the grace period.
+    /// Returns nil if already resolved by someone else.
+    func settleWithBest() -> PlexCloudResource.Connection? {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !resolved, let best = bestConnection else { return nil }
+        resolved = true
+        return best
+    }
+
+    private func isBetter(_ a: PlexCloudResource.Connection, than b: PlexCloudResource.Connection) -> Bool {
+        if a.isLocal != b.isLocal { return a.isLocal }
+        if a.isRelay != b.isRelay { return !a.isRelay }
+        return false
     }
 }
