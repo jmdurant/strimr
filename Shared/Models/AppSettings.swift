@@ -147,10 +147,22 @@ struct DownloadSettings: Codable, Equatable {
     }
 }
 
+struct WatchTogetherSettings: Codable, Equatable {
+    var customServerURL: String?
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        customServerURL = try container.decodeIfPresent(String.self, forKey: .customServerURL)
+    }
+}
+
 struct AppSettings: Codable, Equatable {
     var playback = PlaybackSettings()
     var interface = InterfaceSettings()
     var downloads = DownloadSettings()
+    var watchTogether = WatchTogetherSettings()
 
     init() {}
 
@@ -159,5 +171,6 @@ struct AppSettings: Codable, Equatable {
         playback = try container.decodeIfPresent(PlaybackSettings.self, forKey: .playback) ?? PlaybackSettings()
         interface = try container.decodeIfPresent(InterfaceSettings.self, forKey: .interface) ?? InterfaceSettings()
         downloads = try container.decodeIfPresent(DownloadSettings.self, forKey: .downloads) ?? DownloadSettings()
+        watchTogether = try container.decodeIfPresent(WatchTogetherSettings.self, forKey: .watchTogether) ?? WatchTogetherSettings()
     }
 }

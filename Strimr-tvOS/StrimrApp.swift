@@ -17,7 +17,8 @@ struct StrimrApp: App {
         let sessionManager = SessionManager(context: context, libraryStore: store)
         _plexApiContext = State(initialValue: context)
         _sessionManager = State(initialValue: sessionManager)
-        _settingsManager = State(initialValue: SettingsManager())
+        let settings = SettingsManager()
+        _settingsManager = State(initialValue: settings)
         _libraryStore = State(initialValue: store)
         _mediaFocusModel = State(initialValue: MediaFocusModel())
         _seerrStore = State(initialValue: SeerrStore())
@@ -25,6 +26,7 @@ struct StrimrApp: App {
         _watchTogetherViewModel = State(initialValue: WatchTogetherViewModel(
             sessionManager: sessionManager,
             context: context,
+            settingsManager: settings,
         ))
     }
 

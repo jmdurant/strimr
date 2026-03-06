@@ -59,9 +59,14 @@ final class WatchTogetherViewModel {
         },
     )
 
-    init(sessionManager: SessionManager, context: PlexAPIContext) {
+    init(sessionManager: SessionManager, context: PlexAPIContext, settingsManager: SettingsManager) {
         self.sessionManager = sessionManager
         self.context = context
+
+        client.serverResolver = WatchTogetherServerResolver(
+            settingsManager: settingsManager,
+            context: context
+        )
 
         client.onMessage = { [weak self] message in
             self?.handle(message)
@@ -96,6 +101,10 @@ final class WatchTogetherViewModel {
 
     var plexServerId: String? {
         sessionManager.plexServer?.clientIdentifier
+    }
+
+    var resolvedServerURL: URL? {
+        client.resolvedURL
     }
 
     var canStartPlayback: Bool {

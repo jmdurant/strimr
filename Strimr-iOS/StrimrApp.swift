@@ -26,6 +26,7 @@ struct StrimrApp: App {
         _watchTogetherViewModel = State(initialValue: WatchTogetherViewModel(
             sessionManager: deps.sessionManager,
             context: deps.plexApiContext,
+            settingsManager: deps.settingsManager,
         ))
         _watchSyncManager = State(initialValue: syncManager)
 

@@ -38,6 +38,14 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Watch Together") {
+                NavigationLink {
+                    SettingsWatchTogetherView()
+                } label: {
+                    Label("Server", systemImage: "server.rack")
+                }
+            }
+
             Section {
                 NavigationLink {
                     AboutView()

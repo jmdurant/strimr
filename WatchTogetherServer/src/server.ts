@@ -1,4 +1,7 @@
 import * as http from 'http';
+import * as os from 'os';
+
+import { Bonjour } from 'bonjour-service';
 
 import { PORT } from './config.js';
 import { CLEANUP_INTERVAL_MS, HEARTBEAT_INTERVAL_MS, HEARTBEAT_TIMEOUT_MS, SESSION_TTL_MS } from './constants.js';
@@ -43,4 +46,18 @@ setInterval(() => {
 
 server.listen(PORT, () => {
   logger.info({ port: PORT, logLevel: logger.level }, 'WatchTogetherServer listening');
+
+  // Advertise via mDNS so clients can auto-discover
+  try {
+    const bonjour = new Bonjour();
+    const hostname = os.hostname();
+    bonjour.publish({
+      name: `WatchTogether-${hostname}`,
+      type: 'watchtogether',
+      port: PORT,
+    });
+    logger.info({ port: PORT, hostname }, 'mDNS service advertised as _watchtogether._tcp');
+  } catch (err) {
+    logger.warn({ err }, 'Failed to advertise mDNS service');
+  }
 });

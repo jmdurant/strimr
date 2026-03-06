@@ -32,6 +32,10 @@ final class SettingsManager {
         settings.downloads
     }
 
+    var watchTogether: WatchTogetherSettings {
+        settings.watchTogether
+    }
+
     func setAutoPlayNextEpisode(_ enabled: Bool) {
         settings.playback.autoPlayNextEpisode = enabled
         persist()
@@ -126,6 +130,11 @@ final class SettingsManager {
 
     func setDownloadWiFiOnly(_ enabled: Bool) {
         settings.downloads.wifiOnly = enabled
+        persist()
+    }
+
+    func setWatchTogetherServerURL(_ url: String?) {
+        settings.watchTogether.customServerURL = url?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true ? nil : url?.trimmingCharacters(in: .whitespacesAndNewlines)
         persist()
     }
 

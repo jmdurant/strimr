@@ -16,7 +16,9 @@ final class WatchTogetherWebSocketClient {
     var state: State = .disconnected
     var onMessage: ((WatchTogetherServerMessage) -> Void)?
     var onDisconnect: ((Error?) -> Void)?
+    var serverResolver: WatchTogetherServerResolver?
 
+    private(set) var resolvedURL: URL?
     private var task: URLSessionWebSocketTask?
     private var receiveTask: Task<Void, Never>?
     private var pingTask: Task<Void, Never>?
@@ -25,10 +27,20 @@ final class WatchTogetherWebSocketClient {
 
     func connect() async throws {
         guard state == .disconnected else { return }
-        guard let url = watchTogetherURL() else {
+
+        let url: URL
+        if let resolver = serverResolver {
+            guard let resolved = await resolver.resolve() else {
+                throw ClientError.missingURL
+            }
+            url = resolved
+        } else if let fallback = watchTogetherURL() {
+            url = fallback
+        } else {
             throw ClientError.missingURL
         }
 
+        resolvedURL = url
         state = .connecting
         let session = URLSession(configuration: .default)
         let task = session.webSocketTask(with: url)
