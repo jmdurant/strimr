@@ -15,6 +15,8 @@ enum WatchTogetherClientMessage: Codable {
     case stopPlayback(StopPlaybackRequest)
     case playerEvent(PlayerEventRequest)
     case ping(PingRequest)
+    case chatMessage(ChatMessageRequest)
+    case setLiveTVChannel(SetLiveTVChannelRequest)
 
     private enum CodingKeys: String, CodingKey {
         case v
@@ -33,6 +35,8 @@ enum WatchTogetherClientMessage: Codable {
         case stopPlayback
         case playerEvent
         case ping
+        case chatMessage
+        case setLiveTVChannel
     }
 
     init(from decoder: Decoder) throws {
@@ -71,6 +75,12 @@ enum WatchTogetherClientMessage: Codable {
         case .ping:
             let payload = try container.decode(PingRequest.self, forKey: .payload)
             self = .ping(payload)
+        case .chatMessage:
+            let payload = try container.decode(ChatMessageRequest.self, forKey: .payload)
+            self = .chatMessage(payload)
+        case .setLiveTVChannel:
+            let payload = try container.decode(SetLiveTVChannelRequest.self, forKey: .payload)
+            self = .setLiveTVChannel(payload)
         }
     }
 
@@ -108,6 +118,12 @@ enum WatchTogetherClientMessage: Codable {
             try container.encode(payload, forKey: .payload)
         case let .ping(payload):
             try container.encode(MessageType.ping, forKey: .type)
+            try container.encode(payload, forKey: .payload)
+        case let .chatMessage(payload):
+            try container.encode(MessageType.chatMessage, forKey: .type)
+            try container.encode(payload, forKey: .payload)
+        case let .setLiveTVChannel(payload):
+            try container.encode(MessageType.setLiveTVChannel, forKey: .type)
             try container.encode(payload, forKey: .payload)
         }
     }
@@ -159,6 +175,16 @@ struct PingRequest: Codable, Hashable {
     let sentAtMs: Int64
 }
 
+struct ChatMessageRequest: Codable, Hashable {
+    let text: String
+}
+
+struct SetLiveTVChannelRequest: Codable, Hashable {
+    let channelId: String
+    let channelName: String
+    let thumb: String?
+}
+
 enum WatchTogetherServerMessage: Codable {
     case created(CreatedResponse)
     case joined(JoinedResponse)
@@ -170,6 +196,7 @@ enum WatchTogetherServerMessage: Codable {
     case startPlayback(WatchTogetherStartPlayback)
     case playbackStopped(PlaybackStopped)
     case playerEvent(WatchTogetherPlayerEvent)
+    case chatMessage(WatchTogetherChatMessage)
 
     private enum CodingKeys: String, CodingKey {
         case v
@@ -188,6 +215,7 @@ enum WatchTogetherServerMessage: Codable {
         case startPlayback
         case playbackStopped
         case playerEvent
+        case chatMessage
     }
 
     init(from decoder: Decoder) throws {
@@ -226,6 +254,9 @@ enum WatchTogetherServerMessage: Codable {
         case .playerEvent:
             let payload = try container.decode(WatchTogetherPlayerEvent.self, forKey: .payload)
             self = .playerEvent(payload)
+        case .chatMessage:
+            let payload = try container.decode(WatchTogetherChatMessage.self, forKey: .payload)
+            self = .chatMessage(payload)
         }
     }
 
@@ -263,6 +294,9 @@ enum WatchTogetherServerMessage: Codable {
             try container.encode(payload, forKey: .payload)
         case let .playerEvent(payload):
             try container.encode(MessageType.playerEvent, forKey: .type)
+            try container.encode(payload, forKey: .payload)
+        case let .chatMessage(payload):
+            try container.encode(MessageType.chatMessage, forKey: .type)
             try container.encode(payload, forKey: .payload)
         }
     }

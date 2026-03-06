@@ -69,3 +69,6 @@ node_modules/
 .env
 WatchTogetherServer/.env.prod
 WatchTogetherServer/dist/
+WatchTogetherServer/watchtogether-server
+WatchTogetherServer/watchtogether-server-*
+WatchTogetherServer/bun.lock

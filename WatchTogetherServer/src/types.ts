@@ -37,6 +37,20 @@ export interface Participant {
 
 export type SelectedMedia = Record<string, unknown>;
 
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  sentAtMs: number;
+}
+
+export interface LiveTVChannel {
+  channelId: string;
+  channelName: string;
+  thumb: string | null;
+}
+
 export interface LobbySnapshot {
   code: string;
   hostId: string | null;
@@ -51,6 +65,10 @@ export interface LobbySnapshot {
   selectedMedia: SelectedMedia | null;
   started: boolean;
   startAtEpochMs: number | null;
+  currentPositionSeconds: number | null;
+  isPaused: boolean;
+  chatMessages: ChatMessage[];
+  liveTVChannel: LiveTVChannel | null;
 }
 
 export interface Session {
@@ -65,6 +83,11 @@ export interface Session {
   createdAt: number;
   started: boolean;
   startAtEpochMs: number | null;
+  currentPositionSeconds: number | null;
+  lastPositionUpdatedAt: number | null;
+  isPaused: boolean;
+  chatMessages: ChatMessage[];
+  liveTVChannel: LiveTVChannel | null;
 }
 
 export type OnMessage = (client: Client, message: ProtocolMessage) => void;

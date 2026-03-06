@@ -25,6 +25,20 @@ extension WatchTogetherSelectedMedia {
     }
 }
 
+struct WatchTogetherChatMessage: Identifiable, Codable, Hashable {
+    let id: String
+    let senderId: String
+    let senderName: String
+    let text: String
+    let sentAtMs: Int64
+}
+
+struct WatchTogetherLiveTVChannel: Codable, Hashable {
+    let channelId: String
+    let channelName: String
+    let thumb: String?
+}
+
 struct WatchTogetherLobbySnapshot: Codable, Hashable {
     let code: String
     let hostId: String
@@ -32,6 +46,10 @@ struct WatchTogetherLobbySnapshot: Codable, Hashable {
     let selectedMedia: WatchTogetherSelectedMedia?
     let started: Bool
     let startAtEpochMs: Int64?
+    let currentPositionSeconds: Double?
+    let isPaused: Bool?
+    let chatMessages: [WatchTogetherChatMessage]?
+    let liveTVChannel: WatchTogetherLiveTVChannel?
 }
 
 struct WatchTogetherStartPlayback: Codable, Hashable {

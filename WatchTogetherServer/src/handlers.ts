@@ -12,7 +12,7 @@ import {
   snapshotFor,
 } from './sessions.js';
 import { sessions } from './state.js';
-import type { Client, ProtocolMessage, SelectedMedia, Session } from './types.js';
+import type { ChatMessage, Client, LiveTVChannel, ProtocolMessage, SelectedMedia, Session } from './types.js';
 
 const logger = loggerBase.child({ module: 'handlers' });
 
@@ -90,6 +90,12 @@ export function handleMessage(client: Client, message: ProtocolMessage): void {
       break;
     case 'playerEvent':
       handlePlayerEvent(client, payload);
+      break;
+    case 'chatMessage':
+      handleChatMessage(client, payload);
+      break;
+    case 'setLiveTVChannel':
+      handleSetLiveTVChannel(client, payload);
       break;
     case 'ping':
       handlePing(client, payload);
@@ -230,8 +236,12 @@ function handleSetSelectedMedia(client: Client, payload: Payload): void {
   }
 
   session.selectedMedia = payload.media as SelectedMedia;
+  session.liveTVChannel = null;
   session.started = false;
   session.startAtEpochMs = null;
+  session.currentPositionSeconds = null;
+  session.lastPositionUpdatedAt = null;
+  session.isPaused = false;
   session.mediaAccess = new Map();
   session.participants.forEach((participant) => {
     session.mediaAccess.set(participant.id, false);
@@ -275,6 +285,9 @@ function handleStartPlayback(client: Client, payload: Payload): void {
 
   session.started = true;
   session.startAtEpochMs = nowMs() + 2000;
+  session.currentPositionSeconds = 0;
+  session.lastPositionUpdatedAt = session.startAtEpochMs;
+  session.isPaused = false;
 
   const startPayload = {
     ratingKey,
@@ -299,6 +312,9 @@ function handleStopPlayback(client: Client, payload: Payload): void {
 
   session.started = false;
   session.startAtEpochMs = null;
+  session.currentPositionSeconds = null;
+  session.lastPositionUpdatedAt = null;
+  session.isPaused = false;
 
   const reason = typeof payload.reason === 'string' ? payload.reason : null;
   broadcast(session, 'playbackStopped', { reason });
@@ -312,15 +328,102 @@ function handlePlayerEvent(client: Client, payload: Payload): void {
   if (!isRecord(payload.event)) return;
 
   const eventType = typeof payload.event.type === 'string' ? payload.event.type : 'unknown';
+  const now = nowMs();
   const event = {
     ...payload.event,
     senderId: client.participantId,
-    serverReceivedAtMs: nowMs(),
+    serverReceivedAtMs: now,
   };
+
+  // Track playback position from events
+  const positionSeconds =
+    typeof payload.event.positionSeconds === 'number' ? payload.event.positionSeconds : null;
+
+  switch (eventType) {
+    case 'play':
+      session.isPaused = false;
+      if (positionSeconds != null) {
+        session.currentPositionSeconds = positionSeconds;
+        session.lastPositionUpdatedAt = now;
+      }
+      break;
+    case 'pause':
+      session.isPaused = true;
+      if (positionSeconds != null) {
+        session.currentPositionSeconds = positionSeconds;
+        session.lastPositionUpdatedAt = now;
+      }
+      break;
+    case 'seek':
+      if (positionSeconds != null) {
+        session.currentPositionSeconds = positionSeconds;
+        session.lastPositionUpdatedAt = now;
+      }
+      break;
+  }
 
   logger.debug({ code: session.code, eventType }, 'Player event received');
 
   broadcast(session, 'playerEvent', event);
+}
+
+function handleChatMessage(client: Client, payload: Payload): void {
+  const session = sessionForClient(client);
+  if (!session || !client.participantId) return;
+
+  const text = getString(payload, 'text');
+  if (!text || text.trim().length === 0) return;
+
+  const message: ChatMessage = {
+    id: `${client.participantId}-${nowMs()}-${Math.random().toString(36).slice(2, 8)}`,
+    senderId: client.participantId,
+    senderName: client.displayName ?? 'Unknown',
+    text: text.trim().slice(0, 500),
+    sentAtMs: nowMs(),
+  };
+
+  session.chatMessages.push(message);
+  // Keep only last 100 messages in memory
+  if (session.chatMessages.length > 100) {
+    session.chatMessages = session.chatMessages.slice(-100);
+  }
+
+  logger.debug({ code: session.code, senderId: client.participantId }, 'Chat message');
+
+  broadcast(session, 'chatMessage', message);
+}
+
+function handleSetLiveTVChannel(client: Client, payload: Payload): void {
+  const session = sessionForClient(client);
+  if (!session) return;
+
+  if (session.hostId !== client.participantId) {
+    sendJson(client, 'error', { message: 'Host only action.', code: 'forbidden' });
+    return;
+  }
+
+  const channelId = getString(payload, 'channelId');
+  const channelName = getString(payload, 'channelName');
+  if (!channelId || !channelName) return;
+
+  const thumb = getString(payload, 'thumb');
+
+  session.liveTVChannel = { channelId, channelName, thumb };
+  // Clear regular media when live TV is selected
+  session.selectedMedia = null;
+  session.started = false;
+  session.startAtEpochMs = null;
+  session.currentPositionSeconds = null;
+  session.lastPositionUpdatedAt = null;
+  session.isPaused = false;
+  session.mediaAccess = new Map();
+  session.participants.forEach((participant) => {
+    session.mediaAccess.set(participant.id, false);
+  });
+
+  logger.info({ code: session.code, channelId, channelName }, 'Live TV channel set');
+
+  broadcast(session, 'lobbySnapshot', snapshotFor(session));
 }
 
 function handlePing(client: Client, payload: Payload): void {

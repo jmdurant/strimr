@@ -36,13 +36,14 @@ final class WatchTogetherPlaybackSyncEngine {
         playerCoordinator = nil
     }
 
-    func emitPlayPause(isCurrentlyPaused: Bool) {
+    func emitPlayPause(isCurrentlyPaused: Bool, positionSeconds: Double? = nil) {
         guard isEnabled, !suppressOutboundEvents else { return }
         guard let senderId = currentParticipantId() else { return }
         let type: WatchTogetherPlayerEvent.EventType = isCurrentlyPaused ? .play : .pause
         let event = WatchTogetherPlayerEvent(
             senderId: senderId,
             type: type,
+            positionSeconds: positionSeconds,
             clientSentAtMs: Self.nowMs,
         )
         sendEvent(event)

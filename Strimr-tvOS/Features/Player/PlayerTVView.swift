@@ -297,7 +297,7 @@ struct PlayerTVView: View {
         let wasPaused = viewModel.isPaused
         playerCoordinator.togglePlayback()
         showControls(temporarily: true)
-        watchTogetherViewModel.sendPlayPause(isCurrentlyPaused: wasPaused)
+        watchTogetherViewModel.sendPlayPause(isCurrentlyPaused: wasPaused, positionSeconds: viewModel.position)
     }
 
     private func showAudioSettings() {

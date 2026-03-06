@@ -55,6 +55,11 @@ export function createSession({
     createdAt: nowMs(),
     started: false,
     startAtEpochMs: null,
+    currentPositionSeconds: null,
+    lastPositionUpdatedAt: null,
+    isPaused: false,
+    chatMessages: [],
+    liveTVChannel: null,
   };
 
   const hostParticipant = addParticipant(session, {
@@ -96,6 +101,17 @@ export function removeParticipant(session: Session, participantId: string): void
   session.mediaAccess.delete(participantId);
 }
 
+export function estimatedPosition(session: Session): number | null {
+  if (session.currentPositionSeconds == null || session.lastPositionUpdatedAt == null) {
+    return null;
+  }
+  if (session.isPaused) {
+    return session.currentPositionSeconds;
+  }
+  const elapsed = (nowMs() - session.lastPositionUpdatedAt) / 1000;
+  return session.currentPositionSeconds + elapsed;
+}
+
 export function snapshotFor(session: Session): LobbySnapshot {
   return {
     code: session.code,
@@ -111,6 +127,10 @@ export function snapshotFor(session: Session): LobbySnapshot {
     selectedMedia: session.selectedMedia,
     started: session.started,
     startAtEpochMs: session.startAtEpochMs,
+    currentPositionSeconds: estimatedPosition(session),
+    isPaused: session.isPaused,
+    chatMessages: session.chatMessages.slice(-50),
+    liveTVChannel: session.liveTVChannel,
   };
 }
 

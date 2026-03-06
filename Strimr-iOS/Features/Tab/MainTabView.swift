@@ -133,6 +133,9 @@ struct MainTabView: View {
                     openURL: { url in openURL(url) },
                 ),
             )
+            watchTogetherViewModel.configureLiveTVPlayer { [weak coordinator] url, channelName in
+                coordinator?.showLiveTV(streamURL: url, channelName: channelName)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("strimr.siri.openLibrary"))) { notification in
             guard let library = notification.userInfo?["library"] as? Library else { return }

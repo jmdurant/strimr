@@ -33,14 +33,20 @@ final class WatchTogetherViewModel {
     var sessionEndedSignal: UUID?
     var playbackStoppedSignal: UUID?
     var participantId: String?
+    var chatMessages: [WatchTogetherChatMessage] = []
+    var chatInput: String = ""
+    var selectedLiveTVChannel: WatchTogetherLiveTVChannel?
 
     @ObservationIgnored private let sessionManager: SessionManager
     @ObservationIgnored private let context: PlexAPIContext
     @ObservationIgnored private let client = WatchTogetherWebSocketClient()
     @ObservationIgnored private var reconnectTask: Task<Void, Never>?
     @ObservationIgnored private var playbackLauncher: PlaybackLauncher?
+    @ObservationIgnored private var showLiveTVPlayer: ((URL, String) -> Void)?
     @ObservationIgnored private var lastMediaAccessRatingKey: String?
     @ObservationIgnored private var lastKnownHostId: String?
+    @ObservationIgnored private var pendingLateJoinSeek: Double?
+    @ObservationIgnored private var pendingLateJoinPaused: Bool = false
     @ObservationIgnored private lazy var playbackSyncEngine: WatchTogetherPlaybackSyncEngine = .init(
         sendEvent: { [weak self] event in
             Task { await self?.sendPlayerEvent(event) }
@@ -93,8 +99,12 @@ final class WatchTogetherViewModel {
     }
 
     var canStartPlayback: Bool {
-        guard isHost, selectedMedia != nil else { return false }
+        guard isHost else { return false }
+        guard selectedMedia != nil || selectedLiveTVChannel != nil else { return false }
         guard participants.count >= Self.minimumParticipantsToStartPlayback else { return false }
+        if selectedLiveTVChannel != nil {
+            return participants.allSatisfy(\.isReady)
+        }
         return participants.allSatisfy { $0.isReady && $0.hasMediaAccess }
     }
 
@@ -104,6 +114,10 @@ final class WatchTogetherViewModel {
 
     func configurePlaybackLauncher(_ launcher: PlaybackLauncher) {
         playbackLauncher = launcher
+    }
+
+    func configureLiveTVPlayer(_ handler: @escaping (URL, String) -> Void) {
+        showLiveTVPlayer = handler
     }
 
     func createSession() {
@@ -165,16 +179,28 @@ final class WatchTogetherViewModel {
 
     func startPlayback() {
         guard canStartPlayback else { return }
-        guard let selectedMedia else { return }
-        Task {
-            await sendMessage(
-                .startPlayback(
-                    StartPlaybackRequest(
-                        ratingKey: selectedMedia.ratingKey,
-                        type: selectedMedia.type,
+        if let selectedMedia {
+            Task {
+                await sendMessage(
+                    .startPlayback(
+                        StartPlaybackRequest(
+                            ratingKey: selectedMedia.ratingKey,
+                            type: selectedMedia.type,
+                        ),
                     ),
-                ),
-            )
+                )
+            }
+        } else if let channel = selectedLiveTVChannel {
+            Task {
+                await sendMessage(
+                    .startPlayback(
+                        StartPlaybackRequest(
+                            ratingKey: channel.channelId,
+                            type: .clip,
+                        ),
+                    ),
+                )
+            }
         }
     }
 
@@ -187,14 +213,28 @@ final class WatchTogetherViewModel {
 
     func attachPlayerCoordinator(_ coordinator: any PlayerCoordinating) {
         playbackSyncEngine.attachCoordinator(coordinator)
+
+        if let seekPosition = pendingLateJoinSeek {
+            pendingLateJoinSeek = nil
+            let shouldPause = pendingLateJoinPaused
+            pendingLateJoinPaused = false
+            // Small delay to let the player initialize before seeking
+            Task {
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                coordinator.seek(to: seekPosition)
+                if shouldPause {
+                    coordinator.pause()
+                }
+            }
+        }
     }
 
     func detachPlayerCoordinator() {
         playbackSyncEngine.detachCoordinator()
     }
 
-    func sendPlayPause(isCurrentlyPaused: Bool) {
-        playbackSyncEngine.emitPlayPause(isCurrentlyPaused: isCurrentlyPaused)
+    func sendPlayPause(isCurrentlyPaused: Bool, positionSeconds: Double? = nil) {
+        playbackSyncEngine.emitPlayPause(isCurrentlyPaused: isCurrentlyPaused, positionSeconds: positionSeconds)
     }
 
     func sendSeek(to positionSeconds: Double) {
@@ -203,6 +243,26 @@ final class WatchTogetherViewModel {
 
     func sendRateChange(_ rate: Float) {
         playbackSyncEngine.emitSetRate(rate)
+    }
+
+    func sendChatMessage() {
+        let text = chatInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        chatInput = ""
+        Task {
+            await sendMessage(.chatMessage(ChatMessageRequest(text: text)))
+        }
+    }
+
+    func setLiveTVChannel(channelId: String, channelName: String, thumb: String?) {
+        guard isHost else { return }
+        Task {
+            await sendMessage(.setLiveTVChannel(SetLiveTVChannelRequest(
+                channelId: channelId,
+                channelName: channelName,
+                thumb: thumb
+            )))
+        }
     }
 
     private func connectAndSend(_ message: WatchTogetherClientMessage) {
@@ -268,6 +328,14 @@ final class WatchTogetherViewModel {
         case let .playerEvent(event):
             let senderName = participants.first(where: { $0.id == event.senderId })?.displayName
             playbackSyncEngine.handleRemoteEvent(event, senderName: senderName)
+        case let .chatMessage(message):
+            if !chatMessages.contains(where: { $0.id == message.id }) {
+                chatMessages.append(message)
+                // Keep last 50 locally
+                if chatMessages.count > 50 {
+                    chatMessages.removeFirst(chatMessages.count - 50)
+                }
+            }
         }
     }
 
@@ -311,13 +379,15 @@ final class WatchTogetherViewModel {
     private func apply(snapshot: WatchTogetherLobbySnapshot) {
         let previousParticipantsById = Dictionary(uniqueKeysWithValues: participants.map { ($0.id, $0) })
         let previousHostId = lastKnownHostId
+        let wasStarted = isSessionStarted
 
         code = snapshot.code
         role = snapshot.hostId == currentParticipantId ? .host : .guest
         participants = snapshot.participants
         selectedMedia = snapshot.selectedMedia
         isSessionStarted = snapshot.started
-        playbackSyncEngine.setEnabled(snapshot.started)
+        // Only enable playback sync for VOD, not live TV
+        playbackSyncEngine.setEnabled(snapshot.started && snapshot.liveTVChannel == nil)
 
         readyMap = Dictionary(uniqueKeysWithValues: participants.map { ($0.id, $0.isReady) })
         mediaAccessMap = Dictionary(uniqueKeysWithValues: participants.map { ($0.id, $0.hasMediaAccess) })
@@ -336,6 +406,35 @@ final class WatchTogetherViewModel {
         }
 
         handleSelectedMediaChange(snapshot.selectedMedia)
+
+        let previousLiveTVChannel = selectedLiveTVChannel
+        selectedLiveTVChannel = snapshot.liveTVChannel
+
+        // Auto-report media access for live TV (all participants on same server can tune)
+        if snapshot.liveTVChannel != nil, previousLiveTVChannel?.channelId != snapshot.liveTVChannel?.channelId {
+            Task {
+                await sendMessage(.mediaAccess(MediaAccessRequest(hasAccess: true)))
+            }
+        }
+
+        if let serverMessages = snapshot.chatMessages {
+            chatMessages = serverMessages
+        }
+
+        // Late-join: session is playing but we weren't in playback yet
+        if snapshot.started, !wasStarted {
+            if let channel = snapshot.liveTVChannel {
+                Task {
+                    await tuneLiveTV(channelId: channel.channelId, channelName: channel.channelName)
+                }
+            } else if let media = snapshot.selectedMedia {
+                handleLateJoinPlayback(
+                    media: media,
+                    positionSeconds: snapshot.currentPositionSeconds,
+                    isPaused: snapshot.isPaused ?? false,
+                )
+            }
+        }
     }
 
     private func handleSelectedMediaChange(_ media: WatchTogetherSelectedMedia?) {
@@ -426,6 +525,11 @@ final class WatchTogetherViewModel {
         playbackSyncEngine.setEnabled(false)
         lastMediaAccessRatingKey = nil
         lastKnownHostId = nil
+        pendingLateJoinSeek = nil
+        pendingLateJoinPaused = false
+        chatMessages = []
+        chatInput = ""
+        selectedLiveTVChannel = nil
     }
 
     private func verifyMediaAccess(for media: WatchTogetherSelectedMedia) async -> Bool {
@@ -443,7 +547,6 @@ final class WatchTogetherViewModel {
 
     private func handleStartPlayback(_ payload: WatchTogetherStartPlayback) {
         isSessionStarted = true
-        playbackSyncEngine.setEnabled(true)
 
         Task {
             let nowMs = Int64(Date().timeIntervalSince1970 * 1000)
@@ -452,16 +555,79 @@ final class WatchTogetherViewModel {
                 try? await Task.sleep(nanoseconds: UInt64(delayMs) * 1_000_000)
             }
 
+            if let channel = selectedLiveTVChannel {
+                await tuneLiveTV(channelId: channel.channelId, channelName: channel.channelName)
+            } else {
+                playbackSyncEngine.setEnabled(true)
+
+                guard let playbackLauncher else {
+                    showToast(String(localized: "watchTogether.error.playbackLauncher"))
+                    return
+                }
+
+                await playbackLauncher.play(
+                    ratingKey: payload.ratingKey,
+                    type: payload.type,
+                    shouldResumeFromOffset: false,
+                )
+            }
+        }
+    }
+
+    private func handleLateJoinPlayback(
+        media: WatchTogetherSelectedMedia,
+        positionSeconds: Double?,
+        isPaused: Bool,
+    ) {
+        if let positionSeconds {
+            pendingLateJoinSeek = positionSeconds
+            pendingLateJoinPaused = isPaused
+        }
+
+        Task {
             guard let playbackLauncher else {
                 showToast(String(localized: "watchTogether.error.playbackLauncher"))
                 return
             }
 
             await playbackLauncher.play(
-                ratingKey: payload.ratingKey,
-                type: payload.type,
+                ratingKey: media.ratingKey,
+                type: media.type,
                 shouldResumeFromOffset: false,
             )
+        }
+    }
+
+    private func tuneLiveTV(channelId: String, channelName: String) async {
+        guard let showLiveTVPlayer else {
+            showToast(String(localized: "watchTogether.error.playbackLauncher"))
+            return
+        }
+
+        do {
+            let repo = try LiveTVRepository(context: context)
+            let dvrResponse = try await repo.getDVRs()
+            guard let dvr = dvrResponse.mediaContainer.dvr?.first else {
+                showToast("No DVR configured on this server")
+                return
+            }
+
+            let response = try await repo.tuneChannel(dvrKey: dvr.key, channelIdentifier: channelId)
+            guard let sessionPath = response.sessionPath else {
+                showToast("Failed to tune channel")
+                return
+            }
+
+            let clientSession = UUID().uuidString
+            try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession)
+            guard let url = repo.liveTVStreamURL(sessionPath: sessionPath, session: clientSession) else {
+                showToast("Failed to build stream URL")
+                return
+            }
+
+            showLiveTVPlayer(url, channelName)
+        } catch {
+            showToast("Failed to tune live TV")
         }
     }
 

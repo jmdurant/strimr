@@ -105,6 +105,10 @@ struct WatchTogetherView: View {
                 Section {
                     actionsSection
                 }
+
+                Section("Chat") {
+                    chatSection
+                }
             }
             .listStyle(.insetGrouped)
 
@@ -161,14 +165,33 @@ struct WatchTogetherView: View {
         ForEach(viewModel.participants) { participant in
             WatchTogetherParticipantRow(
                 participant: participant,
-                hasSelectedMedia: viewModel.selectedMedia != nil,
+                hasSelectedMedia: viewModel.selectedMedia != nil || viewModel.selectedLiveTVChannel != nil,
             )
         }
     }
 
     private var selectedMediaSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let selectedMedia = viewModel.selectedMedia {
+            if let liveTVChannel = viewModel.selectedLiveTVChannel {
+                HStack(spacing: 12) {
+                    Image(systemName: "tv")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(liveTVChannel.channelName)
+                            .font(.headline)
+                        Text("Live TV")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.gray.opacity(0.12))
+                )
+            } else if let selectedMedia = viewModel.selectedMedia {
                 WatchTogetherSelectedMediaCard(media: selectedMedia)
             } else {
                 Text("watchTogether.selectedMedia.empty")
@@ -180,6 +203,14 @@ struct WatchTogetherView: View {
                     WatchTogetherSearchView { media in
                         viewModel.setSelectedMedia(media)
                     }
+                }
+
+                NavigationLink {
+                    WatchTogetherLiveTVPickerView { channelId, channelName, thumb in
+                        viewModel.setLiveTVChannel(channelId: channelId, channelName: channelName, thumb: thumb)
+                    }
+                } label: {
+                    Label("Live TV Channel", systemImage: "tv")
                 }
             }
         }
@@ -193,6 +224,56 @@ struct WatchTogetherView: View {
                 set: { _ in viewModel.toggleReady() },
             ),
         )
+    }
+
+    private var chatSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if viewModel.chatMessages.isEmpty {
+                Text("No messages yet")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            } else {
+                ForEach(viewModel.chatMessages) { message in
+                    chatBubble(message)
+                }
+            }
+
+            HStack(spacing: 8) {
+                TextField("Message...", text: Binding(
+                    get: { viewModel.chatInput },
+                    set: { viewModel.chatInput = $0 }
+                ))
+                .textFieldStyle(.roundedBorder)
+
+                Button {
+                    viewModel.sendChatMessage()
+                } label: {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.title2)
+                }
+                .disabled(viewModel.chatInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+        }
+    }
+
+    private func chatBubble(_ message: WatchTogetherChatMessage) -> some View {
+        let isMe = message.senderId == viewModel.currentParticipantId
+        return VStack(alignment: isMe ? .trailing : .leading, spacing: 2) {
+            if !isMe {
+                Text(message.senderName)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            Text(message.text)
+                .font(.callout)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(isMe ? Color.accentColor.opacity(0.2) : Color.gray.opacity(0.15))
+                )
+        }
+        .frame(maxWidth: .infinity, alignment: isMe ? .trailing : .leading)
     }
 
     private var startPlaybackButton: some View {
@@ -364,6 +445,66 @@ private struct WatchTogetherSearchView: View {
         SearchView(viewModel: SearchViewModel(context: plexApiContext)) { media in
             onSelect(media)
             dismiss()
+        }
+    }
+}
+
+private struct WatchTogetherLiveTVPickerView: View {
+    @Environment(PlexAPIContext.self) private var plexApiContext
+    @Environment(SettingsManager.self) private var settingsManager
+    @Environment(\.dismiss) private var dismiss
+    let onSelect: (String, String, String?) -> Void
+
+    @State private var viewModel: LiveTVViewModel?
+
+    var body: some View {
+        Group {
+            if let viewModel {
+                if viewModel.isLoading, viewModel.channels.isEmpty {
+                    ProgressView("Loading channels...")
+                } else {
+                    List(viewModel.channels) { channel in
+                        Button {
+                            onSelect(channel.tuneIdentifier, channel.displayName, channel.thumb)
+                            dismiss()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Text(channel.channelNumber)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                                    .frame(width: 40, alignment: .trailing)
+
+                                if let thumb = channel.thumb, let thumbURL = URL(string: thumb) {
+                                    AsyncImage(url: thumbURL) { phase in
+                                        if case let .success(image) = phase {
+                                            image.resizable().scaledToFit()
+                                        } else {
+                                            Color.clear
+                                        }
+                                    }
+                                    .frame(width: 28, height: 28)
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                }
+
+                                Text(channel.displayName)
+                                    .font(.body)
+                            }
+                        }
+                    }
+                }
+            } else {
+                ProgressView()
+            }
+        }
+        .navigationTitle("Select Channel")
+        .task {
+            if viewModel == nil {
+                let vm = LiveTVViewModel(context: plexApiContext)
+                vm.settingsManager = settingsManager
+                viewModel = vm
+                await vm.load()
+            }
         }
     }
 }

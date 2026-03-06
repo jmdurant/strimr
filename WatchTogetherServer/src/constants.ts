@@ -3,3 +3,4 @@ export const CLEANUP_INTERVAL_MS = 60 * 1000;
 export const HEARTBEAT_INTERVAL_MS = 15 * 1000;
 export const HEARTBEAT_TIMEOUT_MS = 45 * 1000;
 export const MIN_PARTICIPANTS_TO_START_PLAYBACK = 2;
+export const MAX_CHAT_MESSAGES = 100;

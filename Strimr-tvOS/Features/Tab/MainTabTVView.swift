@@ -122,6 +122,9 @@ struct MainTabTVView: View {
                     openURL: { url in openURL(url) },
                 ),
             )
+            watchTogetherViewModel.configureLiveTVPlayer { [weak coordinator] url, channelName in
+                coordinator?.showLiveTV(streamURL: url, channelName: channelName)
+            }
         }
         .fullScreenCover(isPresented: $coordinator.isPresentingPlayer, onDismiss: coordinator.resetPlayer) {
             if let playQueue = coordinator.selectedPlayQueue,
@@ -136,6 +139,13 @@ struct MainTabTVView: View {
                     ),
                     onExit: coordinator.resetPlayer,
                 )
+            }
+        }
+        .fullScreenCover(isPresented: $coordinator.isPresentingLiveTV, onDismiss: coordinator.dismissLiveTV) {
+            if let url = coordinator.liveTVStreamURL,
+               let name = coordinator.liveTVChannelName
+            {
+                LiveTVPlayerTVView(streamURL: url, channelName: name, programTitle: coordinator.liveTVProgramTitle, programEndsAt: coordinator.liveTVProgramEndsAt)
             }
         }
     }
