@@ -238,7 +238,7 @@ struct LiveTVTVView: View {
         VStack(spacing: 12) {
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.gray.opacity(0.15))
+                    .fill(Color.gray.opacity(0.2))
                     .frame(height: 140)
 
                 if tuningChannelKey == channel.id {

@@ -1,8 +1,10 @@
 import SwiftUI
 
 private let gridBackground: Color = {
-    #if os(watchOS) || os(tvOS)
+    #if os(watchOS)
     return Color.black
+    #elseif os(tvOS)
+    return Color("Background")
     #else
     return Color(.systemBackground)
     #endif
