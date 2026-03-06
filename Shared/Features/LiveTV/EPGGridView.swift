@@ -33,14 +33,18 @@ struct EPGGridView: View {
 
     #if os(tvOS)
     private let blockGap: CGFloat = 4
-    private let channelNumberWidth: CGFloat = 56
+    private let channelNumberWidth: CGFloat = 72
     private let blockCornerRadius: CGFloat = 8
     private let programPadding: CGFloat = 10
+    private let channelIconSize: CGFloat = 44
+    private let channelIconCornerRadius: CGFloat = 8
     #else
     private let blockGap: CGFloat = 2
     private let channelNumberWidth: CGFloat = 32
     private let blockCornerRadius: CGFloat = 4
     private let programPadding: CGFloat = 4
+    private let channelIconSize: CGFloat = 28
+    private let channelIconCornerRadius: CGFloat = 4
     #endif
 
     private var windowStart: Date {
@@ -105,8 +109,12 @@ struct EPGGridView: View {
                         }
                         .frame(width: adaptiveGridWidth)
                     }
+                    .frame(maxWidth: availableWidth)
+                    .clipped()
                 }
+                .frame(maxWidth: geo.size.width)
             }
+            .clipped()
         }
     }
 
@@ -124,6 +132,19 @@ struct EPGGridView: View {
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                         .frame(width: channelNumberWidth, alignment: .trailing)
+
+                    if let thumb = row.channel.thumb, let thumbURL = URL(string: thumb) {
+                        AsyncImage(url: thumbURL) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable().scaledToFit()
+                            default:
+                                Color.clear
+                            }
+                        }
+                        .frame(width: channelIconSize, height: channelIconSize)
+                        .clipShape(RoundedRectangle(cornerRadius: channelIconCornerRadius))
+                    }
 
                     Text(row.channel.displayName)
                         .font(channelFont)

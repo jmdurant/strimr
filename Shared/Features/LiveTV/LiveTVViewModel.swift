@@ -350,6 +350,8 @@ struct LiveStreamInfo: Identifiable {
     let id = UUID()
     let url: URL
     let channelName: String
+    var programTitle: String?
+    var programEndsAt: Date?
 }
 
 // MARK: - EPG Grid Types

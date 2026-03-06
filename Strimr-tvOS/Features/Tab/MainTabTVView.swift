@@ -27,37 +27,6 @@ struct MainTabTVView: View {
                 }
             }
 
-            if settingsManager.interface.displaySeerrDiscoverTab, seerrStore.isLoggedIn {
-                Tab("tabs.discover", systemImage: "sparkles", value: MainCoordinator.Tab.seerrDiscover) {
-                    NavigationStack(path: coordinator.pathBinding(for: .seerrDiscover)) {
-                        SeerrDiscoverTVView(
-                            viewModel: SeerrDiscoverViewModel(store: seerrStore),
-                            onSelectMedia: coordinator.showSeerrMediaDetail,
-                        )
-                        .navigationDestination(for: SeerrMedia.self) { media in
-                            SeerrMediaDetailTVView(
-                                viewModel: SeerrMediaDetailViewModel(
-                                    media: media,
-                                    store: seerrStore,
-                                ),
-                            )
-                        }
-                    }
-                }
-            }
-
-            Tab("tabs.search", systemImage: "magnifyingglass", value: MainCoordinator.Tab.search, role: .search) {
-                NavigationStack(path: coordinator.pathBinding(for: .search)) {
-                    SearchTVView(
-                        viewModel: SearchViewModel(context: plexApiContext),
-                        onSelectMedia: coordinator.showMediaDetail,
-                    )
-                    .navigationDestination(for: MainCoordinator.Route.self) { route in
-                        destination(for: route)
-                    }
-                }
-            }
-
             Tab("tabs.libraries", systemImage: "rectangle.stack.fill", value: MainCoordinator.Tab.library) {
                 NavigationStack(path: coordinator.pathBinding(for: .library)) {
                     LibraryTVView(
@@ -93,6 +62,37 @@ struct MainTabTVView: View {
                         .navigationDestination(for: MainCoordinator.Route.self) { route in
                             destination(for: route)
                         }
+                    }
+                }
+            }
+
+            if settingsManager.interface.displaySeerrDiscoverTab, seerrStore.isLoggedIn {
+                Tab("tabs.discover", systemImage: "sparkles", value: MainCoordinator.Tab.seerrDiscover) {
+                    NavigationStack(path: coordinator.pathBinding(for: .seerrDiscover)) {
+                        SeerrDiscoverTVView(
+                            viewModel: SeerrDiscoverViewModel(store: seerrStore),
+                            onSelectMedia: coordinator.showSeerrMediaDetail,
+                        )
+                        .navigationDestination(for: SeerrMedia.self) { media in
+                            SeerrMediaDetailTVView(
+                                viewModel: SeerrMediaDetailViewModel(
+                                    media: media,
+                                    store: seerrStore,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+
+            Tab("tabs.search", systemImage: "magnifyingglass", value: MainCoordinator.Tab.search, role: .search) {
+                NavigationStack(path: coordinator.pathBinding(for: .search)) {
+                    SearchTVView(
+                        viewModel: SearchViewModel(context: plexApiContext),
+                        onSelectMedia: coordinator.showMediaDetail,
+                    )
+                    .navigationDestination(for: MainCoordinator.Route.self) { route in
+                        destination(for: route)
                     }
                 }
             }

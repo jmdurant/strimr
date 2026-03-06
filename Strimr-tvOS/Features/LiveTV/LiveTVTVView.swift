@@ -1,4 +1,81 @@
 import SwiftUI
+import UIKit
+
+// MARK: - Focus Guide
+
+/// Invisible full-width view that hosts a UIFocusGuide redirecting to the picker.
+private struct PickerFocusGuide: UIViewRepresentable {
+    func makeUIView(context: Context) -> PickerFocusGuideView {
+        PickerFocusGuideView()
+    }
+
+    func updateUIView(_ uiView: PickerFocusGuideView, context: Context) {
+        uiView.reconnectIfNeeded()
+    }
+}
+
+private class PickerFocusGuideView: UIView {
+    private let focusGuide = UIFocusGuide()
+    private var isSetUp = false
+
+    func reconnectIfNeeded() {
+        guard isSetUp, let segmented = findSegmentedControl(from: self) else { return }
+        focusGuide.preferredFocusEnvironments = [segmented]
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setUp()
+    }
+
+    private func setUp() {
+        guard !isSetUp, window != nil else { return }
+        isSetUp = true
+
+        // Add guide to the nearest large ancestor so it spans the full width
+        guard let container = findHostingView() else { return }
+        container.addLayoutGuide(focusGuide)
+
+        // Span the full width of the container, positioned at this view's vertical location
+        focusGuide.leftAnchor.constraint(equalTo: container.leftAnchor).isActive = true
+        focusGuide.rightAnchor.constraint(equalTo: container.rightAnchor).isActive = true
+        focusGuide.topAnchor.constraint(equalTo: topAnchor, constant: -20).isActive = true
+        focusGuide.heightAnchor.constraint(equalToConstant: 80).isActive = true
+
+        if let segmented = findSegmentedControl(from: self) {
+            focusGuide.preferredFocusEnvironments = [segmented]
+        }
+    }
+
+    private func findHostingView() -> UIView? {
+        var current: UIView? = superview
+        while let view = current {
+            if String(describing: Swift.type(of: view)).contains("UIHostingView") {
+                return view
+            }
+            current = view.superview
+        }
+        return superview
+    }
+
+    private func findSegmentedControl(from view: UIView) -> UISegmentedControl? {
+        // Walk up to find a common ancestor, then search down
+        var ancestor: UIView? = view
+        for _ in 0..<15 {
+            ancestor = ancestor?.superview
+        }
+        return findSubview(of: UISegmentedControl.self, in: ancestor ?? view.window)
+    }
+
+    private func findSubview<T: UIView>(of type: T.Type, in view: UIView?) -> T? {
+        guard let view else { return nil }
+        if let match = view as? T { return match }
+        for sub in view.subviews {
+            if let match = findSubview(of: type, in: sub) { return match }
+        }
+        return nil
+    }
+}
 
 struct LiveTVTVView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
@@ -34,6 +111,9 @@ struct LiveTVTVView: View {
             .frame(width: 300)
             .padding(.bottom, 24)
 
+            PickerFocusGuide()
+                .frame(height: 0)
+
             Group {
                 if let viewModel {
                     if viewModel.isLoading, viewModel.channels.isEmpty {
@@ -63,7 +143,7 @@ struct LiveTVTVView: View {
                 }
             }
         }
-        .navigationTitle("Live TV")
+        .navigationTitle("")
         .task {
             if viewModel == nil {
                 let vm = LiveTVViewModel(context: plexApiContext)
@@ -73,7 +153,7 @@ struct LiveTVTVView: View {
             }
         }
         .fullScreenCover(item: $activeStream) { info in
-            LiveTVPlayerTVView(streamURL: info.url, channelName: info.channelName)
+            LiveTVPlayerTVView(streamURL: info.url, channelName: info.channelName, programTitle: info.programTitle, programEndsAt: info.programEndsAt)
                 .ignoresSafeArea()
         }
         .alert("Unable to Tune", isPresented: Binding(
@@ -163,10 +243,25 @@ struct LiveTVTVView: View {
 
                 if tuningChannelKey == channel.id {
                     ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let thumb = channel.thumb, let thumbURL = URL(string: thumb) {
+                    AsyncImage(url: thumbURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFit()
+                        default:
+                            Image(systemName: "tv")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(width: 80, height: 80)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     Image(systemName: "tv")
                         .font(.system(size: 40))
                         .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
 
                 if isFav {
@@ -215,6 +310,10 @@ struct LiveTVTVView: View {
         defer { tuningChannelKey = nil }
 
         guard let result = await viewModel?.tune(channel: channel) else { return }
-        activeStream = LiveStreamInfo(url: result.url, channelName: result.channelName)
+        let airing = viewModel?.airingProgram(for: channel)
+        let np = viewModel?.nowPlaying(for: channel)
+        let title = result.programTitle ?? airing?.title ?? np?.title
+        let endsAt = airing?.endsAt ?? np?.endsAt
+        activeStream = LiveStreamInfo(url: result.url, channelName: result.channelName, programTitle: title, programEndsAt: endsAt)
     }
 }
