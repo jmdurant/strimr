@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 
 struct WatchMediaDetailView: View {
@@ -250,9 +251,9 @@ struct WatchMediaDetailView: View {
     }
 
     private func play(shouldResume: Bool) async {
-        writeDebug("[Detail] play tapped, shouldResume=\(shouldResume), vm=\(viewModel != nil), ratingKey=\(viewModel?.primaryActionRatingKey ?? "NIL"), plexType=\(media.plexType.rawValue)")
+        AppLogger.fileLog("play tapped, shouldResume=\(shouldResume), vm=\(viewModel != nil), ratingKey=\(viewModel?.primaryActionRatingKey ?? "NIL"), plexType=\(media.plexType.rawValue)", logger: AppLogger.player)
         guard let ratingKey = viewModel?.primaryActionRatingKey else {
-            writeDebug("[Detail] BAILING: primaryActionRatingKey is nil")
+            AppLogger.fileLog("BAILING: primaryActionRatingKey is nil", logger: AppLogger.player)
             return
         }
         await launchPlayback(ratingKey: ratingKey, type: media.plexType, shouldResume: shouldResume)
@@ -263,13 +264,13 @@ struct WatchMediaDetailView: View {
     }
 
     private func launchPlayback(ratingKey: String, type: PlexItemType, shouldResume: Bool) async {
-        writeDebug("[Detail] launchPlayback ratingKey=\(ratingKey), type=\(type.rawValue)")
+        AppLogger.fileLog("launchPlayback ratingKey=\(ratingKey), type=\(type.rawValue)", logger: AppLogger.player)
 
         // Play from local download if available
         if let downloadItem = downloadManager.downloadStatus(for: ratingKey),
            downloadItem.status == .completed,
            let localURL = downloadManager.localVideoURL(for: downloadItem) {
-            writeDebug("[Detail] playing local download for \(ratingKey)")
+            AppLogger.fileLog("playing local download for \(ratingKey)", logger: AppLogger.player)
             localPlayback = LocalPlaybackRequest(
                 id: downloadItem.id,
                 ratingKey: downloadItem.ratingKey,
@@ -289,11 +290,10 @@ struct WatchMediaDetailView: View {
                          || type == .track || type == .album || type == .artist,
                 shuffle: false
             )
-            writeDebug("[Detail] queue created, showing player")
+            AppLogger.fileLog("queue created, showing player", logger: AppLogger.player)
             presentedPlayQueue = queue
         } catch {
-            writeDebug("[Detail] FAILED to create play queue: \(error)")
-            debugPrint("Failed to create play queue:", error)
+            AppLogger.fileLog("FAILED to create play queue: \(error)", logger: AppLogger.player)
         }
     }
 

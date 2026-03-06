@@ -1,8 +1,6 @@
 import Foundation
 import os
 
-private let netLogger = Logger(subsystem: "com.doctordurant.strimr", category: "PlexNetwork")
-
 final class PlexServerNetworkClient {
     private let session: URLSession = PlexURLSession.shared
     private var authToken: String
@@ -39,19 +37,10 @@ final class PlexServerNetworkClient {
             throw PlexAPIError.requestFailed(statusCode: -1)
         }
 
-        // Log response details for tune requests
         if path.contains("/tune") {
             let bodyStr = String(data: data.prefix(3000), encoding: .utf8) ?? "(not utf8)"
-            // Write to file-based debug log (watchOS suppresses os_log info)
             let logLine = "HTTP \(httpResponse.statusCode), \(data.count) bytes\n\(bodyStr)"
-            let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let logURL = dir.appendingPathComponent("debug.log")
-            if let logData = "\(logLine)\n".data(using: .utf8),
-               let handle = try? FileHandle(forWritingTo: logURL) {
-                handle.seekToEndOfFile()
-                handle.write(logData)
-                handle.closeFile()
-            }
+            AppLogger.fileLog(logLine, logger: AppLogger.network)
         }
 
         guard 200 ..< 300 ~= httpResponse.statusCode else {
@@ -73,7 +62,7 @@ final class PlexServerNetworkClient {
         method: String = "GET",
         headers: [String: String] = [:],
     ) async throws -> Response {
-        NSLog("[PlexNetwork] %@ %@", method, url.absoluteString)
+        AppLogger.network.info("\(method) \(url.absoluteString)")
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -142,19 +131,12 @@ final class PlexServerNetworkClient {
             throw PlexAPIError.invalidURL
         }
 
-        // File-based debug log for tune requests
         if path.contains("/tune") {
-            let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let logURL = dir.appendingPathComponent("debug.log")
-            let msg = "[NET] \(method) \(url.absoluteString)\n[NET] clientId=\(clientIdentifier ?? "(nil)") baseURL=\(baseURL.absoluteString)\n"
-            if let data = msg.data(using: .utf8), let handle = try? FileHandle(forWritingTo: logURL) {
-                handle.seekToEndOfFile()
-                handle.write(data)
-                handle.closeFile()
-            }
+            let msg = "\(method) \(url.absoluteString)\nclientId=\(clientIdentifier ?? "(nil)") baseURL=\(baseURL.absoluteString)"
+            AppLogger.fileLog(msg, logger: AppLogger.network)
         }
 
-        NSLog("[PlexNetwork] %@ %@", method, url.absoluteString)
+        AppLogger.network.info("\(method) \(url.absoluteString)")
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")

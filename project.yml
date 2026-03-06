@@ -8,6 +8,7 @@ options:
     iOS: "26.0"
     tvOS: "26.0"
     watchOS: "26.2"
+    macOS: "15.5"
 
 configFiles:
   Debug: Config/Config.xcconfig
@@ -364,6 +365,129 @@ targets:
         embed: true
         codeSign: true
       - target: StrimrWidgetExtension
+
+  Strimr-macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.5"
+    configFiles:
+      Debug: Config/Config.xcconfig
+      Release: Config/Config.xcconfig
+    entitlements:
+      path: Strimr-macOS/Strimr-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+    sources:
+      - path: Strimr-macOS
+        excludes:
+          - Info.plist
+      - path: Shared
+        excludes:
+          - Intents/StrimrAppIntents.swift
+          - Intents/StrimrShortcuts.swift
+          - Library/Audio/VLCAudioBridge.h
+          - Library/Audio/VLCAudioBridge.m
+          - Library/VLC/VLCPlayerView.swift
+          - Library/VLC/VLCPlayerViewController.swift
+          - Library/VLC/VLCPlayerDelegate.swift
+          - Library/MPV/MPVPlayerView.swift
+          - Library/MPV/MPVPlayerViewController.swift
+          - Library/MPV/MetalLayer.swift
+          - Library/Player/PlayerFactory.swift
+          - Features/Player/Controls/PlayerBadge.swift
+          - Features/Player/Controls/PlayerTimelineView.swift
+          - Features/Search/SearchResultCard.swift
+          - Features/Seerr/SeerrDiscoverViewModel.swift
+          - Features/Seerr/SeerrManageRequestsViewModel.swift
+          - Features/Seerr/SeerrMediaDetailViewModel.swift
+          - Features/Seerr/SeerrMediaRequestAvailability.swift
+          - Features/Seerr/SeerrMediaRequestType.swift
+          - Features/Seerr/SeerrMediaRequestViewModel.swift
+          - Features/Seerr/SeerrPendingRequestsViewModel.swift
+          - Features/Seerr/SeerrSearchViewModel.swift
+          - Features/Settings/DisplayedLibrariesSectionView.swift
+          - Features/Settings/DisplayedLibrariesViewModel.swift
+          - Features/Settings/NavigationLibrariesSectionView.swift
+          - Features/Settings/NavigationLibrariesViewModel.swift
+          - Features/Integrations/SeerrPermissionService.swift
+          - Features/Integrations/SeerrSessionService.swift
+          - Features/Integrations/SeerrViewModel.swift
+          - Features/MediaDetail/CastSection.swift
+          - Features/MediaDetail/RelatedHubsSection.swift
+          - Features/Library/LibraryBrowseControlsView.swift
+          - Models/Seerr/SeerrAuthRequests.swift
+          - Models/Seerr/SeerrMedia.swift
+          - Models/Seerr/SeerrPaginatedResponse.swift
+          - Models/Seerr/SeerrQuota.swift
+          - Models/Seerr/SeerrRequest.swift
+          - Models/Seerr/SeerrRequestCount.swift
+          - Models/Seerr/SeerrRequestPageResponse.swift
+          - Models/Seerr/SeerrRequestPayloads.swift
+          - Models/Seerr/SeerrServiceModels.swift
+          - Models/Seerr/SeerrSettings.swift
+          - Models/Seerr/SeerrUser.swift
+          - Networking/Seerr/SeerrAPI.swift
+          - Networking/Seerr/SeerrNetworkClient.swift
+          - Networking/Seerr/TMDBImageService.swift
+          - Repository/Seerr/SeerrAuthRepository.swift
+          - Repository/Seerr/SeerrDiscoverRepository.swift
+          - Repository/Seerr/SeerrMediaRepository.swift
+          - Repository/Seerr/SeerrRequestRepository.swift
+          - Repository/Seerr/SeerrServiceRepository.swift
+          - Repository/Seerr/SeerrSettingsRepository.swift
+          - Store/SeerrStore.swift
+          - Views/Seerr/SeerrAvailabilityBadgeView.swift
+          - Views/Seerr/SeerrCastSection.swift
+          - Views/Seerr/SeerrEpisodeCardView.swift
+          - Views/Seerr/SeerrMediaArtworkView.swift
+          - Views/Seerr/SeerrMediaCard.swift
+          - Views/Seerr/SeerrMediaCarousel.swift
+          - Views/Seerr/SeerrMediaSection.swift
+          - Views/Seerr/SeerrRelatedSection.swift
+          - Views/Seerr/SeerrSearchCard.swift
+          - Views/Seerr/SeerrSeasonAvailabilityBadgeView.swift
+      - path: Shared/Widget/WidgetData.swift
+        buildPhase: none
+      - path: Localizable.xcstrings
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.doctordurant.strimr.macos
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: Strimr-macOS/Info.plist
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: PHS5V2FW3J
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.0"
+        ENABLE_APP_SANDBOX: YES
+        GENERATE_INFOPLIST_FILE: YES
+        COMBINE_HIDPI_IMAGES: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+        PRODUCT_NAME: "$(TARGET_NAME)"
+        SDKROOT: macosx
+        STRING_CATALOG_GENERATE_SYMBOLS: YES
+        SWIFT_APPROACHABLE_CONCURRENCY: YES
+        SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+        SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS:
+          - "$(inherited)"
+      debug:
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS:
+          - "$(inherited)"
+          - "DEBUG"
+      release:
+        VALIDATE_PRODUCT: YES
+    dependencies:
+      - package: Sentry
+      - package: MPVKit
+        product: MPVKit-GPL
 
   StrimrWidgetExtension:
     type: app-extension

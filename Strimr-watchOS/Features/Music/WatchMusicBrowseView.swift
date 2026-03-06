@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 
 struct WatchMusicBrowseView: View {
@@ -328,7 +329,7 @@ struct WatchMusicTracksView: View {
             )
             presentedPlayQueue = queue
         } catch {
-            debugPrint("Failed to play track:", error)
+            AppLogger.player.error("Failed to play track: \(error)")
         }
     }
 
@@ -342,7 +343,7 @@ struct WatchMusicTracksView: View {
             )
             presentedPlayQueue = queue
         } catch {
-            debugPrint("Failed to play album:", error)
+            AppLogger.player.error("Failed to play album: \(error)")
         }
     }
 }

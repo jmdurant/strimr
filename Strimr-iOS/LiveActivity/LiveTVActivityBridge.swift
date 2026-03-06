@@ -1,5 +1,6 @@
 import ActivityKit
 import Foundation
+import os
 
 @MainActor
 final class LiveTVActivityBridge {
@@ -18,8 +19,7 @@ final class LiveTVActivityBridge {
         isStarted = true
 
         let authInfo = ActivityAuthorizationInfo()
-        NSLog("[LiveActivity-TV] Starting — channel: %@, activitiesEnabled: %d",
-              channelName, authInfo.areActivitiesEnabled ? 1 : 0)
+        AppLogger.liveActivity.info("Starting — channel: \(self.channelName), activitiesEnabled: \(authInfo.areActivitiesEnabled)")
 
         let attributes = LiveTVAttributes(
             channelName: channelName,
@@ -38,9 +38,9 @@ final class LiveTVActivityBridge {
                 content: ActivityContent(state: initialState, staleDate: nil),
                 pushType: nil
             )
-            NSLog("[LiveActivity-TV] Started successfully — id: %@", activity?.id ?? "?")
+            AppLogger.liveActivity.info("Started successfully — id: \(self.activity?.id ?? "?")")
         } catch {
-            NSLog("[LiveActivity-TV] Failed to start: %@", String(describing: error))
+            AppLogger.liveActivity.error("Failed to start: \(error)")
         }
     }
 

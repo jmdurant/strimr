@@ -1,5 +1,6 @@
 import Foundation
 import Libmpv
+import os
 import UIKit
 
 /// warning: metal API validation has been disabled to ignore crash when playing HDR videos.
@@ -74,7 +75,7 @@ final class MPVPlayerViewController: UIViewController {
     func setupMpv() {
         mpv = mpv_create()
         guard let mpv else {
-            print("failed creating context\n")
+            AppLogger.player.error("Failed creating mpv context")
             exit(1)
         }
 
@@ -279,7 +280,6 @@ final class MPVPlayerViewController: UIViewController {
                 free(UnsafeMutablePointer(mutating: ptr!))
             }
         }
-        // print("\(command) -- \(args)")
         let returnValue = mpv_command(mpv, &cargs)
         if checkForErrors {
             checkError(returnValue)
@@ -363,17 +363,17 @@ final class MPVPlayerViewController: UIViewController {
                         self.playDelegate?.fileLoaded()
                     }
                 case MPV_EVENT_SHUTDOWN:
-                    print("event: shutdown\n")
+                    AppLogger.player.debug("event: shutdown")
                     destruct()
                 case MPV_EVENT_LOG_MESSAGE:
                     let msg = UnsafeMutablePointer<mpv_event_log_message>(OpaquePointer(event!.pointee.data))
-                    print(
-                        "[\(String(cString: (msg!.pointee.prefix)!))] \(String(cString: (msg!.pointee.level)!)): \(String(cString: (msg!.pointee.text)!))",
-                        terminator: "",
-                    )
+                    let prefix = String(cString: msg!.pointee.prefix!)
+                    let level = String(cString: msg!.pointee.level!)
+                    let text = String(cString: msg!.pointee.text!)
+                    AppLogger.player.debug("[\(prefix)] \(level): \(text)")
                 default:
                     let eventName = mpv_event_name(event!.pointee.event_id)
-                    print("event: \(String(cString: eventName!))")
+                    AppLogger.player.debug("event: \(String(cString: eventName!))")
                 }
             }
         }
@@ -445,7 +445,7 @@ final class MPVPlayerViewController: UIViewController {
 
     private func checkError(_ status: CInt) {
         if status < 0 {
-            print("MPV API error: \(String(cString: mpv_error_string(status)))\n")
+            AppLogger.player.error("MPV API error: \(String(cString: mpv_error_string(status)))")
         }
     }
 }

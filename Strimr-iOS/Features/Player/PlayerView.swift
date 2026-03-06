@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 
 struct PlayerView: View {
@@ -185,7 +186,7 @@ struct PlayerView: View {
             }
         }
         .onAppear {
-            NSLog("[Player] onAppear — isResumingFromBackground=%d", isResumingFromBackground ? 1 : 0)
+            AppLogger.player.debug("onAppear — isResumingFromBackground=\(isResumingFromBackground)")
             showControls(temporarily: true)
             if isResumingFromBackground {
                 // Player is already playing — just re-register the Live Activity bridge
@@ -204,7 +205,7 @@ struct PlayerView: View {
             }
         }
         .onDisappear {
-            NSLog("[Player] onDisappear: isForceClosing=%d", isForceClosing ? 1 : 0)
+            AppLogger.player.debug("onDisappear: isForceClosing=\(isForceClosing)")
             hideControlsWorkItem?.cancel()
             playerCoordinator.stopRendererDiscovery()
             AppDelegate.orientationLock = .all
@@ -214,11 +215,11 @@ struct PlayerView: View {
             }
 
             if isForceClosing {
-                NSLog("[Player] force closing — destructing player")
+                AppLogger.player.debug("force closing — destructing player")
                 viewModel.handleStop()
                 LiveActivityManager.shared.stopNowPlaying()
             } else {
-                NSLog("[Player] manual dismiss — retaining player for background")
+                AppLogger.player.debug("manual dismiss — retaining player for background")
                 playerCoordinator.retainForBackground()
             }
         }

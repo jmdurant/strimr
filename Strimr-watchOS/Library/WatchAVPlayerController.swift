@@ -21,13 +21,13 @@ final class WatchAVPlayerController: PlayerCoordinating {
         try? session.setCategory(.playback, mode: .moviePlayback, policy: .longFormAudio)
         session.activate(options: []) { activated, error in
             if let error {
-                debugPrint("Audio session activation failed:", error)
+                AppLogger.player.error("Audio session activation failed: \(error)")
             }
         }
     }
 
     func play(_ url: URL) {
-        writeDebug("[WatchAVPlayer] play url=\(url.absoluteString)")
+        AppLogger.fileLog("play url=\(url.absoluteString)", logger: AppLogger.player)
         configureAudioSession()
         let asset = AVURLAsset(url: url)
         let item = AVPlayerItem(asset: asset)
@@ -156,27 +156,27 @@ final class WatchAVPlayerController: PlayerCoordinating {
 
         statusObservation = player.currentItem?.observe(\.status) { [weak self] item, _ in
             Task { @MainActor in
-                writeDebug("[WatchAVPlayer] status=\(item.status.rawValue), error=\(item.error?.localizedDescription ?? "none")")
+                AppLogger.fileLog("status=\(item.status.rawValue), error=\(item.error?.localizedDescription ?? "none")", logger: AppLogger.player)
                 switch item.status {
                 case .readyToPlay:
                     let duration = CMTimeGetSeconds(item.duration)
-                    writeDebug("[WatchAVPlayer] readyToPlay, duration=\(duration)")
+                    AppLogger.fileLog("readyToPlay, duration=\(duration)", logger: AppLogger.player)
                     let tracks = item.tracks
                     for track in tracks {
                         let mediaType = track.assetTrack?.mediaType.rawValue ?? "nil"
                         let enabled = track.isEnabled
                         let format = track.assetTrack?.formatDescriptions.first.map { String(describing: $0) } ?? "nil"
-                        writeDebug("[WatchAVPlayer] track: type=\(mediaType) enabled=\(enabled) format=\(format)")
+                        AppLogger.fileLog("track: type=\(mediaType) enabled=\(enabled) format=\(format)", logger: AppLogger.player)
                     }
                     if tracks.isEmpty {
-                        writeDebug("[WatchAVPlayer] WARNING: no tracks found in player item")
+                        AppLogger.fileLog("WARNING: no tracks found in player item", logger: AppLogger.player)
                     }
                     if duration.isFinite {
                         self?.onPropertyChange?(.duration, duration)
                     }
                     self?.onMediaLoaded?()
                 case .failed:
-                    writeDebug("[WatchAVPlayer] FAILED: \(item.error?.localizedDescription ?? "unknown")")
+                    AppLogger.fileLog("FAILED: \(item.error?.localizedDescription ?? "unknown")", logger: AppLogger.player)
                 default:
                     break
                 }

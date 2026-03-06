@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 @MainActor
 final class WatchSyncReceiver {
@@ -16,7 +17,7 @@ final class WatchSyncReceiver {
               var downloadMetadata = try? JSONDecoder().decode(
                   DownloadedMediaMetadata.self, from: metadataData
               ) else {
-            debugPrint("[WatchSync] Failed to decode metadata from transfer")
+            AppLogger.watchSync.error("Failed to decode metadata from transfer")
             return
         }
 
@@ -27,7 +28,7 @@ final class WatchSyncReceiver {
         do {
             try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
         } catch {
-            debugPrint("[WatchSync] Failed to create folder: \(error)")
+            AppLogger.watchSync.error("Failed to create folder: \(error)")
             return
         }
 
@@ -36,7 +37,7 @@ final class WatchSyncReceiver {
         do {
             try FileManager.default.moveItem(at: file, to: audioDestination)
         } catch {
-            debugPrint("[WatchSync] Failed to move audio file: \(error)")
+            AppLogger.watchSync.error("Failed to move audio file: \(error)")
             try? FileManager.default.removeItem(at: folderURL)
             return
         }
@@ -69,7 +70,7 @@ final class WatchSyncReceiver {
         )
 
         downloadManager.insertSyncedItem(item)
-        debugPrint("[WatchSync] Received and stored: \(downloadMetadata.title)")
+        AppLogger.watchSync.debug("Received and stored: \(downloadMetadata.title)")
     }
 
     private static func downloadsDirectory() -> URL {

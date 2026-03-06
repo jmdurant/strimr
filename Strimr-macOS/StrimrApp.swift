@@ -1,0 +1,64 @@
+import SwiftUI
+
+@main
+struct StrimrApp: App {
+    @State private var plexApiContext: PlexAPIContext
+    @State private var sessionManager: SessionManager
+    @State private var settingsManager: SettingsManager
+    @State private var libraryStore: LibraryStore
+    @State private var watchTogetherViewModel: WatchTogetherViewModel
+
+    init() {
+        let deps = AppDependencies.shared
+        _plexApiContext = State(initialValue: deps.plexApiContext)
+        _sessionManager = State(initialValue: deps.sessionManager)
+        _settingsManager = State(initialValue: deps.settingsManager)
+        _libraryStore = State(initialValue: deps.libraryStore)
+        _watchTogetherViewModel = State(initialValue: WatchTogetherViewModel(
+            sessionManager: deps.sessionManager,
+            context: deps.plexApiContext,
+            settingsManager: deps.settingsManager
+        ))
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(plexApiContext)
+                .environment(sessionManager)
+                .environment(settingsManager)
+                .environment(libraryStore)
+                .environment(watchTogetherViewModel)
+                .tint(settingsManager.interface.accentColor.color)
+                .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
+                .frame(minWidth: 900, minHeight: 600)
+        }
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+
+            CommandMenu("Playback") {
+                Button("Play / Pause") {
+                    NotificationCenter.default.post(name: .init("strimr.command.playPause"), object: nil)
+                }
+                .keyboardShortcut(.space, modifiers: [])
+
+                Button("Skip Forward") {
+                    NotificationCenter.default.post(name: .init("strimr.command.skipForward"), object: nil)
+                }
+                .keyboardShortcut(.rightArrow, modifiers: [])
+
+                Button("Skip Back") {
+                    NotificationCenter.default.post(name: .init("strimr.command.skipBack"), object: nil)
+                }
+                .keyboardShortcut(.leftArrow, modifiers: [])
+            }
+        }
+
+        Settings {
+            SettingsView()
+                .environment(settingsManager)
+                .environment(libraryStore)
+                .environment(watchTogetherViewModel)
+        }
+    }
+}

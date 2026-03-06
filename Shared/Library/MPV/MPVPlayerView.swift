@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SwiftUI
 
 struct MPVPlayerView: UIViewControllerRepresentable {
@@ -107,24 +108,24 @@ struct MPVPlayerView: UIViewControllerRepresentable {
 
         func retainForBackground() {
             retainedPlayer = player
-            NSLog("[MPV Coordinator] retainForBackground — player retained")
+            AppLogger.player.debug("retainForBackground — player retained")
         }
 
         func releaseFromBackground() {
             retainedPlayer = nil
-            NSLog("[MPV Coordinator] releaseFromBackground")
+            AppLogger.player.debug("releaseFromBackground")
         }
 
         func reuseRetainedPlayer() -> MPVPlayerViewController? {
             guard let retained = retainedPlayer else { return nil }
             retainedPlayer = nil
             player = retained
-            NSLog("[MPV Coordinator] reuseRetainedPlayer — reattached existing VC")
+            AppLogger.player.debug("reuseRetainedPlayer — reattached existing VC")
             return retained
         }
 
         func destruct() {
-            NSLog("[MPV Coordinator] destruct() called")
+            AppLogger.player.debug("destruct() called")
             let playerToDestruct = retainedPlayer ?? player
             playerToDestruct?.destruct()
             retainedPlayer = nil

@@ -2,8 +2,6 @@ import AuthenticationServices
 import os
 import SwiftUI
 
-private let authLog = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Auth")
-
 struct WatchSignInView: View {
     @Environment(SessionManager.self) private var sessionManager
     @Environment(PlexAPIContext.self) private var plexApiContext
@@ -93,18 +91,18 @@ struct WatchSignInView: View {
 
         do {
             let authRepo = AuthRepository(context: plexApiContext)
-            debugPrint("[Auth] Requesting PIN...")
+            AppLogger.auth.debug("Requesting PIN...")
             let pinResponse = try await authRepo.requestPin()
             let url = plexAuthURL(pin: pinResponse)
-            debugPrint("[Auth] PIN received, opening URL:", url.absoluteString)
-            debugPrint("[Auth] URL host:", url.host ?? "nil", "path:", url.path, "fragment:", url.fragment ?? "nil")
+            AppLogger.auth.debug("PIN received, opening URL: \(url.absoluteString)")
+            AppLogger.auth.debug("URL host: \(url.host ?? "nil") path: \(url.path) fragment: \(url.fragment ?? "nil")")
 
             authSession?.cancel()
             let session = ASWebAuthenticationSession(
                 url: url,
                 callbackURLScheme: nil
             ) { callbackURL, error in
-                debugPrint("[Auth] ASWebAuth callback — url:", callbackURL?.absoluteString ?? "nil", "error:", error?.localizedDescription ?? "nil", "code:", (error as NSError?)?.code ?? -1)
+                AppLogger.auth.debug("ASWebAuth callback — url: \(callbackURL?.absoluteString ?? "nil") error: \(error?.localizedDescription ?? "nil") code: \((error as NSError?)?.code ?? -1)")
                 if let authError = error as? ASWebAuthenticationSessionError,
                    authError.code == .canceledLogin
                 {
@@ -115,7 +113,7 @@ struct WatchSignInView: View {
             authSession = session
 
             let started = session.start()
-            debugPrint("[Auth] session.start() returned:", started)
+            AppLogger.auth.debug("session.start() returned: \(started)")
 
             guard started else {
                 errorMessage = "Failed to start auth session"
@@ -125,7 +123,7 @@ struct WatchSignInView: View {
 
             beginPolling(pinID: pinResponse.id)
         } catch {
-            debugPrint("[Auth] Error:", error)
+            AppLogger.auth.debug("Error: \(error)")
             errorMessage = error.localizedDescription
             isSigningIn = false
         }

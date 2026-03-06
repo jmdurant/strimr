@@ -3,20 +3,6 @@ import AVKit
 import os
 import SwiftUI
 
-private let logger = Logger(subsystem: "com.doctordurant.strimr.watchos", category: "Player")
-
-func writeDebug(_ msg: String) {
-    let path = NSHomeDirectory() + "/tmp/strimr-debug.log"
-    let line = "\(Date()): \(msg)\n"
-    if let handle = FileHandle(forWritingAtPath: path) {
-        handle.seekToEndOfFile()
-        handle.write(line.data(using: .utf8)!)
-        handle.closeFile()
-    } else {
-        FileManager.default.createFile(atPath: path, contents: line.data(using: .utf8))
-    }
-}
-
 private protocol PlayerCallbackProviding: PlayerCoordinating {
     var onPropertyChange: ((PlayerProperty, Any?) -> Void)? { get set }
     var onPlaybackEnded: (() -> Void)? { get set }
@@ -277,7 +263,7 @@ struct WatchPlayerView: View {
             viewModel = vm
         } else {
             // Streaming playback
-            writeDebug("[WatchPlayer] setupPlayer called, queue.selectedRatingKey=\(playQueue.selectedRatingKey ?? "nil")")
+            AppLogger.fileLog("setupPlayer called, queue.selectedRatingKey=\(playQueue.selectedRatingKey ?? "nil")", logger: AppLogger.player)
             vm = PlayerViewModel(
                 playQueue: playQueue,
                 context: plexApiContext,
@@ -285,10 +271,10 @@ struct WatchPlayerView: View {
             )
             vm.settingsManager = settingsManager
             viewModel = vm
-            writeDebug("[WatchPlayer] calling vm.load()")
+            AppLogger.fileLog("calling vm.load()", logger: AppLogger.player)
             await vm.load()
-            writeDebug("[WatchPlayer] vm.load() returned")
-            writeDebug("[WatchPlayer] load done, url=\(vm.playbackURL?.absoluteString ?? "nil"), error=\(vm.errorMessage ?? "none")")
+            AppLogger.fileLog("vm.load() returned", logger: AppLogger.player)
+            AppLogger.fileLog("load done, url=\(vm.playbackURL?.absoluteString ?? "nil"), error=\(vm.errorMessage ?? "none")", logger: AppLogger.player)
         }
 
         guard let url = vm.playbackURL else { return }
@@ -299,7 +285,7 @@ struct WatchPlayerView: View {
 
         if useVLC {
             // Offline audio — use VLC for local file playback + visualization bridge
-            writeDebug("[WatchPlayer] creating VLC for offline audio")
+            AppLogger.fileLog("creating VLC for offline audio", logger: AppLogger.player)
             await WatchVLCPlayerController.activateAudioSession()
 
             let playerCoordinator = WatchVLCPlayerController(options: PlayerOptions())
@@ -316,20 +302,20 @@ struct WatchPlayerView: View {
 
             if !isLocal {
                 // Remote streaming — proxy through localhost for TLS termination
-                writeDebug("[WatchPlayer] creating AVPlayer for streaming")
+                AppLogger.fileLog("creating AVPlayer for streaming", logger: AppLogger.player)
                 let proxy = HLSProxyServer.shared
                 if let serverBase = plexApiContext.baseURLServer {
                     do {
                         try await proxy.start(baseURL: serverBase)
-                        writeDebug("[HLSProxy] started on port \(proxy.port)")
+                        AppLogger.fileLog("started on port \(proxy.port)", logger: AppLogger.player)
                     } catch {
-                        writeDebug("[HLSProxy] failed to start: \(error)")
+                        AppLogger.fileLog("HLSProxy failed to start: \(error)", logger: AppLogger.player)
                     }
                 }
                 playURL = proxy.proxyURL(for: url) ?? url
-                writeDebug("[WatchPlayer] playURL=\(playURL.absoluteString)")
+                AppLogger.fileLog("playURL=\(playURL.absoluteString)", logger: AppLogger.player)
             } else {
-                writeDebug("[WatchPlayer] creating AVPlayer for local \(isVideo ? "video" : "audio")")
+                AppLogger.fileLog("creating AVPlayer for local \(isVideo ? "video" : "audio")", logger: AppLogger.player)
             }
 
             let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())

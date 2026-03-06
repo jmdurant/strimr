@@ -1,6 +1,7 @@
 import AVFoundation
 import Foundation
 import Observation
+import os
 
 @MainActor
 @Observable
@@ -118,7 +119,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 path: metadataPath,
                 session: sessionID
             ) else {
-                writeDebug("[WatchDownload] failed to build HLS URL for: \(mediaItem.title)")
+                AppLogger.fileLog("failed to build HLS URL for: \(mediaItem.title)", logger: AppLogger.downloads)
                 if let idx = items.firstIndex(where: { $0.id == id }) {
                     items[idx].status = .failed
                     items[idx].errorMessage = "Failed to build URL"
@@ -126,7 +127,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 }
                 return
             }
-            writeDebug("[WatchDownload] enqueue HLS video: \(mediaItem.title), url=\(hlsURL.absoluteString.prefix(200))")
+            AppLogger.fileLog("enqueue HLS video: \(mediaItem.title), url=\(hlsURL.absoluteString.prefix(200))", logger: AppLogger.downloads)
             await warmUpTranscode(hlsURL: hlsURL, title: mediaItem.title)
 
             let asset = AVURLAsset(url: hlsURL)
@@ -142,7 +143,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
             observeProgress(for: task, itemID: id)
             task.resume()
         } catch {
-            writeDebug("[WatchDownload] enqueue failed: \(error)")
+            AppLogger.fileLog("enqueue failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -219,7 +220,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
             persistState()
             task.resume()
         } catch {
-            writeDebug("[WatchDownload] enqueueTrack failed: \(error)")
+            AppLogger.fileLog("enqueueTrack failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -235,7 +236,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 await enqueueTrack(ratingKey: trackItem.id, context: context)
             }
         } catch {
-            writeDebug("[WatchDownload] enqueueAlbum failed: \(error)")
+            AppLogger.fileLog("enqueueAlbum failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -248,7 +249,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 await enqueueItem(ratingKey: episode.ratingKey, context: context)
             }
         } catch {
-            writeDebug("[WatchDownload] enqueueSeason failed: \(error)")
+            AppLogger.fileLog("enqueueSeason failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -320,7 +321,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 } else {
                     rawPath = assetPath
                 }
-                writeDebug("[localVideoURL] rawPath=\(rawPath)")
+                AppLogger.fileLog("rawPath=\(rawPath)", logger: AppLogger.downloads)
 
                 // Try as-is first
                 if FileManager.default.fileExists(atPath: rawPath) {
@@ -331,14 +332,14 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 if let range = rawPath.range(of: #"/Application/[A-Fa-f0-9\-]+/"#, options: .regularExpression) {
                     let relativePath = String(rawPath[range.upperBound...])
                     fullPath = NSHomeDirectory() + "/" + relativePath
-                    writeDebug("[localVideoURL] re-rooted=\(fullPath)")
+                    AppLogger.fileLog("re-rooted=\(fullPath)", logger: AppLogger.downloads)
                 } else {
-                    writeDebug("[localVideoURL] no regex match")
+                    AppLogger.fileLog("no regex match", logger: AppLogger.downloads)
                     return nil
                 }
             }
             let exists = FileManager.default.fileExists(atPath: fullPath)
-            writeDebug("[localVideoURL] exists=\(exists), path=\(fullPath)")
+            AppLogger.fileLog("exists=\(exists), path=\(fullPath)", logger: AppLogger.downloads)
             return exists ? URL(fileURLWithPath: fullPath) : nil
         }
 
@@ -466,7 +467,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
     ) {
         Task { @MainActor in
             assetDownloadLocations[assetDownloadTask.taskIdentifier] = location
-            writeDebug("[WatchDownload] willDownloadTo: \(location.path)")
+            AppLogger.fileLog("willDownloadTo: \(location.path)", logger: AppLogger.downloads)
         }
     }
 
@@ -479,12 +480,12 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
     ) {
         let host = challenge.protectionSpace.host
         let method = challenge.protectionSpace.authenticationMethod
-        writeDebug("[WatchDownload] TLS challenge: host=\(host), method=\(method)")
+        AppLogger.fileLog("TLS challenge: host=\(host), method=\(method)", logger: AppLogger.downloads)
         if method == NSURLAuthenticationMethodServerTrust,
            let serverTrust = challenge.protectionSpace.serverTrust,
            host.hasSuffix(".plex.direct")
         {
-            writeDebug("[WatchDownload] TLS: trusting .plex.direct")
+            AppLogger.fileLog("TLS: trusting .plex.direct", logger: AppLogger.downloads)
             completionHandler(.useCredential, URLCredential(trust: serverTrust))
         } else {
             completionHandler(.performDefaultHandling, nil)
@@ -505,28 +506,28 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
             let masterStatus = (masterResp as? HTTPURLResponse)?.statusCode ?? -1
             guard masterStatus == 200,
                   let masterBody = String(data: masterData, encoding: .utf8) else {
-                writeDebug("[WatchDownload] warmup: master m3u8 failed status=\(masterStatus) for \(title)")
+                AppLogger.fileLog("warmup: master m3u8 failed status=\(masterStatus) for \(title)", logger: AppLogger.downloads)
                 return false
             }
 
             // 2. Parse the variant playlist URL from the master
             let lines = masterBody.components(separatedBy: "\n")
             guard let variantLine = lines.first(where: { !$0.hasPrefix("#") && !$0.trimmingCharacters(in: .whitespaces).isEmpty }) else {
-                writeDebug("[WatchDownload] warmup: no variant URL in master for \(title)")
+                AppLogger.fileLog("warmup: no variant URL in master for \(title)", logger: AppLogger.downloads)
                 return false
             }
             guard let variantURL = URL(string: variantLine.trimmingCharacters(in: .whitespacesAndNewlines), relativeTo: hlsURL) else {
-                writeDebug("[WatchDownload] warmup: couldn't resolve variant URL for \(title)")
+                AppLogger.fileLog("warmup: couldn't resolve variant URL for \(title)", logger: AppLogger.downloads)
                 return false
             }
-            writeDebug("[WatchDownload] warmup: variant URL = \(variantURL.absoluteString.prefix(200))")
+            AppLogger.fileLog("warmup: variant URL = \(variantURL.absoluteString.prefix(200))", logger: AppLogger.downloads)
 
             // 3. Fetch variant playlist — this starts FFmpeg on the server
             let (variantData, variantResp) = try await PlexURLSession.shared.data(from: variantURL)
             let variantStatus = (variantResp as? HTTPURLResponse)?.statusCode ?? -1
             guard variantStatus == 200,
                   let variantBody = String(data: variantData, encoding: .utf8) else {
-                writeDebug("[WatchDownload] warmup: variant m3u8 failed status=\(variantStatus) for \(title)")
+                AppLogger.fileLog("warmup: variant m3u8 failed status=\(variantStatus) for \(title)", logger: AppLogger.downloads)
                 return false
             }
 
@@ -536,7 +537,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 let t = $0.trimmingCharacters(in: .whitespaces)
                 return !t.hasPrefix("#") && !t.isEmpty && t.hasSuffix(".ts")
             }) else {
-                writeDebug("[WatchDownload] warmup: no .ts segment in variant for \(title)")
+                AppLogger.fileLog("warmup: no .ts segment in variant for \(title)", logger: AppLogger.downloads)
                 return false
             }
             guard let segURL = URL(string: segLine.trimmingCharacters(in: .whitespacesAndNewlines), relativeTo: variantURL) else {
@@ -544,23 +545,23 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
             }
 
             // 5. Poll until the first segment is available (transcoder needs time to produce it)
-            writeDebug("[WatchDownload] warmup: polling first segment for \(title)")
+            AppLogger.fileLog("warmup: polling first segment for \(title)", logger: AppLogger.downloads)
             for attempt in 1...20 {
                 var req = URLRequest(url: segURL)
                 req.httpMethod = "HEAD"
                 let (_, resp) = try await PlexURLSession.shared.data(for: req)
                 let status = (resp as? HTTPURLResponse)?.statusCode ?? -1
                 if status == 200 {
-                    writeDebug("[WatchDownload] warmup: segment ready after \(attempt) poll(s) for \(title)")
+                    AppLogger.fileLog("warmup: segment ready after \(attempt) poll(s) for \(title)", logger: AppLogger.downloads)
                     return true
                 }
-                writeDebug("[WatchDownload] warmup: poll \(attempt) status=\(status) for \(title)")
+                AppLogger.fileLog("warmup: poll \(attempt) status=\(status) for \(title)", logger: AppLogger.downloads)
                 try await Task.sleep(nanoseconds: 1_500_000_000) // 1.5 seconds
             }
-            writeDebug("[WatchDownload] warmup: timed out for \(title), proceeding anyway")
+            AppLogger.fileLog("warmup: timed out for \(title), proceeding anyway", logger: AppLogger.downloads)
             return true
         } catch {
-            writeDebug("[WatchDownload] warmup failed: \(error)")
+            AppLogger.fileLog("warmup failed: \(error)", logger: AppLogger.downloads)
             return false
         }
     }
@@ -579,7 +580,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         do {
             try createDirectoryIfNeeded(at: downloadsDirectory)
         } catch {
-            writeDebug("[WatchDownload] storage setup failed: \(error)")
+            AppLogger.fileLog("storage setup failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -706,14 +707,14 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
 
         // Validate HTTP response status
         if let httpResponse = task.response as? HTTPURLResponse {
-            writeDebug("[WatchDownload] HTTP \(httpResponse.statusCode) for: \(item.metadata.title)")
+            AppLogger.fileLog("HTTP \(httpResponse.statusCode) for: \(item.metadata.title)", logger: AppLogger.downloads)
             if httpResponse.statusCode < 200 || httpResponse.statusCode >= 400 {
                 try? FileManager.default.removeItem(at: stagedLocation)
                 items[index].status = .failed
                 items[index].taskIdentifier = nil
                 items[index].errorMessage = "Server error (HTTP \(httpResponse.statusCode))"
                 persistState()
-                writeDebug("[WatchDownload] failed HTTP \(httpResponse.statusCode): \(item.metadata.title)")
+                AppLogger.fileLog("failed HTTP \(httpResponse.statusCode): \(item.metadata.title)", logger: AppLogger.downloads)
                 return
             }
         }
@@ -739,7 +740,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
                 items[index].taskIdentifier = nil
                 items[index].errorMessage = "Download failed (received \(fileSize) bytes — not a valid media file)"
                 persistState()
-                writeDebug("[WatchDownload] failed: \(item.metadata.title), too small (\(fileSize) bytes)")
+                AppLogger.fileLog("failed: \(item.metadata.title), too small (\(fileSize) bytes)", logger: AppLogger.downloads)
                 return
             }
 
@@ -754,13 +755,13 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
 
             persistState()
             refreshStorageSummary()
-            writeDebug("[WatchDownload] completed: \(item.metadata.title), size=\(fileSize)")
+            AppLogger.fileLog("completed: \(item.metadata.title), size=\(fileSize)", logger: AppLogger.downloads)
         } catch {
             items[index].status = .failed
             items[index].taskIdentifier = nil
             items[index].errorMessage = error.localizedDescription
             persistState()
-            writeDebug("[WatchDownload] move failed: \(error)")
+            AppLogger.fileLog("move failed: \(error)", logger: AppLogger.downloads)
         }
     }
 
@@ -776,7 +777,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         items[index].taskIdentifier = nil
         items[index].errorMessage = error.localizedDescription
         persistState()
-        writeDebug("[WatchDownload] failed: \(error)")
+        AppLogger.fileLog("failed: \(error)", logger: AppLogger.downloads)
     }
 
     private func completeAssetDownload(task: URLSessionTask) {
@@ -785,7 +786,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         let item = items[index]
 
         guard let sourceURL = assetDownloadLocations.removeValue(forKey: task.taskIdentifier) else {
-            writeDebug("[WatchDownload] asset complete but no source URL for: \(item.metadata.title)")
+            AppLogger.fileLog("asset complete but no source URL for: \(item.metadata.title)", logger: AppLogger.downloads)
             items[index].status = .failed
             items[index].taskIdentifier = nil
             items[index].errorMessage = "Download location unknown"
@@ -813,7 +814,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
 
         persistState()
         refreshStorageSummary()
-        writeDebug("[WatchDownload] asset completed: \(item.metadata.title), size=\(fileSize), location=\(sourceURL.path)")
+        AppLogger.fileLog("asset completed: \(item.metadata.title), size=\(fileSize), location=\(sourceURL.path)", logger: AppLogger.downloads)
     }
 
     private func failAssetDownload(task: URLSessionTask, error: Error) {
@@ -831,7 +832,7 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         items[index].taskIdentifier = nil
         items[index].errorMessage = error.localizedDescription
         persistState()
-        writeDebug("[WatchDownload] asset failed: \(error)")
+        AppLogger.fileLog("asset failed: \(error)", logger: AppLogger.downloads)
     }
 
     private func observeProgress(for task: AVAssetDownloadTask, itemID: String) {

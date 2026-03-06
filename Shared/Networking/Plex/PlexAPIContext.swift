@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 @Observable
 final class PlexAPIContext {
@@ -94,6 +95,7 @@ final class PlexAPIContext {
         }
 
         let accessToken = resource.accessToken
+        AppLogger.connection.info("Racing \(connections.count) connections")
 
         return await withCheckedContinuation { continuation in
             let state = ConnectionRaceState(connections: connections)
@@ -101,9 +103,10 @@ final class PlexAPIContext {
             for connection in connections {
                 Task {
                     let reachable = await self.checkReachability(connection, accessToken: accessToken)
+                    AppLogger.connection.debug("Connection \(connection.uri) reachable: \(reachable)")
                     guard reachable else {
                         if state.recordFailure() {
-                            // All connections failed
+                            AppLogger.connection.warning("All connections failed")
                             continuation.resume(returning: nil)
                         }
                         return
@@ -112,12 +115,13 @@ final class PlexAPIContext {
                     let action = state.recordSuccess(connection)
                     switch action {
                     case let .resolve(winner):
+                        AppLogger.connection.info("Selected connection: \(winner.uri) (local: \(winner.isLocal), relay: \(winner.isRelay))")
                         continuation.resume(returning: winner)
                     case .waitForLocal:
-                        // A non-local connection won, but wait briefly for a local one
                         Task {
                             try? await Task.sleep(nanoseconds: 1_000_000_000)
                             if let winner = state.settleWithBest() {
+                                AppLogger.connection.info("Selected connection: \(winner.uri) (local: \(winner.isLocal), relay: \(winner.isRelay))")
                                 continuation.resume(returning: winner)
                             }
                         }
@@ -127,12 +131,13 @@ final class PlexAPIContext {
                 }
             }
 
-            // Overall timeout
             Task {
                 try? await Task.sleep(nanoseconds: 6_000_000_000)
                 if let winner = state.settleWithBest() {
+                    AppLogger.connection.info("Selected connection: \(winner.uri) (local: \(winner.isLocal), relay: \(winner.isRelay))")
                     continuation.resume(returning: winner)
                 } else if state.recordTimeout() {
+                    AppLogger.connection.warning("Connection race timed out")
                     continuation.resume(returning: nil)
                 }
             }

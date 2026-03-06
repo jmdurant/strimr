@@ -1,4 +1,5 @@
 import Foundation
+import os
 import WatchConnectivity
 
 final class WatchSessionManager: NSObject, WCSessionDelegate {
@@ -29,7 +30,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
         error: Error?
     ) {
         if let error {
-            debugPrint("WCSession activation failed:", error)
+            AppLogger.auth.error("WCSession activation failed: \(error)")
         }
     }
 

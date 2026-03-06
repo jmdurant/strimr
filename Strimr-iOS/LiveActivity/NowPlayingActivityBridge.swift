@@ -1,6 +1,7 @@
 import ActivityKit
 import Foundation
 import Observation
+import os
 
 @MainActor
 final class NowPlayingActivityBridge {
@@ -23,9 +24,7 @@ final class NowPlayingActivityBridge {
         isStarted = true
 
         let authInfo = ActivityAuthorizationInfo()
-        NSLog("[LiveActivity] Bridge start — activitiesEnabled: %d, media: %@",
-              authInfo.areActivitiesEnabled ? 1 : 0,
-              viewModel.media?.title ?? "nil")
+        AppLogger.liveActivity.info("Bridge start — activitiesEnabled: \(authInfo.areActivitiesEnabled), media: \(self.viewModel.media?.title ?? "nil")")
 
         if viewModel.media != nil {
             Task { await createActivity() }
@@ -60,30 +59,30 @@ final class NowPlayingActivityBridge {
 
     private func waitForMedia() {
         waitTask = Task { [weak self] in
-            NSLog("[LiveActivity] Waiting for media to load...")
+            AppLogger.liveActivity.debug("Waiting for media to load...")
             // Poll for media availability — more reliable than one-shot withObservationTracking
             for _ in 0..<150 { // Up to 15 seconds
                 try? await Task.sleep(for: .milliseconds(100))
                 guard let self, self.isStarted, !Task.isCancelled else { return }
                 if self.viewModel.media != nil {
-                    NSLog("[LiveActivity] Media became available: %@", self.viewModel.media?.title ?? "?")
+                    AppLogger.liveActivity.info("Media became available: \(self.viewModel.media?.title ?? "?")")
                     await self.createActivity()
                     return
                 }
             }
-            NSLog("[LiveActivity] Timed out waiting for media")
+            AppLogger.liveActivity.debug("Timed out waiting for media")
         }
     }
 
     private func createActivity() async {
         guard let media = viewModel.media else { return }
-        NSLog("[LiveActivity] Creating activity for: %@ type: %@", media.title, media.type.rawValue)
+        AppLogger.liveActivity.info("Creating activity for: \(media.title) type: \(media.type.rawValue)")
 
         let artworkData = await LiveActivityImageLoader.loadCompressedThumbnail(
             path: media.preferredThumbPath ?? media.thumbPath,
             context: context
         )
-        NSLog("[LiveActivity] Artwork loaded: %d bytes", artworkData?.count ?? 0)
+        AppLogger.liveActivity.debug("Artwork loaded: \(artworkData?.count ?? 0) bytes")
 
         let title: String
         let subtitle: String?
@@ -129,11 +128,10 @@ final class NowPlayingActivityBridge {
                 content: ActivityContent(state: initialState, staleDate: nil),
                 pushType: nil
             )
-            NSLog("[LiveActivity] Started successfully — id: %@, duration: %.0fs, position: %.0fs, artworkBytes: %d",
-                  activity?.id ?? "?", durationSeconds, viewModel.position, artworkData?.count ?? 0)
+            AppLogger.liveActivity.info("Started successfully — id: \(self.activity?.id ?? "?"), duration: \(durationSeconds)s, position: \(self.viewModel.position)s, artworkBytes: \(artworkData?.count ?? 0)")
             startPeriodicUpdates()
         } catch {
-            NSLog("[LiveActivity] Failed to start: %@", String(describing: error))
+            AppLogger.liveActivity.error("Failed to start: \(error)")
         }
     }
 

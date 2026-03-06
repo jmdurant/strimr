@@ -1,36 +1,5 @@
 import Foundation
 import Observation
-import os
-
-private let logger = Logger(subsystem: "com.doctordurant.strimr", category: "LiveTV")
-
-/// Simple file logger for debugging on watchOS where os_log info messages are suppressed.
-enum DebugLog {
-    private static let fileURL: URL = {
-        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return dir.appendingPathComponent("debug.log")
-    }()
-
-    static func write(_ message: String) {
-        let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"
-        logger.warning("\(message)")
-        if let data = line.data(using: .utf8) {
-            if FileManager.default.fileExists(atPath: fileURL.path) {
-                if let handle = try? FileHandle(forWritingTo: fileURL) {
-                    handle.seekToEndOfFile()
-                    handle.write(data)
-                    handle.closeFile()
-                }
-            } else {
-                try? data.write(to: fileURL)
-            }
-        }
-    }
-
-    static func clear() {
-        try? FileManager.default.removeItem(at: fileURL)
-    }
-}
 
 @MainActor
 @Observable
@@ -131,13 +100,13 @@ final class LiveTVViewModel {
 
     func tune(channel: PlexChannel) async -> (url: URL, channelName: String, programTitle: String?)? {
         tuneError = nil
-        DebugLog.clear()
+        AppLogger.clearFileLog()
         guard let dvrKey else {
-            DebugLog.write("tune: no dvrKey available")
+            AppLogger.fileLog("tune: no dvrKey available", logger: AppLogger.liveTV)
             return nil
         }
 
-        DebugLog.write("tune: channel=\(channel.displayName) key=\(channel.tuneIdentifier) dvrKey=\(dvrKey)")
+        AppLogger.fileLog("tune: channel=\(channel.displayName) key=\(channel.tuneIdentifier) dvrKey=\(dvrKey)", logger: AppLogger.liveTV)
 
         do {
             let repo = try LiveTVRepository(context: context)
@@ -148,41 +117,41 @@ final class LiveTVViewModel {
                 channelIdentifier: channel.tuneIdentifier
             )
 
-            DebugLog.write("tune response: status=\(response.mediaContainer.status ?? -999) size=\(response.mediaContainer.size ?? -1) message=\(response.mediaContainer.message ?? "(none)")")
+            AppLogger.fileLog("tune response: status=\(response.mediaContainer.status ?? -999) size=\(response.mediaContainer.size ?? -1) message=\(response.mediaContainer.message ?? "(none)")", logger: AppLogger.liveTV)
 
             if response.mediaContainer.status == -1 {
                 let msg = response.mediaContainer.message ?? "Could not tune channel"
-                DebugLog.write("tune failed: \(msg)")
+                AppLogger.fileLog("tune failed: \(msg)", logger: AppLogger.liveTV)
                 tuneError = msg
                 return nil
             }
 
             guard let sessionPath = response.sessionPath else {
-                DebugLog.write("tune: no session path in response")
+                AppLogger.fileLog("tune: no session path in response", logger: AppLogger.liveTV)
                 tuneError = "Failed to tune channel"
                 return nil
             }
 
-            DebugLog.write("tune session: \(sessionPath)")
+            AppLogger.fileLog("tune session: \(sessionPath)", logger: AppLogger.liveTV)
 
             // Step 2: Call decision endpoint to warm up the transcoder
             let clientSession = UUID().uuidString
             let quality = settingsManager?.playback.streamQuality ?? .q720
             try await repo.startLiveTVSession(sessionPath: sessionPath, session: clientSession, quality: quality)
-            DebugLog.write("decision OK (quality=\(quality.resolution))")
+            AppLogger.fileLog("decision OK (quality=\(quality.resolution))", logger: AppLogger.liveTV)
 
             // Step 3: Build the HLS stream URL
             guard let url = repo.liveTVStreamURL(sessionPath: sessionPath, session: clientSession, quality: quality) else {
-                DebugLog.write("tune: could not build stream URL")
+                AppLogger.fileLog("tune: could not build stream URL", logger: AppLogger.liveTV)
                 tuneError = "Failed to build stream URL"
                 return nil
             }
 
             let programTitle = response.channelName
-            DebugLog.write("tune SUCCESS: \(url.absoluteString)")
+            AppLogger.fileLog("tune SUCCESS: \(url.absoluteString)", logger: AppLogger.liveTV)
             return (url: url, channelName: channel.displayName, programTitle: programTitle)
         } catch {
-            DebugLog.write("tune ERROR: \(error)")
+            AppLogger.fileLog("tune ERROR: \(error)", logger: AppLogger.liveTV)
             tuneError = "Tuner device is offline or unreachable"
             return nil
         }

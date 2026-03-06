@@ -1,5 +1,6 @@
 import AVKit
 import Foundation
+import os
 import SwiftUI
 
 struct VLCPlayerView: UIViewControllerRepresentable {
@@ -107,12 +108,12 @@ struct VLCPlayerView: UIViewControllerRepresentable {
 
         func retainForBackground() {
             retainedPlayer = player
-            NSLog("[VLC Coordinator] retainForBackground — player retained")
+            AppLogger.player.debug("retainForBackground — player retained")
         }
 
         func releaseFromBackground() {
             retainedPlayer = nil
-            NSLog("[VLC Coordinator] releaseFromBackground")
+            AppLogger.player.debug("releaseFromBackground")
         }
 
         /// Return the retained VC for reuse in makeUIViewController, transferring ownership back to the weak reference.
@@ -120,12 +121,12 @@ struct VLCPlayerView: UIViewControllerRepresentable {
             guard let retained = retainedPlayer else { return nil }
             retainedPlayer = nil
             player = retained
-            NSLog("[VLC Coordinator] reuseRetainedPlayer — reattached existing VC")
+            AppLogger.player.debug("reuseRetainedPlayer — reattached existing VC")
             return retained
         }
 
         func destruct() {
-            NSLog("[VLC Coordinator] destruct() called")
+            AppLogger.player.debug("destruct() called")
             // Destruct the player BEFORE releasing the strong reference,
             // so VLC cleanup (audio bridge, PiP, etc.) happens while the VC is still alive.
             let playerToDestruct = retainedPlayer ?? player

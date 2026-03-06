@@ -4,6 +4,8 @@ private extension Color {
     static var backdropBackground: Color {
         #if os(tvOS) || os(watchOS)
         Color.black
+        #elseif os(macOS)
+        Color(.windowBackgroundColor)
         #else
         Color(.systemBackground)
         #endif

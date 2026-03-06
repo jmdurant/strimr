@@ -161,6 +161,7 @@ final class MainCoordinator: ObservableObject {
         }
     }
 
+    #if !os(macOS)
     func showSeerrMediaDetail(_ media: SeerrMedia) {
         switch tab {
         case .seerrDiscover:
@@ -171,6 +172,7 @@ final class MainCoordinator: ObservableObject {
             break
         }
     }
+    #endif
 
     func showPlayer(for playQueue: PlayQueueState, shouldResumeFromOffset: Bool = true) {
         isResumingPlayer = false

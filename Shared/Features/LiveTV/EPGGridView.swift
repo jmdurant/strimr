@@ -5,6 +5,8 @@ private let gridBackground: Color = {
     return Color.black
     #elseif os(tvOS)
     return Color("Background")
+    #elseif os(macOS)
+    return Color(.windowBackgroundColor)
     #else
     return Color(.systemBackground)
     #endif

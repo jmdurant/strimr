@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 
 struct WatchPhotoBrowseView: View {
@@ -187,7 +188,7 @@ struct WatchPhotoAlbumView: View {
             )
             presentedPlayQueue = queue
         } catch {
-            debugPrint("Failed to play clip:", error)
+            AppLogger.player.error("Failed to play clip: \(error)")
         }
     }
 

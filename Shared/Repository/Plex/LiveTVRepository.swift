@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 final class LiveTVRepository {
     private let baseURL: URL
@@ -117,7 +118,7 @@ final class LiveTVRepository {
         request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
         request.setValue(clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
 
-        NSLog("[PlexNetwork] POST %@", url.absoluteString)
+        AppLogger.network.info("POST \(url.absoluteString)")
         let (_, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               200 ..< 300 ~= httpResponse.statusCode else {

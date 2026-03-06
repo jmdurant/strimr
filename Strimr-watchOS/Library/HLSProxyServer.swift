@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import os
 
 final class HLSProxyServer: @unchecked Sendable {
     static let shared = HLSProxyServer()
@@ -25,10 +26,10 @@ final class HLSProxyServer: @unchecked Sendable {
             case .ready:
                 if let assignedPort = nwListener.port?.rawValue {
                     self?.port = assignedPort
-                    writeDebug("[HLSProxy] listening on localhost:\(assignedPort)")
+                    AppLogger.fileLog("listening on localhost:\(assignedPort)", logger: AppLogger.network)
                 }
             case .failed(let error):
-                writeDebug("[HLSProxy] listener failed: \(error)")
+                AppLogger.fileLog("listener failed: \(error)", logger: AppLogger.network)
                 self?.stop()
             default:
                 break
@@ -64,7 +65,7 @@ final class HLSProxyServer: @unchecked Sendable {
             self.listener?.cancel()
             self.listener = nil
             self.port = 0
-            writeDebug("[HLSProxy] stopped")
+            AppLogger.fileLog("stopped", logger: AppLogger.network)
         }
     }
 
@@ -107,7 +108,7 @@ final class HLSProxyServer: @unchecked Sendable {
                 return
             }
 
-            writeDebug("[HLSProxy] \(request.method) \(request.path)")
+            AppLogger.fileLog("\(request.method) \(request.path)", logger: AppLogger.network)
             self.forwardRequest(request, to: connection)
         }
     }
@@ -164,7 +165,7 @@ final class HLSProxyServer: @unchecked Sendable {
                     return
                 }
 
-                writeDebug("[HLSProxy] forwarding to: \(forwardURL.absoluteString.prefix(200))...")
+                AppLogger.fileLog("forwarding to: \(forwardURL.absoluteString.prefix(200))...", logger: AppLogger.network)
 
                 var urlRequest = URLRequest(url: forwardURL)
                 urlRequest.httpMethod = request.method
@@ -182,14 +183,14 @@ final class HLSProxyServer: @unchecked Sendable {
                 }
 
                 let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type") ?? ""
-                writeDebug("[HLSProxy] response status=\(httpResponse.statusCode), contentType=\(contentType), size=\(data.count)")
+                AppLogger.fileLog("response status=\(httpResponse.statusCode), contentType=\(contentType), size=\(data.count)", logger: AppLogger.network)
                 let isM3U8 = contentType.contains("mpegurl") || request.path.contains(".m3u8")
 
                 let responseData: Data
                 if isM3U8, let m3u8String = String(data: data, encoding: .utf8) {
-                    writeDebug("[HLSProxy] m3u8 content: \(m3u8String)")
+                    AppLogger.fileLog("m3u8 content: \(m3u8String)", logger: AppLogger.network)
                     let rewritten = self.rewriteM3U8(m3u8String)
-                    writeDebug("[HLSProxy] rewrote m3u8 (\(data.count) -> \(rewritten.count) bytes)")
+                    AppLogger.fileLog("rewrote m3u8 (\(data.count) -> \(rewritten.count) bytes)", logger: AppLogger.network)
                     responseData = rewritten.data(using: .utf8) ?? data
                 } else {
                     responseData = data
@@ -202,7 +203,7 @@ final class HLSProxyServer: @unchecked Sendable {
                     to: connection
                 )
             } catch {
-                writeDebug("[HLSProxy] forward error: \(error.localizedDescription)")
+                AppLogger.fileLog("forward error: \(error.localizedDescription)", logger: AppLogger.network)
                 self.sendErrorResponse(status: 502, message: "Forward failed: \(error.localizedDescription)", to: connection)
             }
         }

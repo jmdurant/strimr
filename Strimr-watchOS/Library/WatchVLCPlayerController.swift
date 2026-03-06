@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import os
 import VLCKit
 
 @MainActor
@@ -30,14 +31,14 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
         do {
             try session.setCategory(.playback, mode: .default, policy: .longFormAudio)
         } catch {
-            writeDebug("[VLC] setCategory failed: \(error)")
+            AppLogger.fileLog("setCategory failed: \(error)", logger: AppLogger.player)
         }
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             session.activate(options: []) { activated, error in
                 if let error {
-                    writeDebug("[VLC] audio session activation failed: \(error)")
+                    AppLogger.fileLog("audio session activation failed: \(error)", logger: AppLogger.player)
                 } else {
-                    writeDebug("[VLC] audio session activated: \(activated)")
+                    AppLogger.fileLog("audio session activated: \(activated)", logger: AppLogger.player)
                 }
                 continuation.resume()
             }
@@ -45,7 +46,7 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
     }
 
     func play(_ url: URL) {
-        writeDebug("[VLC] play called, url=\(url.absoluteString)")
+        AppLogger.fileLog("play called, url=\(url.absoluteString)", logger: AppLogger.player)
         hasNotifiedFileLoaded = false
         lastReportedTimeSeconds = -1.0
         mediaPlayer?.media = VLCMedia(url: url)
@@ -56,9 +57,9 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
             audioBridge = VLCAudioBridge(player: mp, spectrumData: spectrumData)
         }
 
-        writeDebug("[VLC] media set, calling play()")
+        AppLogger.fileLog("media set, calling play()", logger: AppLogger.player)
         mediaPlayer?.play()
-        writeDebug("[VLC] play() returned, isPlaying=\(mediaPlayer?.isPlaying ?? false), state=\(mediaPlayer?.state.rawValue ?? -1)")
+        AppLogger.fileLog("play() returned, isPlaying=\(mediaPlayer?.isPlaying ?? false), state=\(mediaPlayer?.state.rawValue ?? -1)", logger: AppLogger.player)
     }
 
     func togglePlayback() {
@@ -153,9 +154,9 @@ extension WatchVLCPlayerController: VLCMediaPlayerDelegate {
         Task { @MainActor in
             let stateNames = ["stopped","stopping","opening","buffering","error","playing","paused"]
             let stateName = newState.rawValue < stateNames.count ? stateNames[Int(newState.rawValue)] : "unknown(\(newState.rawValue))"
-            writeDebug("[VLC] stateChanged: \(stateName) (\(newState.rawValue))")
+            AppLogger.fileLog("stateChanged: \(stateName) (\(newState.rawValue))", logger: AppLogger.player)
             if newState == .error {
-                writeDebug("[VLC] ERROR state!")
+                AppLogger.fileLog("ERROR state!", logger: AppLogger.player)
             }
             let isPaused = newState == .paused || newState == .stopped || newState == .stopping
 

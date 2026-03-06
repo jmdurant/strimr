@@ -1,4 +1,5 @@
 import Foundation
+import os
 import UIKit
 
 #if os(tvOS)
@@ -202,7 +203,7 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
     }
 
     func destruct() {
-        NSLog("[VLC] destruct() called")
+        AppLogger.player.debug("destruct() called")
         #if os(iOS)
         pipWindowController?.stopPictureInPicture()
         pipWindowController = nil
@@ -245,15 +246,15 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
         guard rendererDiscoverer == nil else { return }
         // Use microdns for Chromecast discovery
         guard let discoverer = VLCRendererDiscoverer(name: "microdns_renderer") else {
-            NSLog("[Chromecast] Failed to create renderer discoverer")
+            AppLogger.chromecast.error("Failed to create renderer discoverer")
             return
         }
         discoverer.delegate = self
         rendererDiscoverer = discoverer
         if discoverer.start() {
-            NSLog("[Chromecast] Discovery started")
+            AppLogger.chromecast.info("Discovery started")
         } else {
-            NSLog("[Chromecast] Discovery failed to start")
+            AppLogger.chromecast.error("Discovery failed to start")
         }
     }
 
@@ -269,16 +270,16 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
             mediaPlayer.setRendererItem(nil)
             activeRenderer = nil
             activeRendererDeviceName = nil
-            NSLog("[Chromecast] Disconnected")
+            AppLogger.chromecast.info("Disconnected")
             return
         }
         guard let item = vlcRenderers.first(where: { $0.name == name }) else { return }
         if mediaPlayer.setRendererItem(item) {
             activeRenderer = item
             activeRendererDeviceName = item.name
-            NSLog("[Chromecast] Casting to: %@", item.name)
+            AppLogger.chromecast.info("Casting to: \(item.name)")
         } else {
-            NSLog("[Chromecast] Failed to set renderer")
+            AppLogger.chromecast.error("Failed to set renderer")
         }
     }
 
@@ -431,7 +432,7 @@ final class VLCPlayerViewController: UIViewController, VLCMediaPlayerDelegate {
 extension VLCPlayerViewController: VLCRendererDiscovererDelegate {
     func rendererDiscovererItemAdded(_ rendererDiscoverer: VLCRendererDiscoverer, item: VLCRendererItem) {
         DispatchQueue.main.async {
-            NSLog("[Chromecast] Device found: %@ (type: %@)", item.name, item.type)
+            AppLogger.chromecast.info("Device found: \(item.name) (type: \(item.type))")
             self.vlcRenderers.append(item)
             self.syncRendererDevices()
             self.onRenderersChanged?()
@@ -440,7 +441,7 @@ extension VLCPlayerViewController: VLCRendererDiscovererDelegate {
 
     func rendererDiscovererItemDeleted(_ rendererDiscoverer: VLCRendererDiscoverer, item: VLCRendererItem) {
         DispatchQueue.main.async {
-            NSLog("[Chromecast] Device removed: %@", item.name)
+            AppLogger.chromecast.info("Device removed: \(item.name)")
             self.vlcRenderers.removeAll { $0.name == item.name }
             if self.activeRenderer?.name == item.name {
                 self.activeRenderer = nil
