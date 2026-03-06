@@ -1,4 +1,6 @@
+import AVFoundation
 import AVKit
+import os
 import SwiftUI
 
 struct PlayerView: View {
@@ -7,6 +9,7 @@ struct PlayerView: View {
     @Environment(SettingsManager.self) private var settingsManager
     @State var viewModel: PlayerViewModel
     @State private var player = AVPlayer()
+    @State private var didInjectSettings = false
     @State private var controlsVisible = true
     @State private var hideControlsTask: Task<Void, Never>?
     @State private var isScrubbing = false
@@ -31,7 +34,7 @@ struct PlayerView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VideoPlayer(player: player)
+            MacAVPlayerView(player: player)
                 .ignoresSafeArea()
                 .onAppear {
                     setupTimeObserver()
@@ -83,8 +86,14 @@ struct PlayerView: View {
         }
         .frame(minWidth: 640, minHeight: 360)
         .task {
+            if !didInjectSettings {
+                viewModel.settingsManager = settingsManager
+                didInjectSettings = true
+            }
             guard activePlaybackURL == nil || viewModel.media == nil else { return }
+            NSLog("[Strimr] Player loading — ratingKey: %@", viewModel.playQueue.selectedRatingKey ?? "nil")
             await viewModel.load()
+            NSLog("[Strimr] Player loaded — url: %@, error: %@", viewModel.playbackURL?.absoluteString ?? "nil", viewModel.errorMessage ?? "none")
         }
         .onChange(of: viewModel.playbackURL) { _, newURL in
             startPlaybackIfNeeded(url: newURL)
@@ -277,5 +286,21 @@ struct PlayerView: View {
             player.removeTimeObserver(observer)
             timeObserver = nil
         }
+    }
+}
+
+private struct MacAVPlayerView: NSViewRepresentable {
+    let player: AVPlayer
+
+    func makeNSView(context: Context) -> AVPlayerView {
+        let view = AVPlayerView()
+        view.player = player
+        view.controlsStyle = .none
+        view.showsFullScreenToggleButton = false
+        return view
+    }
+
+    func updateNSView(_ nsView: AVPlayerView, context: Context) {
+        nsView.player = player
     }
 }

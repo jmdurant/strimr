@@ -65,14 +65,31 @@ struct WatchTogetherView: View {
                 Button("Create New Session") {
                     viewModel.createSession()
                 }
+                .buttonStyle(.borderedProminent)
+                .disabled(viewModel.connectionState == .connecting)
             }
 
             Section("Join Session") {
                 TextField("Enter session code", text: joinCodeBinding)
+                    .textFieldStyle(.roundedBorder)
                     .disableAutocorrection(true)
+                    .onSubmit { viewModel.joinSession() }
 
                 Button("Join Session") {
                     viewModel.joinSession()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(joinCodeBinding.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    || viewModel.connectionState == .connecting)
+            }
+
+            if viewModel.connectionState == .connecting {
+                Section {
+                    HStack(spacing: 8) {
+                        ProgressView().controlSize(.small)
+                        Text("Connecting...")
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 

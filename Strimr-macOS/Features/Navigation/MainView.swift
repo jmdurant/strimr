@@ -15,9 +15,7 @@ struct MainView: View {
     @State var homeViewModel: HomeViewModel
     @State private var selection: SidebarItem? = .home
     @State private var navigationPath = NavigationPath()
-    @State private var isPresentingPlayer = false
-    @State private var activePlayQueue: PlayQueueState?
-    @State private var activeRatingKey: String?
+    @State private var activePlayerViewModel: PlayerViewModel?
     @State private var shouldResume = true
 
     enum SidebarItem: Hashable {
@@ -73,17 +71,15 @@ struct MainView: View {
         .task {
             try? await libraryStore.loadLibraries()
         }
-        .sheet(isPresented: $isPresentingPlayer) {
-            if let playQueue = activePlayQueue, let ratingKey = activeRatingKey {
-                PlayerView(
-                    viewModel: PlayerViewModel(
-                        playQueue: playQueue,
-                        ratingKey: ratingKey,
-                        context: plexApiContext,
-                        shouldResumeFromOffset: shouldResume
-                    )
-                )
-                .frame(minWidth: 800, minHeight: 500)
+        .sheet(isPresented: Binding(
+            get: { activePlayerViewModel != nil },
+            set: { if !$0 { activePlayerViewModel = nil } }
+        )) {
+            if let vm = activePlayerViewModel {
+                PlayerView(viewModel: vm)
+                    .frame(width: 960, height: 540)
+                    .environment(plexApiContext)
+                    .environment(settingsManager)
             }
         }
     }
@@ -117,6 +113,7 @@ struct MainView: View {
                     library: library,
                     onSelectMedia: { navigate(to: $0) }
                 )
+                .id(libraryId)
             } else {
                 ContentUnavailableView("Library not found", systemImage: "rectangle.stack.fill")
             }
@@ -199,11 +196,16 @@ struct MainView: View {
                     || type == .track || type == .album || type == .artist,
                 shuffle: shuffle
             )
-            guard let selectedKey = playQueue.selectedRatingKey else { return }
-            activePlayQueue = playQueue
-            activeRatingKey = selectedKey
-            shouldResume = resume
-            isPresentingPlayer = true
+            guard playQueue.selectedRatingKey != nil else { return }
+            let vm = PlayerViewModel(
+                playQueue: playQueue,
+                ratingKey: playQueue.selectedRatingKey!,
+                context: plexApiContext,
+                shouldResumeFromOffset: resume
+            )
+            vm.settingsManager = settingsManager
+            NSLog("[Strimr] Player created — ratingKey: %@", playQueue.selectedRatingKey!)
+            activePlayerViewModel = vm
         } catch {
             AppLogger.player.error("Failed to create play queue: \(error)")
         }
