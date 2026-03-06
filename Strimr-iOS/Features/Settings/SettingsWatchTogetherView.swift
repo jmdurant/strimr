@@ -35,7 +35,7 @@ struct SettingsWatchTogetherView: View {
                 Text("The server is discovered automatically. It checks: custom URL, build config, Plex server host, then local network (mDNS).")
             }
 
-            Section("Custom Server URL") {
+            Section {
                 TextField("wss://example.com:8080", text: $customURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -47,6 +47,8 @@ struct SettingsWatchTogetherView: View {
                         settingsManager.setWatchTogetherServerURL(nil)
                     }
                 }
+            } header: {
+                Text("Custom Server URL")
             } footer: {
                 Text("Only set this if your Watch Together server is not on the same machine as your Plex server. Leave blank for automatic discovery.")
             }
