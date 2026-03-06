@@ -1,12 +1,20 @@
 import Foundation
 import Observation
 
+enum SignInMethod: String, CaseIterable {
+    case credentials = "Sign In"
+    case qrCode = "QR Code"
+}
+
 @MainActor
 @Observable
 final class SignInTVViewModel {
     var isAuthenticating = false
     var errorMessage: String?
     var pin: PlexCloudPin?
+    var signInMethod: SignInMethod = .credentials
+    var email = ""
+    var password = ""
 
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private let sessionManager: SessionManager
@@ -17,8 +25,42 @@ final class SignInTVViewModel {
         plexContext = context
     }
 
-    func startSignIn() async {
-        resetSignInState()
+    // MARK: - Email/Password Sign In
+
+    func signInWithCredentials() async {
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Please enter your email and password."
+            return
+        }
+
+        cancelSignIn()
+        errorMessage = nil
+        isAuthenticating = true
+
+        do {
+            let authRepository = AuthRepository(context: plexContext)
+            let user = try await authRepository.signIn(login: email, password: password)
+            try await sessionManager.signIn(with: user.authToken)
+            isAuthenticating = false
+        } catch {
+            if case PlexAPIError.requestFailed(statusCode: let code) = error {
+                if code == 401 {
+                    errorMessage = "Invalid email or password."
+                } else {
+                    errorMessage = "Sign in failed (HTTP \(code))."
+                }
+            } else {
+                errorMessage = "Sign in failed: \(error.localizedDescription)"
+                ErrorReporter.capture(error)
+            }
+            isAuthenticating = false
+        }
+    }
+
+    // MARK: - QR Code Sign In
+
+    func startQRSignIn() async {
+        cancelSignIn()
         errorMessage = nil
         isAuthenticating = true
 
@@ -33,7 +75,9 @@ final class SignInTVViewModel {
 
     func cancelSignIn() {
         isAuthenticating = false
-        resetSignInState()
+        pollTask?.cancel()
+        pollTask = nil
+        pin = nil
     }
 
     private func beginPolling(pinID: Int) {
@@ -82,11 +126,5 @@ final class SignInTVViewModel {
         let pinResponse = try await authRepository.requestPin()
         pin = pinResponse
         beginPolling(pinID: pinResponse.id)
-    }
-
-    private func resetSignInState() {
-        pollTask?.cancel()
-        pollTask = nil
-        pin = nil
     }
 }

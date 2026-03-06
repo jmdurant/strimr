@@ -74,6 +74,7 @@ struct LiveTVTVView: View {
         }
         .fullScreenCover(item: $activeStream) { info in
             LiveTVPlayerTVView(streamURL: info.url, channelName: info.channelName)
+                .ignoresSafeArea()
         }
         .alert("Unable to Tune", isPresented: Binding(
             get: { viewModel?.tuneError != nil },

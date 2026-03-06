@@ -14,13 +14,13 @@ struct EPGGridView: View {
     var onRecord: ((EPGGridProgram, PlexChannel) -> Void)?
 
     #if os(tvOS)
-    private let channelColumnWidth: CGFloat = 200
-    private let rowHeight: CGFloat = 80
-    private let pixelsPerMinute: CGFloat = 5
-    private let headerHeight: CGFloat = 50
+    private let channelColumnWidth: CGFloat = 280
+    private let rowHeight: CGFloat = 90
+    private let pixelsPerMinute: CGFloat = 9.5
+    private let headerHeight: CGFloat = 60
     private let channelFont: Font = .headline
     private let channelNumberFont: Font = .subheadline
-    private let programFont: Font = .callout
+    private let programFont: Font = .body
     #else
     private let channelColumnWidth: CGFloat = 120
     private let rowHeight: CGFloat = 56
@@ -31,7 +31,17 @@ struct EPGGridView: View {
     private let programFont: Font = .caption2
     #endif
 
+    #if os(tvOS)
+    private let blockGap: CGFloat = 4
+    private let channelNumberWidth: CGFloat = 56
+    private let blockCornerRadius: CGFloat = 8
+    private let programPadding: CGFloat = 10
+    #else
     private let blockGap: CGFloat = 2
+    private let channelNumberWidth: CGFloat = 32
+    private let blockCornerRadius: CGFloat = 4
+    private let programPadding: CGFloat = 4
+    #endif
 
     private var windowStart: Date {
         viewModel.epgTimeWindow?.start ?? Date()
@@ -39,11 +49,6 @@ struct EPGGridView: View {
 
     private var windowEnd: Date {
         viewModel.epgTimeWindow?.end ?? Date()
-    }
-
-    private var totalGridWidth: CGFloat {
-        let totalMinutes = windowEnd.timeIntervalSince(windowStart) / 60
-        return CGFloat(totalMinutes) * pixelsPerMinute
     }
 
     private var timeSlots: [Date] {
@@ -58,10 +63,6 @@ struct EPGGridView: View {
             slot = slot.addingTimeInterval(30 * 60)
         }
         return slots
-    }
-
-    private func minutesToPoints(_ minutes: Double) -> CGFloat {
-        CGFloat(minutes) * pixelsPerMinute
     }
 
     var body: some View {
@@ -86,15 +87,24 @@ struct EPGGridView: View {
     // MARK: - Grid Layout
 
     private var gridContent: some View {
-        ScrollView(.vertical) {
-            HStack(alignment: .top, spacing: 0) {
-                channelColumn
-                ScrollView(.horizontal, showsIndicators: true) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        timeHeader
-                        programRows
+        GeometryReader { geo in
+            let availableWidth = geo.size.width - channelColumnWidth
+            let totalMinutes = windowEnd.timeIntervalSince(windowStart) / 60
+            let adaptivePixelsPerMinute = totalMinutes > 0
+                ? max(pixelsPerMinute, availableWidth / CGFloat(totalMinutes))
+                : pixelsPerMinute
+            let adaptiveGridWidth = CGFloat(totalMinutes) * adaptivePixelsPerMinute
+
+            ScrollView(.vertical) {
+                HStack(alignment: .top, spacing: 0) {
+                    channelColumn
+                    ScrollView(.horizontal, showsIndicators: true) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            timeHeaderAdaptive(pixelsPerMinute: adaptivePixelsPerMinute)
+                            programRowsAdaptive(gridWidth: adaptiveGridWidth, pixelsPerMinute: adaptivePixelsPerMinute)
+                        }
+                        .frame(width: adaptiveGridWidth)
                     }
-                    .frame(width: totalGridWidth)
                 }
             }
         }
@@ -113,7 +123,7 @@ struct EPGGridView: View {
                         .font(channelNumberFont)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
-                        .frame(width: 32, alignment: .trailing)
+                        .frame(width: channelNumberWidth, alignment: .trailing)
 
                     Text(row.channel.displayName)
                         .font(channelFont)
@@ -129,34 +139,35 @@ struct EPGGridView: View {
 
     // MARK: - Time Header
 
-    private var timeHeader: some View {
+    private func timeHeaderAdaptive(pixelsPerMinute ppm: CGFloat) -> some View {
         ZStack(alignment: .leading) {
             ForEach(timeSlots, id: \.self) { slot in
-                let x = minutesToPoints(slot.timeIntervalSince(windowStart) / 60)
+                let x = CGFloat(slot.timeIntervalSince(windowStart) / 60) * ppm
                 Text(slot, format: .dateTime.hour().minute())
                     .font(channelNumberFont)
                     .foregroundStyle(.secondary)
                     .offset(x: x)
             }
         }
-        .frame(width: totalGridWidth, height: headerHeight, alignment: .leading)
+        .frame(height: headerHeight, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(gridBackground.opacity(0.95))
     }
 
-    // MARK: - Program Rows (HStack-based, no ZStack/offset)
+    // MARK: - Program Rows
 
-    private var programRows: some View {
+    private func programRowsAdaptive(gridWidth: CGFloat, pixelsPerMinute ppm: CGFloat) -> some View {
         ForEach(viewModel.epgRows) { row in
-            programRow(row: row)
-                .frame(width: totalGridWidth, height: rowHeight)
+            programRow(row: row, pixelsPerMinute: ppm)
+                .frame(width: gridWidth, height: rowHeight)
                 .background(Color.gray.opacity(0.06))
-                .overlay(alignment: .leading) { nowLine }
+                .overlay(alignment: .leading) { nowLineAdaptive(pixelsPerMinute: ppm) }
                 .clipped()
         }
     }
 
     /// Build an HStack of gap-spacers and program blocks for one channel row.
-    private func programRow(row: EPGGridRow) -> some View {
+    private func programRow(row: EPGGridRow, pixelsPerMinute ppm: CGFloat) -> some View {
         HStack(spacing: 0) {
             let programs = row.programs
             ForEach(Array(programs.enumerated()), id: \.element.id) { index, program in
@@ -166,14 +177,14 @@ struct EPGGridView: View {
                 // Gap before this block
                 let prevEnd: Date = index == 0 ? windowStart : max(programs[index - 1].endsAt, windowStart)
                 let gapMinutes = clampedStart.timeIntervalSince(prevEnd) / 60
-                let gapWidth = minutesToPoints(gapMinutes)
+                let gapWidth = CGFloat(gapMinutes) * ppm
                 if gapWidth > 0 {
                     Color.clear.frame(width: gapWidth)
                 }
 
                 // Program block
                 let blockMinutes = clampedEnd.timeIntervalSince(clampedStart) / 60
-                let blockWidth = minutesToPoints(blockMinutes) - blockGap
+                let blockWidth = CGFloat(blockMinutes) * ppm - blockGap
                 let now = Date()
                 let isAiring = program.beginsAt <= now && program.endsAt >= now
                 let bgColor: Color = isAiring
@@ -193,13 +204,13 @@ struct EPGGridView: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, programPadding)
                 }
                 .buttonStyle(.plain)
                 .frame(width: max(blockWidth, 0), height: rowHeight - 8)
-                .background(RoundedRectangle(cornerRadius: 4).fill(bgColor))
-                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(borderColor, lineWidth: 1))
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .background(RoundedRectangle(cornerRadius: blockCornerRadius).fill(bgColor))
+                .overlay(RoundedRectangle(cornerRadius: blockCornerRadius).strokeBorder(borderColor, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: blockCornerRadius))
             }
             Spacer(minLength: 0)
         }
@@ -207,8 +218,8 @@ struct EPGGridView: View {
 
     // MARK: - Now Indicator
 
-    private var nowLine: some View {
-        let x = minutesToPoints(Date().timeIntervalSince(windowStart) / 60)
+    private func nowLineAdaptive(pixelsPerMinute ppm: CGFloat) -> some View {
+        let x = CGFloat(Date().timeIntervalSince(windowStart) / 60) * ppm
         return Rectangle()
             .fill(Color.red)
             .frame(width: 2, height: rowHeight)
