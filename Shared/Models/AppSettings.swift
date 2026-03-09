@@ -136,14 +136,30 @@ enum AppearanceMode: String, Codable, CaseIterable {
     }
 }
 
+enum AudioDownloadQuality: String, Codable, CaseIterable, Identifiable {
+    case original
+    case compressed
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .original: "Original"
+        case .compressed: "Smaller Size"
+        }
+    }
+}
+
 struct DownloadSettings: Codable, Equatable {
     var wifiOnly = true
+    var audioQuality: AudioDownloadQuality = .original
 
     init() {}
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         wifiOnly = try container.decodeIfPresent(Bool.self, forKey: .wifiOnly) ?? true
+        audioQuality = try container.decodeIfPresent(AudioDownloadQuality.self, forKey: .audioQuality) ?? .original
     }
 }
 

@@ -117,7 +117,8 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
 
             guard let hlsURL = transcodeRepo.transcodeURL(
                 path: metadataPath,
-                session: sessionID
+                session: sessionID,
+                quality: currentStreamQuality
             ) else {
                 AppLogger.fileLog("failed to build HLS URL for: \(mediaItem.title)", logger: AppLogger.downloads)
                 if let idx = items.firstIndex(where: { $0.id == id }) {
@@ -164,8 +165,33 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
 
             guard let partPath = plexItem.media?.first?.parts.first?.key else { return }
 
-            let mediaRepo = try MediaRepository(context: context)
-            guard let downloadURL = mediaRepo.mediaURL(path: partPath) else { return }
+            let audioQuality = currentAudioDownloadQuality
+            let sourceCodec = plexItem.media?.first?.parts.first?.stream?.first?.codec.lowercased() ?? ""
+            let isLossless = ["flac", "alac", "wav", "aiff", "dsd", "pcm"].contains(sourceCodec)
+
+            AppLogger.fileLog("enqueueTrack: \(mediaItem.title), audioQuality=\(audioQuality.rawValue), codec=\(sourceCodec), lossless=\(isLossless)", logger: AppLogger.downloads)
+
+            let downloadURL: URL
+            if audioQuality == .compressed && isLossless {
+                let transcodeRepo = try TranscodeRepository(context: context)
+                guard let url = transcodeRepo.audioTranscodeURL(
+                    path: plexItem.key,
+                    session: UUID().uuidString
+                ) else {
+                    AppLogger.fileLog("enqueueTrack: audioTranscodeURL returned nil for key=\(plexItem.key)", logger: AppLogger.downloads)
+                    return
+                }
+                AppLogger.fileLog("enqueueTrack: transcodeURL=\(url.absoluteString.prefix(200))", logger: AppLogger.downloads)
+                downloadURL = url
+            } else {
+                if audioQuality == .compressed && !isLossless {
+                    AppLogger.fileLog("enqueueTrack: skipping transcode, \(sourceCodec) is already lossy", logger: AppLogger.downloads)
+                }
+                let mediaRepo = try MediaRepository(context: context)
+                guard let url = mediaRepo.mediaURL(path: partPath) else { return }
+                AppLogger.fileLog("enqueueTrack: directURL=\(url.absoluteString.prefix(200))", logger: AppLogger.downloads)
+                downloadURL = url
+            }
 
             let id = UUID().uuidString
             let folderURL = downloadsDirectory.appendingPathComponent(id, isDirectory: true)
@@ -404,17 +430,26 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         totalBytesExpectedToWrite: Int64
     ) {
         Task { @MainActor in
-            guard totalBytesExpectedToWrite > 0 else { return }
-            let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
-            let previousProgress = progressByTaskIdentifier[downloadTask.taskIdentifier] ?? -1
-            guard progress - previousProgress >= 0.01 || progress == 1 else { return }
-            progressByTaskIdentifier[downloadTask.taskIdentifier] = progress
+            let progress: Double
+            if totalBytesExpectedToWrite > 0 {
+                progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+            } else {
+                // Unknown total (e.g. transcode streams without Content-Length).
+                // Show indeterminate progress based on bytes received.
+                progress = -1
+            }
+
+            if progress >= 0 {
+                let previousProgress = progressByTaskIdentifier[downloadTask.taskIdentifier] ?? -1
+                guard progress - previousProgress >= 0.01 || progress == 1 else { return }
+                progressByTaskIdentifier[downloadTask.taskIdentifier] = progress
+            }
 
             updateItem({ item in
                 item.status = .downloading
-                item.progress = progress
+                item.progress = max(progress, 0)
                 item.bytesWritten = totalBytesWritten
-                item.totalBytes = totalBytesExpectedToWrite
+                item.totalBytes = totalBytesExpectedToWrite > 0 ? totalBytesExpectedToWrite : totalBytesWritten
             }, matchingTask: downloadTask)
             persistState()
         }
@@ -490,6 +525,22 @@ final class WatchDownloadManager: NSObject, URLSessionDownloadDelegate, AVAssetD
         } else {
             completionHandler(.performDefaultHandling, nil)
         }
+    }
+
+    // MARK: - Settings
+
+    private var currentStreamQuality: StreamQuality {
+        guard let data = UserDefaults.standard.data(forKey: "strimr.settings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data)
+        else { return .q480 }
+        return settings.playback.streamQuality
+    }
+
+    private var currentAudioDownloadQuality: AudioDownloadQuality {
+        guard let data = UserDefaults.standard.data(forKey: "strimr.settings"),
+              let settings = try? JSONDecoder().decode(AppSettings.self, from: data)
+        else { return .original }
+        return settings.downloads.audioQuality
     }
 
     // MARK: - Transcode Warmup

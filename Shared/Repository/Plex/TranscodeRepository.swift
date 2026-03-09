@@ -121,6 +121,37 @@ final class TranscodeRepository {
         )
     }
 
+    /// Build a URL for Plex server-side audio transcoding to AAC 256kbps.
+    func audioTranscodeURL(
+        path: String,
+        session: String
+    ) -> URL? {
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        components?.path = "/music/:/transcode/universal/start.mp3"
+        components?.queryItems = [
+            URLQueryItem(name: "path", value: path),
+            URLQueryItem(name: "session", value: session),
+            URLQueryItem(name: "hasMDE", value: "1"),
+            URLQueryItem(name: "directPlay", value: "0"),
+            URLQueryItem(name: "directStream", value: "0"),
+            URLQueryItem(name: "mediaIndex", value: "0"),
+            URLQueryItem(name: "partIndex", value: "0"),
+            URLQueryItem(name: "musicBitrate", value: "256"),
+            URLQueryItem(name: "musicCodec", value: "mp3"),
+            URLQueryItem(name: "X-Plex-Token", value: authToken),
+            URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
+            URLQueryItem(name: "location", value: "lan"),
+            URLQueryItem(name: "X-Plex-Product", value: "Strimr"),
+            URLQueryItem(name: "X-Plex-Platform", value: platform),
+            URLQueryItem(name: "X-Plex-Version", value: appVersion),
+            URLQueryItem(
+                name: "X-Plex-Client-Profile-Extra",
+                value: "append-transcode-target-codec(type=musicProfile&context=streaming&audioCodec=mp3)"
+            ),
+        ]
+        return components?.url
+    }
+
     func stopSession(id: String) async throws {
         try await network.send(
             path: "/video/:/transcode/universal/stop",

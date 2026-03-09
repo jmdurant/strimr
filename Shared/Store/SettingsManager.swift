@@ -133,6 +133,11 @@ final class SettingsManager {
         persist()
     }
 
+    func setAudioDownloadQuality(_ quality: AudioDownloadQuality) {
+        settings.downloads.audioQuality = quality
+        persist()
+    }
+
     func setWatchTogetherServerURL(_ url: String?) {
         settings.watchTogether.customServerURL = url?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true ? nil : url?.trimmingCharacters(in: .whitespacesAndNewlines)
         persist()

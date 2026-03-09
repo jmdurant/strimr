@@ -30,6 +30,18 @@ struct WatchSettingsView: View {
                 Text("Zoom crops black bars by filling the screen.")
             }
 
+            Section {
+                Picker("Audio Downloads", selection: audioDownloadQualityBinding) {
+                    ForEach(AudioDownloadQuality.allCases) { quality in
+                        Text(quality.displayName).tag(quality)
+                    }
+                }
+            } header: {
+                Text("Downloads")
+            } footer: {
+                Text("Transcodes lossless audio (FLAC, ALAC) to MP3 256kbps. Lossy files download as-is.")
+            }
+
             Section("Storage") {
                 let summary = downloadManager.storageSummary
                 let downloadsText = ByteCountFormatter.string(
@@ -90,6 +102,13 @@ struct WatchSettingsView: View {
         Binding(
             get: { settingsManager.playback.streamQuality },
             set: { settingsManager.setStreamQuality($0) }
+        )
+    }
+
+    private var audioDownloadQualityBinding: Binding<AudioDownloadQuality> {
+        Binding(
+            get: { settingsManager.downloads.audioQuality },
+            set: { settingsManager.setAudioDownloadQuality($0) }
         )
     }
 
