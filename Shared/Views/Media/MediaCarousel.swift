@@ -16,8 +16,8 @@ struct MediaCarousel: View {
                 }
             }
             #if os(tvOS)
-            .padding(.vertical, 18)
-            .padding(.horizontal, 12)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 8)
             #else
             .padding(.horizontal, 2)
             #endif
@@ -45,13 +45,13 @@ struct MediaCarousel: View {
         switch layout {
         case .portrait:
             #if os(tvOS)
-                28
+                20
             #else
                 12
             #endif
         case .landscape:
             #if os(tvOS)
-                32
+                24
             #else
                 16
             #endif

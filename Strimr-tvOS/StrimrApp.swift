@@ -10,6 +10,7 @@ struct StrimrApp: App {
     @State private var seerrStore: SeerrStore
     @State private var seerrFocusModel: SeerrFocusModel
     @State private var watchTogetherViewModel: WatchTogetherViewModel
+    @State private var sharePlayViewModel: SharePlayViewModel
 
     init() {
         let context = PlexAPIContext()
@@ -28,6 +29,7 @@ struct StrimrApp: App {
             context: context,
             settingsManager: settings,
         ))
+        _sharePlayViewModel = State(initialValue: SharePlayViewModel(context: context))
     }
 
     var body: some Scene {
@@ -41,8 +43,12 @@ struct StrimrApp: App {
                 .environment(seerrStore)
                 .environment(seerrFocusModel)
                 .environment(watchTogetherViewModel)
+                .environment(sharePlayViewModel)
                 .tint(settingsManager.interface.accentColor.color)
                 .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
+                .task {
+                    sharePlayViewModel.observeSessions()
+                }
         }
     }
 }

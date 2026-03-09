@@ -7,6 +7,7 @@ struct StrimrApp: App {
     @State private var settingsManager: SettingsManager
     @State private var libraryStore: LibraryStore
     @State private var watchTogetherViewModel: WatchTogetherViewModel
+    @State private var sharePlayViewModel: SharePlayViewModel
 
     init() {
         let deps = AppDependencies.shared
@@ -19,6 +20,7 @@ struct StrimrApp: App {
             context: deps.plexApiContext,
             settingsManager: deps.settingsManager
         ))
+        _sharePlayViewModel = State(initialValue: SharePlayViewModel(context: deps.plexApiContext))
     }
 
     var body: some Scene {
@@ -29,8 +31,12 @@ struct StrimrApp: App {
                 .environment(settingsManager)
                 .environment(libraryStore)
                 .environment(watchTogetherViewModel)
+                .environment(sharePlayViewModel)
                 .tint(settingsManager.interface.accentColor.color)
                 .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
+                .task {
+                    sharePlayViewModel.observeSessions()
+                }
                 .frame(minWidth: 900, minHeight: 600)
         }
         .commands {

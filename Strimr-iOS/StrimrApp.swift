@@ -11,6 +11,7 @@ struct StrimrApp: App {
     @State private var libraryStore: LibraryStore
     @State private var seerrStore: SeerrStore
     @State private var watchTogetherViewModel: WatchTogetherViewModel
+    @State private var sharePlayViewModel: SharePlayViewModel
     @State private var watchSyncManager: WatchSyncManager
 
     init() {
@@ -28,6 +29,7 @@ struct StrimrApp: App {
             context: deps.plexApiContext,
             settingsManager: deps.settingsManager,
         ))
+        _sharePlayViewModel = State(initialValue: SharePlayViewModel(context: deps.plexApiContext))
         _watchSyncManager = State(initialValue: syncManager)
 
         PhoneSessionManager.shared.activate(sessionManager: deps.sessionManager)
@@ -44,9 +46,13 @@ struct StrimrApp: App {
                 .environment(libraryStore)
                 .environment(seerrStore)
                 .environment(watchTogetherViewModel)
+                .environment(sharePlayViewModel)
                 .environment(watchSyncManager)
                 .tint(settingsManager.interface.accentColor.color)
                 .preferredColorScheme(settingsManager.interface.appearance.colorScheme)
+                .task {
+                    sharePlayViewModel.observeSessions()
+                }
                 .onChange(of: sessionManager.status, initial: true) { _, newStatus in
                     if newStatus == .ready,
                        let token = sessionManager.authToken

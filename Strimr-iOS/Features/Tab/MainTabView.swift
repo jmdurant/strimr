@@ -7,6 +7,7 @@ struct MainTabView: View {
     @Environment(SeerrStore.self) var seerrStore
     @Environment(\.openURL) var openURL
     @Environment(WatchTogetherViewModel.self) var watchTogetherViewModel
+    @Environment(SharePlayViewModel.self) var sharePlayViewModel
     @StateObject var coordinator = MainCoordinator()
     @State var homeViewModel: HomeViewModel
     @State var libraryViewModel: LibraryViewModel
@@ -125,14 +126,14 @@ struct MainTabView: View {
         .environmentObject(coordinator)
         .task {
             try? await libraryStore.loadLibraries()
-            watchTogetherViewModel.configurePlaybackLauncher(
-                PlaybackLauncher(
-                    context: plexApiContext,
-                    coordinator: coordinator,
-                    settingsManager: settingsManager,
-                    openURL: { url in openURL(url) },
-                ),
+            let launcher = PlaybackLauncher(
+                context: plexApiContext,
+                coordinator: coordinator,
+                settingsManager: settingsManager,
+                openURL: { url in openURL(url) },
             )
+            watchTogetherViewModel.configurePlaybackLauncher(launcher)
+            sharePlayViewModel.configurePlaybackLauncher(launcher)
             watchTogetherViewModel.configureLiveTVPlayer { [weak coordinator] url, channelName in
                 coordinator?.showLiveTV(streamURL: url, channelName: channelName)
             }
