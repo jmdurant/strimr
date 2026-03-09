@@ -151,6 +151,12 @@ final class WatchAVPlayerController: PlayerCoordinating {
         ) { [weak self] time in
             Task { @MainActor in
                 self?.onPropertyChange?(.timePos, CMTimeGetSeconds(time))
+                if let duration = self?.player?.currentItem?.duration {
+                    let secs = CMTimeGetSeconds(duration)
+                    if secs.isFinite, secs > 0 {
+                        self?.onPropertyChange?(.duration, secs)
+                    }
+                }
             }
         }
 

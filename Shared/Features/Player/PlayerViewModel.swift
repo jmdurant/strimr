@@ -71,6 +71,7 @@ final class PlayerViewModel {
         self.localPlaybackURL = localPlaybackURL
         shouldReportPlaybackToServer = false
         media = localMedia
+        duration = localMedia.duration
         playbackURL = localPlaybackURL
     }
 
@@ -121,6 +122,9 @@ final class PlayerViewModel {
             )
             let metadata = response.mediaContainer.metadata?.first
             media = metadata.map(MediaItem.init)
+            if duration == nil, let mediaDuration = media?.duration {
+                duration = mediaDuration
+            }
             markers = metadata?.markers ?? []
             updatePartContext(from: metadata)
             resolvePreferredStreams(from: metadata)

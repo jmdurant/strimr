@@ -192,30 +192,37 @@ struct WatchMusicTracksView: View {
                     )
                 } else {
                     List {
-                        Button {
-                            Task { await playAlbum(shuffle: false) }
-                        } label: {
-                            Label("Play All", systemImage: "play.fill")
-                                .frame(maxWidth: .infinity)
-                        }
+                        HStack(spacing: 0) {
+                            Button {
+                                Task { await playAlbum(shuffle: false) }
+                            } label: {
+                                Image(systemName: "play.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
 
-                        Button {
-                            Task { await playAlbum(shuffle: true) }
-                        } label: {
-                            Label("Shuffle", systemImage: "shuffle")
-                                .frame(maxWidth: .infinity)
-                        }
+                            Button {
+                                Task { await playAlbum(shuffle: true) }
+                            } label: {
+                                Image(systemName: "shuffle")
+                                    .frame(maxWidth: .infinity)
+                            }
 
-                        Button {
-                            Task { await downloadAlbum() }
-                        } label: {
-                            Label(
-                                isDownloadingAlbum ? "Downloading…" : "Download All",
-                                systemImage: "arrow.down.circle"
-                            )
-                            .frame(maxWidth: .infinity)
+                            Button {
+                                Task { await downloadAlbum() }
+                            } label: {
+                                if isDownloadingAlbum {
+                                    ProgressView()
+                                        .scaleEffect(0.7)
+                                        .frame(maxWidth: .infinity)
+                                } else {
+                                    Image(systemName: "arrow.down.circle")
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
+                            .disabled(isDownloadingAlbum)
                         }
-                        .disabled(isDownloadingAlbum)
+                        .buttonStyle(.plain)
+                        .listRowBackground(Color.clear)
 
                         ForEach(viewModel.items) { track in
                             Button {
@@ -323,10 +330,13 @@ struct WatchMusicTracksView: View {
     private func playTrack(_ track: MediaItem) async {
         let launcher = WatchPlaybackLauncher(context: plexApiContext)
         do {
-            let queue = try await launcher.createPlayQueue(
-                ratingKey: track.id,
-                type: .track
+            // Create queue from the album so all tracks are included,
+            // then override the selected track to start from the tapped one
+            var queue = try await launcher.createPlayQueue(
+                ratingKey: album.id,
+                type: .album
             )
+            queue = queue.selecting(ratingKey: track.id)
             presentedPlayQueue = queue
         } catch {
             AppLogger.player.error("Failed to play track: \(error)")

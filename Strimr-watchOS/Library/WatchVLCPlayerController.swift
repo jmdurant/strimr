@@ -14,6 +14,7 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
     private var mediaPlayer: VLCMediaPlayer?
     private var hasNotifiedFileLoaded = false
     private var lastReportedTimeSeconds = -1.0
+    private var lastReportedState: VLCMediaPlayerState?
 
     init(options: PlayerOptions) {
         super.init()
@@ -152,6 +153,9 @@ final class WatchVLCPlayerController: NSObject, PlayerCoordinating {
 extension WatchVLCPlayerController: VLCMediaPlayerDelegate {
     nonisolated func mediaPlayerStateChanged(_ newState: VLCMediaPlayerState) {
         Task { @MainActor in
+            guard newState != lastReportedState else { return }
+            lastReportedState = newState
+
             let stateNames = ["stopped","stopping","opening","buffering","error","playing","paused"]
             let stateName = newState.rawValue < stateNames.count ? stateNames[Int(newState.rawValue)] : "unknown(\(newState.rawValue))"
             AppLogger.fileLog("stateChanged: \(stateName) (\(newState.rawValue))", logger: AppLogger.player)

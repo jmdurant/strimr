@@ -22,6 +22,26 @@ struct PlayQueueState: Equatable, Identifiable {
         items = container.metadata ?? []
     }
 
+    private init(
+        id: Int,
+        selectedItemID: Int?,
+        selectedMetadataItemID: String?,
+        totalCount: Int?,
+        version: Int?,
+        shuffled: Bool?,
+        sourceURI: String?,
+        items: [PlexItem]
+    ) {
+        self.id = id
+        self.selectedItemID = selectedItemID
+        self.selectedMetadataItemID = selectedMetadataItemID
+        self.totalCount = totalCount
+        self.version = version
+        self.shuffled = shuffled
+        self.sourceURI = sourceURI
+        self.items = items
+    }
+
     init(localRatingKey: String) {
         id = -1
         selectedItemID = nil
@@ -43,10 +63,29 @@ struct PlayQueueState: Equatable, Identifiable {
         return items.first?.ratingKey
     }
 
+    func selecting(ratingKey: String) -> PlayQueueState {
+        PlayQueueState(
+            id: id,
+            selectedItemID: items.first { $0.ratingKey == ratingKey }?.playQueueItemID ?? selectedItemID,
+            selectedMetadataItemID: ratingKey,
+            totalCount: totalCount,
+            version: version,
+            shuffled: shuffled,
+            sourceURI: sourceURI,
+            items: items
+        )
+    }
+
     func item(after ratingKey: String) -> PlexItem? {
         guard let index = items.firstIndex(where: { $0.ratingKey == ratingKey }) else { return nil }
         let nextIndex = items.index(after: index)
         guard nextIndex < items.endIndex else { return nil }
         return items[nextIndex]
+    }
+
+    func item(before ratingKey: String) -> PlexItem? {
+        guard let index = items.firstIndex(where: { $0.ratingKey == ratingKey }) else { return nil }
+        guard index > items.startIndex else { return nil }
+        return items[items.index(before: index)]
     }
 }

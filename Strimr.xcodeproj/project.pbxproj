@@ -303,6 +303,7 @@
 		4DE5659312F4465A1B20EE05 /* DownloadModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB61FA6216EBBD33A534F40 /* DownloadModels.swift */; };
 		4E72AD575AF229D317DEA740 /* PlayQueueState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5FC0E3D10F6495186F91FB7 /* PlayQueueState.swift */; };
 		4EB2D1246C78A3254105AE12 /* WatchTogetherPlayerEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9D81E76FC0016A589500A4B /* WatchTogetherPlayerEvent.swift */; };
+		4EB3518038B9D562EED63562 /* WatchTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED0A0E3A5AFC2073CEA07CF /* WatchTimelineView.swift */; };
 		4F4B6A62CCFBD9F53A719AA7 /* PlayerTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BC753A3D72D8DF19BAB1A9 /* PlayerTrack.swift */; };
 		4F60AF4F6A20E7A737E94A24 /* WatchLiveTVView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B2F352A3FA3E1BCAA20F849 /* WatchLiveTVView.swift */; };
 		4FE2194A76F479A8DB236F85 /* SettingsWatchTogetherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D08F40C7CC8D34215B5CC8 /* SettingsWatchTogetherView.swift */; };
@@ -726,6 +727,7 @@
 		C60A84E3DB02D89B7688C94A /* SectionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4C9FBD453FDCEFE3A5BA7D /* SectionRepository.swift */; };
 		C685FB22DF00EA61592E6981 /* WatchTogetherPlaybackSyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6836B03F6366F6CA58C5EB6C /* WatchTogetherPlaybackSyncEngine.swift */; };
 		C706277DB0DE7604F0AB5776 /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7596B4B38F0712E5DB2E8A38 /* AuthRepository.swift */; };
+		C775BF3DC82FD52C975A1E20 /* WatchPinCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74ED782FDD7F976E68C48D40 /* WatchPinCodeView.swift */; };
 		C793F80B45C2460FF421DC14 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65EE577B9D2DE8DAF2F8E690 /* AppSettings.swift */; };
 		C7E0C989B161E286D7B92A7D /* VisualizationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B23585C613795B41F5CB56 /* VisualizationOverlayView.swift */; };
 		C82E7D5FF1446A5D8679C941 /* LiveTVRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331AB38DBFC44416D1F811F5 /* LiveTVRepository.swift */; };
@@ -1223,6 +1225,7 @@
 		7332A89C514A2F9F6D8E0477 /* WatchProfileSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProfileSelectionView.swift; sourceTree = "<group>"; };
 		745A20F4F0FC51163D1EA432 /* PlayerTrackSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTrackSelectionView.swift; sourceTree = "<group>"; };
 		74D7C176CE9E2B392AC74E76 /* SeerrFocusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrFocusModel.swift; sourceTree = "<group>"; };
+		74ED782FDD7F976E68C48D40 /* WatchPinCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPinCodeView.swift; sourceTree = "<group>"; };
 		75134C7BFD82FFA3D80AD093 /* SeerrPaginatedResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrPaginatedResponse.swift; sourceTree = "<group>"; };
 		7596B4B38F0712E5DB2E8A38 /* AuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
 		75C176BA48246D027FB48459 /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
@@ -1341,6 +1344,7 @@
 		BC982278A3A59C17CE1B2F22 /* PlayerControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControlsView.swift; sourceTree = "<group>"; };
 		BEA7A114EA45B65754F49836 /* LiveTVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTVPlayerView.swift; sourceTree = "<group>"; };
 		BEAC5C88D30267E0FBF14A15 /* SeerrRequestCount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeerrRequestCount.swift; sourceTree = "<group>"; };
+		BED0A0E3A5AFC2073CEA07CF /* WatchTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTimelineView.swift; sourceTree = "<group>"; };
 		BF44429D4DEA76774E765D60 /* Strimr-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Strimr-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0A614DAE4E547A8CAF6D2A8 /* VLCPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VLCPlayerViewController.swift; sourceTree = "<group>"; };
 		C0A720B9451D64E4FF32C6BA /* HLSProxyServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HLSProxyServer.swift; sourceTree = "<group>"; };
@@ -1597,6 +1601,7 @@
 			children = (
 				119019B25F39212169D3B3FD /* WatchPlaybackLauncher.swift */,
 				A7C8152276312DD95D947CEB /* WatchPlayerView.swift */,
+				BED0A0E3A5AFC2073CEA07CF /* WatchTimelineView.swift */,
 				69CD95D0D1451E3F4E4516CC /* WatchVisualizationView.swift */,
 			);
 			path = Player;
@@ -3011,6 +3016,7 @@
 		F413A9DD12771DF0EA5579D7 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				74ED782FDD7F976E68C48D40 /* WatchPinCodeView.swift */,
 				7332A89C514A2F9F6D8E0477 /* WatchProfileSelectionView.swift */,
 				847323CD18E5488218AA7818 /* WatchServerSelectionView.swift */,
 				0A1D278971FEABA5B042EBE9 /* WatchSignInView.swift */,
@@ -3502,6 +3508,7 @@
 				09C556B93A672F02BD24092D /* WatchOfflineLibraryView.swift in Sources */,
 				38327FA00FB9BB829361C75F /* WatchPhotoBrowseView.swift in Sources */,
 				5C297C450130350216B5AA6F /* WatchPhotoDetailView.swift in Sources */,
+				C775BF3DC82FD52C975A1E20 /* WatchPinCodeView.swift in Sources */,
 				3C69EAEC867E62494438F00F /* WatchPlaybackLauncher.swift in Sources */,
 				371766A1B0F2145890657E8E /* WatchPlayerFactory.swift in Sources */,
 				A3C30827241531EE4A0EA9ED /* WatchPlayerView.swift in Sources */,
@@ -3515,6 +3522,7 @@
 				48584C597EC2A97F4C5A6584 /* WatchSignInView.swift in Sources */,
 				089F66918886EB46B38B9C08 /* WatchSyncReceiver.swift in Sources */,
 				DDF49A3FF5AF3677BA616F61 /* WatchSyncStatusView.swift in Sources */,
+				4EB3518038B9D562EED63562 /* WatchTimelineView.swift in Sources */,
 				D644AF1DEBC357279A610377 /* WatchVLCPlayerController.swift in Sources */,
 				E867C7F0749DD7C30A22533B /* WatchVisualizationView.swift in Sources */,
 				22720F85E590D46EB9A8B2D0 /* WidgetData.swift in Sources */,

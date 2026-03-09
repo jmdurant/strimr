@@ -9,11 +9,11 @@ final class AuthRepository {
         network = PlexCloudNetworkClient(authToken: context.authTokenCloud, clientIdentifier: context.clientIdentifier)
     }
 
-    func requestPin() async throws -> PlexCloudPin {
+    func requestPin(strong: Bool = true) async throws -> PlexCloudPin {
         try await network.request(
             path: "/pins",
             method: "POST",
-            queryItems: [URLQueryItem(name: "strong", value: "true")],
+            queryItems: [URLQueryItem(name: "strong", value: strong ? "true" : "false")],
         )
     }
 

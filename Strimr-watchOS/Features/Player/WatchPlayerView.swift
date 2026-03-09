@@ -37,6 +37,18 @@ struct WatchPlayerView: View {
             if let viewModel {
                 if viewModel.isLoading {
                     ProgressView("Loading...")
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button { dismiss() } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.caption2)
+                                        .foregroundStyle(.white)
+                                        .padding(6)
+                                        .background(.black.opacity(0.4), in: Circle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
                 } else if let errorMessage = viewModel.errorMessage {
                     VStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle")
@@ -47,6 +59,18 @@ struct WatchPlayerView: View {
                         Button("Close") { dismiss() }
                     }
                     .padding()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button { dismiss() } label: {
+                                Image(systemName: "xmark")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white)
+                                    .padding(6)
+                                    .background(.black.opacity(0.4), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 } else if let avPlayer {
                     GeometryReader { geo in
                         let w = isLandscape ? geo.size.height : geo.size.width
@@ -128,6 +152,18 @@ struct WatchPlayerView: View {
                             .lineLimit(2)
                             .multilineTextAlignment(.center)
                     }
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button { dismiss() } label: {
+                                Image(systemName: "xmark")
+                                    .font(.caption2)
+                                    .foregroundStyle(.white)
+                                    .padding(6)
+                                    .background(.black.opacity(0.4), in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 } else {
                     audioPlayerView(viewModel: viewModel)
                 }
@@ -145,43 +181,44 @@ struct WatchPlayerView: View {
 
     @ViewBuilder
     private func audioPlayerView(viewModel: PlayerViewModel) -> some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             audioAlbumArt
-                .frame(width: 80, height: 80)
+                .frame(width: 56, height: 56)
                 .cornerRadius(8)
 
             Text(viewModel.media?.title ?? "")
-                .font(.headline)
-                .lineLimit(2)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .lineLimit(1)
                 .multilineTextAlignment(.center)
 
             if let grandparentTitle = viewModel.media?.grandparentTitle {
                 Text(grandparentTitle)
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
 
             if let duration = viewModel.duration, duration > 0 {
-                ProgressView(value: viewModel.position, total: duration)
-                    .tint(.accentColor)
-
-                HStack {
-                    Text(viewModel.position.mediaDurationText())
-                    Spacer()
-                    Text(duration.mediaDurationText())
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                WatchTimelineView(
+                    position: viewModel.position,
+                    duration: duration,
+                    onSeek: { newPosition in
+                        coordinator?.seek(to: newPosition)
+                        viewModel.position = newPosition
+                    }
+                )
             }
 
             HStack(spacing: 20) {
                 Button {
-                    coordinator?.seek(by: -15)
+                    Task { await skipToPreviousTrack() }
                 } label: {
-                    Image(systemName: "gobackward.15")
+                    Image(systemName: "backward.fill")
                         .font(.title3)
                 }
                 .buttonStyle(.plain)
+                .disabled(!hasPreviousTrack)
 
                 Button {
                     coordinator?.togglePlayback()
@@ -192,12 +229,13 @@ struct WatchPlayerView: View {
                 .buttonStyle(.plain)
 
                 Button {
-                    coordinator?.seek(by: 30)
+                    Task { await skipToNextTrack() }
                 } label: {
-                    Image(systemName: "goforward.30")
+                    Image(systemName: "forward.fill")
                         .font(.title3)
                 }
                 .buttonStyle(.plain)
+                .disabled(!hasNextTrack)
 
                 if let vlcCoordinator = coordinator as? WatchVLCPlayerController {
                     Button {
@@ -213,7 +251,19 @@ struct WatchPlayerView: View {
                 }
             }
         }
-        .padding()
+        .padding(.horizontal)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(6)
+                        .background(.black.opacity(0.4), in: Circle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     @ViewBuilder
@@ -301,18 +351,24 @@ struct WatchPlayerView: View {
             var playURL = url
 
             if !isLocal {
-                // Remote streaming — proxy through localhost for TLS termination
-                AppLogger.fileLog("creating AVPlayer for streaming", logger: AppLogger.player)
-                let proxy = HLSProxyServer.shared
-                if let serverBase = plexApiContext.baseURLServer {
-                    do {
-                        try await proxy.start(baseURL: serverBase)
-                        AppLogger.fileLog("started on port \(proxy.port)", logger: AppLogger.player)
-                    } catch {
-                        AppLogger.fileLog("HLSProxy failed to start: \(error)", logger: AppLogger.player)
+                let isHLS = url.pathExtension == "m3u8" || url.absoluteString.contains("/transcode/")
+                if isHLS {
+                    // HLS streams need proxy for TLS termination and URL rewriting
+                    AppLogger.fileLog("creating AVPlayer for HLS streaming", logger: AppLogger.player)
+                    let proxy = HLSProxyServer.shared
+                    if let serverBase = plexApiContext.baseURLServer {
+                        do {
+                            try await proxy.start(baseURL: serverBase)
+                            AppLogger.fileLog("started on port \(proxy.port)", logger: AppLogger.player)
+                        } catch {
+                            AppLogger.fileLog("HLSProxy failed to start: \(error)", logger: AppLogger.player)
+                        }
                     }
+                    playURL = proxy.proxyURL(for: url) ?? url
+                } else {
+                    // Direct media files (MP3, etc.) — AVPlayer handles HTTPS natively
+                    AppLogger.fileLog("creating AVPlayer for direct streaming (no proxy)", logger: AppLogger.player)
                 }
-                playURL = proxy.proxyURL(for: url) ?? url
                 AppLogger.fileLog("playURL=\(playURL.absoluteString)", logger: AppLogger.player)
             } else {
                 AppLogger.fileLog("creating AVPlayer for local \(isVideo ? "video" : "audio")", logger: AppLogger.player)
@@ -423,6 +479,74 @@ struct WatchPlayerView: View {
     }
 
     @Environment(WatchDownloadManager.self) private var downloadManager
+
+    private var hasNextTrack: Bool {
+        guard let currentId = viewModel?.media?.id else { return false }
+        return playQueue.item(after: currentId) != nil
+    }
+
+    private var hasPreviousTrack: Bool {
+        guard let currentId = viewModel?.media?.id else { return false }
+        return playQueue.item(before: currentId) != nil
+    }
+
+    private func skipToNextTrack() async {
+        guard let currentId = viewModel?.media?.id,
+              let nextItem = playQueue.item(after: currentId) else { return }
+        await switchToTrack(ratingKey: nextItem.ratingKey)
+    }
+
+    private func skipToPreviousTrack() async {
+        guard let currentId = viewModel?.media?.id,
+              let prevItem = playQueue.item(before: currentId) else { return }
+        await switchToTrack(ratingKey: prevItem.ratingKey)
+    }
+
+    private func switchToTrack(ratingKey: String) async {
+        // Tear down current player
+        nowPlayingManager?.invalidate()
+        nowPlayingManager = nil
+        coordinator?.destruct()
+        coordinator = nil
+        avPlayer = nil
+        viewModel?.handleStop()
+
+        // Create new view model for the target track
+        let vm = PlayerViewModel(
+            playQueue: playQueue,
+            ratingKey: ratingKey,
+            context: plexApiContext,
+            shouldResumeFromOffset: false
+        )
+        vm.settingsManager = settingsManager
+        viewModel = vm
+        await vm.load()
+
+        guard let url = vm.playbackURL else { return }
+
+        let isVideo = vm.media?.type == .movie || vm.media?.type == .episode
+
+        var playURL = url
+        let isHLS = url.pathExtension == "m3u8" || url.absoluteString.contains("/transcode/")
+        if isHLS {
+            let proxy = HLSProxyServer.shared
+            if let serverBase = plexApiContext.baseURLServer {
+                try? await proxy.start(baseURL: serverBase)
+            }
+            playURL = proxy.proxyURL(for: url) ?? url
+        }
+
+        let playerCoordinator = WatchAVPlayerController(options: PlayerOptions())
+        coordinator = playerCoordinator
+        setupPropertyCallbacks(viewModel: vm, coordinator: playerCoordinator)
+        playerCoordinator.play(playURL)
+
+        if isVideo {
+            playerCoordinator.onMediaLoaded = { [playerCoordinator] in
+                avPlayer = playerCoordinator.player
+            }
+        }
+    }
 
     private func teardown() {
         nowPlayingManager?.invalidate()

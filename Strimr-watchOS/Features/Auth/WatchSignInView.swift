@@ -7,7 +7,6 @@ struct WatchSignInView: View {
     @Environment(PlexAPIContext.self) private var plexApiContext
 
     @State private var isSigningIn = false
-    @State private var pinCode: String?
     @State private var errorMessage: String?
     @State private var pollTask: Task<Void, Never>?
     @State private var authSession: ASWebAuthenticationSession?
@@ -31,27 +30,10 @@ struct WatchSignInView: View {
                     }
                     .disabled(isSigningIn)
 
-                    Button {
-                        Task { await signInWithPIN() }
+                    NavigationLink {
+                        WatchPinCodeView()
                     } label: {
                         Label("Use Code", systemImage: "number")
-                    }
-                    .disabled(isSigningIn)
-
-                    if let pinCode {
-                        VStack(spacing: 8) {
-                            Text("Enter this code at")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            Text("plex.tv/link")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                            Text(pinCode)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .monospacedDigit()
-                        }
-                        .padding(.top, 8)
                     }
 
                     if isSigningIn {
@@ -87,7 +69,6 @@ struct WatchSignInView: View {
         cancelSignIn()
         isSigningIn = true
         errorMessage = nil
-        pinCode = nil
 
         do {
             let authRepo = AuthRepository(context: plexApiContext)
@@ -126,23 +107,6 @@ struct WatchSignInView: View {
             AppLogger.auth.debug("Error: \(error)")
             errorMessage = error.localizedDescription
             isSigningIn = false
-        }
-    }
-
-    private func signInWithPIN() async {
-        cancelSignIn()
-        isSigningIn = true
-        errorMessage = nil
-
-        do {
-            let authRepo = AuthRepository(context: plexApiContext)
-            let pinResponse = try await authRepo.requestPin()
-            pinCode = pinResponse.code
-            beginPolling(pinID: pinResponse.id)
-        } catch {
-            errorMessage = error.localizedDescription
-            isSigningIn = false
-            pinCode = nil
         }
     }
 
