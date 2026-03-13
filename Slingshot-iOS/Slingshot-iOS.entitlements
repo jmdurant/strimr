@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.doctordurant.slingshot</string>
+		<string>group.com.doctordurant.slingshotplayer</string>
 	</array>
 	<!-- CarPlay Audio - Uncomment after Apple approval at https://developer.apple.com/contact/carplay
 	<key>com.apple.developer.carplay-audio</key>

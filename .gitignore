@@ -64,6 +64,7 @@ fastlane/test_output
 
 .idea/
 .DS_Store
+.mcp.json
 Config/Config.xcconfig
 
 node_modules/

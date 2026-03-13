@@ -28,7 +28,7 @@ struct WidgetData: Codable {
     let bannerText: String
     let updatedAt: Date
 
-    static let appGroupID = "group.com.doctordurant.slingshot"
+    static let appGroupID = "group.com.doctordurant.slingshotplayer"
 
     static var containerURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)

@@ -3264,31 +3264,31 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					005E02A1E275C982497E980C = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					0D8359784055B280BE7D22F3 = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					22175D29BED8916A3D5A1F3F = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					421B56E841EA240DC23493ED = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					BEB1C5B79D9F7C27DADD3AE1 = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					E2A5C29D77E2B6E6B1FA97A8 = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 					F16D6E1AA9E4FCB83FFBDBE0 = {
-						DevelopmentTeam = PHS5V2FW3J;
+						DevelopmentTeam = ADVQS8RXPZ;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -4377,7 +4377,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Slingshot-macOS/Info.plist";
@@ -4390,7 +4390,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshot.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshotplayer.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -4413,7 +4413,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Slingshot-visionOS/Slingshot-visionOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Slingshot-visionOS/Info.plist";
@@ -4425,7 +4425,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshot.visionos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshotplayer.visionos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -4448,7 +4448,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4620,7 +4620,7 @@
 				CODE_SIGN_ENTITLEMENTS = SlingshotLiveActivity/SlingshotLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SlingshotLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -4655,7 +4655,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Slingshot-macOS/Info.plist";
@@ -4668,7 +4668,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshot.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshotplayer.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -4689,7 +4689,7 @@
 				CODE_SIGN_ENTITLEMENTS = SlingshotLiveActivity/SlingshotLiveActivity.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SlingshotLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -4723,7 +4723,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4759,7 +4759,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SlingshotWidgetExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -4793,7 +4793,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -4848,7 +4848,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -4901,7 +4901,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4912,7 +4912,7 @@
 				INFOPLIST_FILE = "Slingshot-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Slingshot;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.slingshot;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.slingshotplayer;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4944,7 +4944,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Slingshot-visionOS/Slingshot-visionOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Slingshot-visionOS/Info.plist";
@@ -4956,7 +4956,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshot.visionos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctordurant.slingshotplayer.visionos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -4978,7 +4978,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4989,7 +4989,7 @@
 				INFOPLIST_FILE = "Slingshot-watchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Slingshot;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.slingshot;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.doctordurant.slingshotplayer;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5018,7 +5018,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 20;
-				DEVELOPMENT_TEAM = PHS5V2FW3J;
+				DEVELOPMENT_TEAM = ADVQS8RXPZ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SlingshotWidgetExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
