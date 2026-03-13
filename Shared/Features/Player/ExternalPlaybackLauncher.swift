@@ -2,7 +2,7 @@ import Foundation
 
 struct ExternalPlaybackLauncher {
     let context: PlexAPIContext
-    let callbackScheme: String = "strimr"
+    let callbackScheme: String = "slingshot"
 
     func infuseURL(for ratingKey: String) async throws -> URL {
         let playbackURL = try await resolvePlaybackURL(for: ratingKey)

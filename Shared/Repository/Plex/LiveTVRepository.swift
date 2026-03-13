@@ -115,7 +115,7 @@ final class LiveTVRepository {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(authToken, forHTTPHeaderField: "X-Plex-Token")
-        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue("Slingshot", forHTTPHeaderField: "X-Plex-Product")
         request.setValue(clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
 
         AppLogger.network.info("POST \(url.absoluteString)")
@@ -167,7 +167,7 @@ final class LiveTVRepository {
             URLQueryItem(name: "location", value: "wan"),
             URLQueryItem(name: "X-Plex-Token", value: authToken),
             URLQueryItem(name: "X-Plex-Client-Identifier", value: clientIdentifier),
-            URLQueryItem(name: "X-Plex-Product", value: "Strimr"),
+            URLQueryItem(name: "X-Plex-Product", value: "Slingshot"),
             URLQueryItem(name: "X-Plex-Platform", value: platform),
             URLQueryItem(name: "X-Plex-Version", value: appVersion),
             URLQueryItem(

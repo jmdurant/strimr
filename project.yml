@@ -1,4 +1,4 @@
-name: Strimr
+name: Slingshot
 
 options:
   xcodeVersion: "1600"
@@ -88,26 +88,26 @@ packages:
     exactVersion: "0.41.2"
 
 targets:
-  Strimr-iOS:
+  Slingshot-iOS:
     type: application
     platform: iOS
     deploymentTarget: "26.0"
     entitlements:
-      path: Strimr-iOS/Strimr-iOS.entitlements
+      path: Slingshot-iOS/Slingshot-iOS.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.doctordurant.strimr
+          - group.com.doctordurant.slingshot
     configFiles:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
     sources:
-      - path: Strimr-iOS
+      - path: Slingshot-iOS
         excludes:
           - Info.plist
       - path: Shared
-      - path: StrimrLiveActivity/NowPlayingAttributes.swift
-      - path: StrimrLiveActivity/LiveTVAttributes.swift
-      - path: StrimrLiveActivity/PlaybackIntents.swift
+      - path: SlingshotLiveActivity/NowPlayingAttributes.swift
+      - path: SlingshotLiveActivity/LiveTVAttributes.swift
+      - path: SlingshotLiveActivity/PlaybackIntents.swift
       - path: Localizable.xcstrings
         buildPhase: resources
     settings:
@@ -121,8 +121,8 @@ targets:
         ENABLE_PREVIEWS: YES
         ENABLE_USER_SELECTED_FILES: readonly
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Strimr-iOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_FILE: Slingshot-iOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
         "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]": NO
@@ -148,7 +148,7 @@ targets:
         HEADER_SEARCH_PATHS: "$(SRCROOT)/Shared/Library/Audio"
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
-        SWIFT_OBJC_BRIDGING_HEADER: Strimr-iOS/Strimr-iOS-Bridging-Header.h
+        SWIFT_OBJC_BRIDGING_HEADER: Slingshot-iOS/Slingshot-iOS-Bridging-Header.h
         SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -162,9 +162,9 @@ targets:
       - framework: Carthage/Build/VLCKit.xcframework
         embed: true
         codeSign: true
-      - target: StrimrLiveActivity
+      - target: SlingshotLiveActivity
 
-  Strimr-tvOS:
+  Slingshot-tvOS:
     type: application
     platform: tvOS
     deploymentTarget: "26.0"
@@ -172,14 +172,14 @@ targets:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
     sources:
-      - path: Strimr-tvOS
+      - path: Slingshot-tvOS
         excludes:
           - Info.plist
       - path: Shared
         excludes:
           - AppDependencies.swift
-          - Intents/StrimrAppIntents.swift
-          - Intents/StrimrShortcuts.swift
+          - Intents/SlingshotAppIntents.swift
+          - Intents/SlingshotShortcuts.swift
           - Widget/WidgetData.swift
           - Library/Audio/VLCAudioBridge.h
           - Library/Audio/VLCAudioBridge.m
@@ -194,8 +194,8 @@ targets:
         DEVELOPMENT_TEAM: PHS5V2FW3J
         ENABLE_PREVIEWS: YES
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Strimr-tvOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_FILE: Slingshot-tvOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -223,7 +223,7 @@ targets:
         embed: true
         codeSign: true
 
-  Strimr-watchOS:
+  Slingshot-watchOS:
     type: application
     platform: watchOS
     deploymentTarget: "26.2"
@@ -231,19 +231,19 @@ targets:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
     sources:
-      - path: Strimr-watchOS
+      - path: Slingshot-watchOS
         excludes:
           - Info.plist
       - path: Shared
         excludes:
           - AppDependencies.swift
           - Extensions/ImageCornerColorSampler.swift
-          - Intents/StrimrAppIntents.swift
-          - Intents/StrimrShortcuts.swift
+          - Intents/SlingshotAppIntents.swift
+          - Intents/SlingshotShortcuts.swift
           - Features/SharePlay/SharePlayPlaybackMessage.swift
           - Features/SharePlay/SharePlayPlaybackSyncEngine.swift
           - Features/SharePlay/SharePlayViewModel.swift
-          - Features/SharePlay/StrimrSharePlayActivity.swift
+          - Features/SharePlay/SlingshotSharePlayActivity.swift
           - Features/Integrations/SeerrPermissionService.swift
           - Features/Integrations/SeerrSessionService.swift
           - Features/Integrations/SeerrViewModel.swift
@@ -339,10 +339,10 @@ targets:
         DEVELOPMENT_TEAM: PHS5V2FW3J
         ENABLE_PREVIEWS: YES
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Strimr-watchOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_FILE: Slingshot-watchOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.doctordurant.strimr
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.doctordurant.slingshot
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/Frameworks"
@@ -357,7 +357,7 @@ targets:
         HEADER_SEARCH_PATHS: "$(SRCROOT)/Shared/Library/Audio"
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
-        SWIFT_OBJC_BRIDGING_HEADER: Strimr-watchOS/Strimr-watchOS-Bridging-Header.h
+        SWIFT_OBJC_BRIDGING_HEADER: Slingshot-watchOS/Slingshot-watchOS-Bridging-Header.h
         SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "4"
@@ -369,9 +369,9 @@ targets:
       - framework: Carthage/Build/VLCKit.xcframework
         embed: true
         codeSign: true
-      - target: StrimrWidgetExtension
+      - target: SlingshotWidgetExtension
 
-  Strimr-macOS:
+  Slingshot-macOS:
     type: application
     platform: macOS
     deploymentTarget: "15.5"
@@ -379,18 +379,18 @@ targets:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
     entitlements:
-      path: Strimr-macOS/Strimr-macOS.entitlements
+      path: Slingshot-macOS/Slingshot-macOS.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
     sources:
-      - path: Strimr-macOS
+      - path: Slingshot-macOS
         excludes:
           - Info.plist
       - path: Shared
         excludes:
-          - Intents/StrimrAppIntents.swift
-          - Intents/StrimrShortcuts.swift
+          - Intents/SlingshotAppIntents.swift
+          - Intents/SlingshotShortcuts.swift
           - Library/Audio/VLCAudioBridge.h
           - Library/Audio/VLCAudioBridge.m
           - Library/VLC/VLCPlayerView.swift
@@ -458,10 +458,10 @@ targets:
         buildPhase: resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.doctordurant.strimr.macos
+        PRODUCT_BUNDLE_IDENTIFIER: com.doctordurant.slingshot.macos
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
-        INFOPLIST_FILE: Strimr-macOS/Info.plist
+        INFOPLIST_FILE: Slingshot-macOS/Info.plist
         CODE_SIGN_IDENTITY: "Apple Development"
         DEVELOPMENT_TEAM: PHS5V2FW3J
         CODE_SIGN_STYLE: Automatic
@@ -469,7 +469,7 @@ targets:
         ENABLE_APP_SANDBOX: YES
         GENERATE_INFOPLIST_FILE: YES
         COMBINE_HIDPI_IMAGES: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
         LD_RUNPATH_SEARCH_PATHS:
@@ -494,7 +494,7 @@ targets:
       - package: MPVKit
         product: MPVKit-GPL
 
-  Strimr-visionOS:
+  Slingshot-visionOS:
     type: application
     platform: visionOS
     deploymentTarget: "2.0"
@@ -502,19 +502,19 @@ targets:
       Debug: Config/Config.xcconfig
       Release: Config/Config.xcconfig
     entitlements:
-      path: Strimr-visionOS/Strimr-visionOS.entitlements
+      path: Slingshot-visionOS/Slingshot-visionOS.entitlements
       properties:
         com.apple.security.network.client: true
         com.apple.developer.group-activities: true
     sources:
-      - path: Strimr-visionOS
+      - path: Slingshot-visionOS
         excludes:
           - Info.plist
       - path: Shared
         excludes:
           - AppDependencies.swift
-          - Intents/StrimrAppIntents.swift
-          - Intents/StrimrShortcuts.swift
+          - Intents/SlingshotAppIntents.swift
+          - Intents/SlingshotShortcuts.swift
           - Widget/WidgetData.swift
           - Library/Audio/VLCAudioBridge.h
           - Library/Audio/VLCAudioBridge.m
@@ -532,15 +532,15 @@ targets:
         DEVELOPMENT_TEAM: PHS5V2FW3J
         ENABLE_PREVIEWS: YES
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Strimr-visionOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Strimr
+        INFOPLIST_FILE: Slingshot-visionOS/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.entertainment
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/Frameworks"
         MARKETING_VERSION: "1.0.0"
-        PRODUCT_BUNDLE_IDENTIFIER: com.doctordurant.strimr.visionos
+        PRODUCT_BUNDLE_IDENTIFIER: com.doctordurant.slingshot.visionos
         PRODUCT_NAME: "$(TARGET_NAME)"
         SDKROOT: xros
         STRING_CATALOG_GENERATE_SYMBOLS: YES
@@ -557,12 +557,12 @@ targets:
       - package: MPVKit
         product: MPVKit-GPL
 
-  StrimrWidgetExtension:
+  SlingshotWidgetExtension:
     type: app-extension
     platform: watchOS
     deploymentTarget: "26.2"
     sources:
-      - path: StrimrWidgetExtension
+      - path: SlingshotWidgetExtension
         excludes:
           - Info.plist
     settings:
@@ -572,7 +572,7 @@ targets:
         CURRENT_PROJECT_VERSION: "20"
         DEVELOPMENT_TEAM: PHS5V2FW3J
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: StrimrWidgetExtension/Info.plist
+        INFOPLIST_FILE: SlingshotWidgetExtension/Info.plist
         MARKETING_VERSION: "1.1.0"
         PRODUCT_BUNDLE_IDENTIFIER: "$(IOS_BUNDLE_IDENTIFIER).watchos.widget"
         PRODUCT_NAME: "$(TARGET_NAME)"
@@ -587,17 +587,17 @@ targets:
         TARGETED_DEVICE_FAMILY: "4"
         WATCHOS_DEPLOYMENT_TARGET: "26.2"
 
-  StrimrLiveActivity:
+  SlingshotLiveActivity:
     type: app-extension
     platform: iOS
     deploymentTarget: "26.0"
     entitlements:
-      path: StrimrLiveActivity/StrimrLiveActivity.entitlements
+      path: SlingshotLiveActivity/SlingshotLiveActivity.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.doctordurant.strimr
+          - group.com.doctordurant.slingshot
     sources:
-      - path: StrimrLiveActivity
+      - path: SlingshotLiveActivity
         excludes:
           - Info.plist
       - path: Shared/Widget/WidgetData.swift
@@ -608,7 +608,7 @@ targets:
         CURRENT_PROJECT_VERSION: "20"
         DEVELOPMENT_TEAM: PHS5V2FW3J
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: StrimrLiveActivity/Info.plist
+        INFOPLIST_FILE: SlingshotLiveActivity/Info.plist
         MARKETING_VERSION: "1.1.0"
         PRODUCT_BUNDLE_IDENTIFIER: "$(IOS_BUNDLE_IDENTIFIER).liveactivity"
         PRODUCT_NAME: "$(TARGET_NAME)"

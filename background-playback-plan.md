@@ -51,16 +51,16 @@ Currently `private` in WatchPlayerView.swift (lines 20-27). Move to own file so 
 
 | File | Purpose |
 |------|---------|
-| `Strimr-watchOS/Library/ActivePlaybackManager.swift` | Shared player lifecycle manager |
-| `Strimr-watchOS/Library/PlayerCallbackProviding.swift` | Extracted protocol + conformance extensions |
+| `Slingshot-watchOS/Library/ActivePlaybackManager.swift` | Shared player lifecycle manager |
+| `Slingshot-watchOS/Library/PlayerCallbackProviding.swift` | Extracted protocol + conformance extensions |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `Strimr-watchOS/StrimrWatchApp.swift` | Add `@State activePlaybackManager`, inject into environment |
-| `Strimr-watchOS/Features/WatchMainTabView.swift` | Add conditional Now Playing tab (tag -1), auto-nav onChange |
-| `Strimr-watchOS/Features/Player/WatchPlayerView.swift` | Remove @State player objects, delegate to manager, X→chevron, new dismiss behavior |
+| `Slingshot-watchOS/SlingshotWatchApp.swift` | Add `@State activePlaybackManager`, inject into environment |
+| `Slingshot-watchOS/Features/WatchMainTabView.swift` | Add conditional Now Playing tab (tag -1), auto-nav onChange |
+| `Slingshot-watchOS/Features/Player/WatchPlayerView.swift` | Remove @State player objects, delegate to manager, X→chevron, new dismiss behavior |
 
 ### Unchanged
 
@@ -70,7 +70,7 @@ Launch sites (`WatchMediaDetailView`, `DownloadPlayerLauncher`, music/playlist/p
 
 1. Create `PlayerCallbackProviding.swift` — extract protocol from WatchPlayerView
 2. Create `ActivePlaybackManager.swift` — move setup/teardown/callback logic here
-3. Update `StrimrWatchApp.swift` — create and inject into environment
+3. Update `SlingshotWatchApp.swift` — create and inject into environment
 4. Refactor `WatchPlayerView.swift` — remove state, read from manager, change dismiss behavior
 5. Update `WatchMainTabView.swift` — conditional Now Playing tab showing `WatchPlayerView(resumeFromManager: true)`
 

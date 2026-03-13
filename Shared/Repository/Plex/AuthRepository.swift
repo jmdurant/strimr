@@ -35,7 +35,7 @@ final class AuthRepository {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue("Slingshot", forHTTPHeaderField: "X-Plex-Product")
         request.setValue(context.clientIdentifier, forHTTPHeaderField: "X-Plex-Client-Identifier")
         request.httpBody = "user[login]=\(encodedLogin)&user[password]=\(encodedPassword)".data(using: .utf8)
 

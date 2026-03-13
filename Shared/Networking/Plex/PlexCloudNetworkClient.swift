@@ -91,7 +91,7 @@ final class PlexCloudNetworkClient {
         request.httpMethod = method
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("Strimr", forHTTPHeaderField: "X-Plex-Product")
+        request.setValue("Slingshot", forHTTPHeaderField: "X-Plex-Product")
         request.setValue(platform, forHTTPHeaderField: "X-Plex-Platform")
         if let appVersion {
             request.setValue(appVersion, forHTTPHeaderField: "X-Plex-Version")

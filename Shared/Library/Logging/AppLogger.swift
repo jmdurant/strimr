@@ -2,7 +2,7 @@ import Foundation
 import os
 
 enum AppLogger {
-    private static let subsystem = Bundle.main.bundleIdentifier ?? "com.doctordurant.strimr"
+    private static let subsystem = Bundle.main.bundleIdentifier ?? "com.doctordurant.slingshot"
 
     static let network = Logger(subsystem: subsystem, category: "Network")
     static let player = Logger(subsystem: subsystem, category: "Player")

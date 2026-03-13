@@ -19,7 +19,7 @@ final class SharePlayViewModel {
 
     @ObservationIgnored private let groupStateObserver = GroupStateObserver()
     @ObservationIgnored private var groupStateCancellable: AnyCancellable?
-    @ObservationIgnored private var groupSession: GroupSession<StrimrSharePlayActivity>?
+    @ObservationIgnored private var groupSession: GroupSession<SlingshotSharePlayActivity>?
     @ObservationIgnored private var messenger: GroupSessionMessenger?
     @ObservationIgnored private var sessionTask: Task<Void, Never>?
     @ObservationIgnored private var messageReceiveTask: Task<Void, Never>?
@@ -64,7 +64,7 @@ final class SharePlayViewModel {
         title: String,
         thumbPath: String?
     ) {
-        let activity = StrimrSharePlayActivity(
+        let activity = SlingshotSharePlayActivity(
             ratingKey: ratingKey,
             type: type,
             title: title,
@@ -82,7 +82,7 @@ final class SharePlayViewModel {
 
     func observeSessions() {
         sessionTask = Task {
-            for await session in StrimrSharePlayActivity.sessions() {
+            for await session in SlingshotSharePlayActivity.sessions() {
                 await configureSession(session)
             }
         }
@@ -90,7 +90,7 @@ final class SharePlayViewModel {
 
     // MARK: - Session Configuration
 
-    private func configureSession(_ session: GroupSession<StrimrSharePlayActivity>) async {
+    private func configureSession(_ session: GroupSession<SlingshotSharePlayActivity>) async {
         teardownSession()
 
         groupSession = session
@@ -132,7 +132,7 @@ final class SharePlayViewModel {
         )
     }
 
-    private func handleSessionStateChange(_ state: GroupSession<StrimrSharePlayActivity>.State) {
+    private func handleSessionStateChange(_ state: GroupSession<SlingshotSharePlayActivity>.State) {
         switch state {
         case .waiting, .joined:
             break

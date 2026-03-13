@@ -20,8 +20,8 @@ final class SessionManager {
     private(set) var plexServer: PlexCloudResource?
 
     @ObservationIgnored private let keychain = Keychain(service: Bundle.main.bundleIdentifier!)
-    @ObservationIgnored private let tokenKey = "strimr.plex.authToken"
-    @ObservationIgnored private let serverIdDefaultsKey = "strimr.plex.serverIdentifier"
+    @ObservationIgnored private let tokenKey = "slingshot.plex.authToken"
+    @ObservationIgnored private let serverIdDefaultsKey = "slingshot.plex.serverIdentifier"
 
     init(context: PlexAPIContext, libraryStore: LibraryStore) {
         self.context = context

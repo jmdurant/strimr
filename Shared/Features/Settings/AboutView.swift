@@ -8,7 +8,7 @@ struct AboutView: View {
                     Image(systemName: "play.tv.fill")
                         .font(.system(size: 40))
                         .foregroundColor(.accentColor)
-                    Text("Strimr")
+                    Text("Slingshot")
                         .font(.title2.bold())
                     Text("Version \(appVersion) (\(buildNumber))")
                         .font(.caption)
@@ -32,7 +32,7 @@ struct AboutView: View {
                     Label("View Full License", systemImage: "doc.text")
                 }
 
-                Link(destination: URL(string: "https://github.com/jmdurant/strimr")!) {
+                Link(destination: URL(string: "https://github.com/jmdurant/slingshot")!) {
                     Label("Source Code", systemImage: "chevron.left.forwardslash.chevron.right")
                 }
             }

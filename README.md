@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="Strimr-iOS/Assets.xcassets/Icon.imageset/logo_ios.png" alt="Strimr logo" width="160" />
+  <img src="Slingshot-iOS/Assets.xcassets/Icon.imageset/logo_ios.png" alt="Slingshot logo" width="160" />
 </p>
-<h1 align="center">Strimr</h1>
+<h1 align="center">Slingshot</h1>
 
-Strimr is a third-party Plex client built in Swift with a native interface for iPhone, iPad, and Apple TV.
+Slingshot is a third-party Plex client built in Swift with a native interface for iPhone, iPad, and Apple TV.
 
 ## Key Features
 - Server selection
@@ -19,10 +19,10 @@ Strimr is a third-party Plex client built in Swift with a native interface for i
 
 ## Download
 <p align="center">
-  <a href="https://apps.apple.com/us/app/strimr/id6757491271">
+  <a href="https://apps.apple.com/us/app/slingshot/id6757491271">
     <img src=".github/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg" alt="Download on the App Store" width="200" />
   </a>
-  <a href="https://apps.apple.com/us/app/strimr/id6757491271">
+  <a href="https://apps.apple.com/us/app/slingshot/id6757491271">
     <img src=".github/assets/Download_on_Apple_TV_Badge_US-UK_RGB_blk_092917.svg" alt="Download on Apple TV" width="200" />
   </a>
 </p>

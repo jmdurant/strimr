@@ -63,7 +63,7 @@ final class LibraryStore {
         let data = WidgetData(
             libraries: items,
             hasLiveTV: hasLiveTV,
-            bannerText: "Strimr",
+            bannerText: "Slingshot",
             updatedAt: Date()
         )
         WidgetData.write(data)

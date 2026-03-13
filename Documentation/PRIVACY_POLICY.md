@@ -2,11 +2,11 @@
 
 Effective date: 16 January 2026
 
-This Privacy Policy explains how Strimr ("Strimr", "we", "us", or "our") handles information when you use the Strimr mobile application (the "App"). Strimr is a third-party client for Plex and is not affiliated with Plex, Inc.
+This Privacy Policy explains how Slingshot ("Slingshot", "we", "us", or "our") handles information when you use the Slingshot mobile application (the "App"). Slingshot is a third-party client for Plex and is not affiliated with Plex, Inc.
 
 ## Summary
 
-- Strimr only collects crash diagnostics to improve app stability (via Sentry).
+- Slingshot only collects crash diagnostics to improve app stability (via Sentry).
 - All information used by the App remains on your device.
 - The App communicates with Plex services to function; Plex's handling of data is governed by Plex's privacy policy.
 
@@ -23,14 +23,14 @@ We do not collect or process:
 
 ## Information Stored On Your Device
 
-Strimr stores only the minimum data required for the App to function. This information is stored locally on your device and is not transmitted to us. Specifically:
+Slingshot stores only the minimum data required for the App to function. This information is stored locally on your device and is not transmitted to us. Specifically:
 
 - Authentication token used to access your Plex account through the App
 - App settings and preferences
 
 ## How the App Communicates
 
-The App connects directly to Plex services to retrieve and display your media. All requests are made from your device to Plex. Strimr does not operate servers that collect or relay your data.
+The App connects directly to Plex services to retrieve and display your media. All requests are made from your device to Plex. Slingshot does not operate servers that collect or relay your data.
 
 For details about Plex's data practices, please review the Plex Privacy Policy:
 
@@ -38,11 +38,11 @@ For details about Plex's data practices, please review the Plex Privacy Policy:
 
 ## Data Retention
 
-Strimr retains local data only for as long as you keep the App installed or until you remove the data. You can delete this information by signing out or uninstalling the App.
+Slingshot retains local data only for as long as you keep the App installed or until you remove the data. You can delete this information by signing out or uninstalling the App.
 
 ## Your Choices
 
-You control all data stored by Strimr. You can:
+You control all data stored by Slingshot. You can:
 
 - Sign out of the App to remove your authentication token
 - Reset or change settings at any time

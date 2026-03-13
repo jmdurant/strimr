@@ -1,6 +1,6 @@
-# Contributing to Strimr
+# Contributing to Slingshot
 
-Thanks for helping improve Strimr. New features are welcome, and so are bug fixes, behavior improvements, and UX/UI polish.
+Thanks for helping improve Slingshot. New features are welcome, and so are bug fixes, behavior improvements, and UX/UI polish.
 
 Before starting a feature request, please open an issue first so we can discuss the implementation, any obstacles, and help other users understand what is planned.
 Before reporting a bug, please check that it does not already exist.
@@ -27,11 +27,11 @@ Before reporting a bug, please check that it does not already exist.
 
    Update `DEVELOPMENT_TEAM` and `PRODUCT_BUNDLE_IDENTIFIER`.
 
-4. Open `Strimr.xcworkspace` in Xcode.
+4. Open `Slingshot.xcworkspace` in Xcode.
 
 ## Architecture
 
-Strimr is a native iOS and tvOS SwiftUI app with shared code between targets. The app is split into feature areas and shared modules.
+Slingshot is a native iOS and tvOS SwiftUI app with shared code between targets. The app is split into feature areas and shared modules.
 
 The UI follows a simple MVVM-style approach with SwiftUI views and `@Observable` view models.
 
@@ -51,5 +51,5 @@ Use `swiftformat` to format the code.
 - Keep PRs focused and avoid mixing unrelated changes.
 - If a pull request is specific to iOS or tvOS, prefix the title with `(iOS)` or `(tvOS)`.
 - Add or update localization keys as needed.
-- If you add new assets, keep them in the correct target catalog: `Strimr-iOS/Assets.xcassets` or `Strimr-tvOS/Assets.xcassets`.
+- If you add new assets, keep them in the correct target catalog: `Slingshot-iOS/Assets.xcassets` or `Slingshot-tvOS/Assets.xcassets`.
 - Use Conventional Commits with the scope `ios` or `tvos`.

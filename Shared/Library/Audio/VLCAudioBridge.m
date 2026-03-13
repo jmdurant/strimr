@@ -1,5 +1,18 @@
 #import "VLCAudioBridge.h"
 
+// Import the generated Swift-to-ObjC header so SpectrumData methods are visible
+#if __has_include("Slingshot_iOS-Swift.h")
+#import "Slingshot_iOS-Swift.h"
+#elif __has_include("Slingshot_macOS-Swift.h")
+#import "Slingshot_macOS-Swift.h"
+#elif __has_include("Slingshot_tvOS-Swift.h")
+#import "Slingshot_tvOS-Swift.h"
+#elif __has_include("Slingshot_watchOS-Swift.h")
+#import "Slingshot_watchOS-Swift.h"
+#elif __has_include("Slingshot_visionOS-Swift.h")
+#import "Slingshot_visionOS-Swift.h"
+#endif
+
 #import <VLCKit/VLCMediaPlayer.h>
 
 #import <AVFoundation/AVFoundation.h>

@@ -18,7 +18,7 @@ struct WidgetLibraryItem: Codable, Identifiable {
     }
 
     var deepLinkURL: URL {
-        URL(string: "strimr://library/\(id)")!
+        URL(string: "slingshot://library/\(id)")!
     }
 }
 
@@ -28,7 +28,7 @@ struct WidgetData: Codable {
     let bannerText: String
     let updatedAt: Date
 
-    static let appGroupID = "group.com.doctordurant.strimr"
+    static let appGroupID = "group.com.doctordurant.slingshot"
 
     static var containerURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
@@ -56,5 +56,5 @@ struct WidgetData: Codable {
         return decoded
     }
 
-    static let liveTVDeepLink = URL(string: "strimr://livetv")!
+    static let liveTVDeepLink = URL(string: "slingshot://livetv")!
 }

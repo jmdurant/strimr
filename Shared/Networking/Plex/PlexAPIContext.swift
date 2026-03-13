@@ -12,8 +12,8 @@ final class PlexAPIContext {
     @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
 
     @ObservationIgnored private let keychain = Keychain(service: Bundle.main.bundleIdentifier!)
-    @ObservationIgnored private let clientIdKey = "strimr.plex.clientId"
-    @ObservationIgnored private let connectionKeyPrefix = "strimr.plex.connection"
+    @ObservationIgnored private let clientIdKey = "slingshot.plex.clientId"
+    @ObservationIgnored private let connectionKeyPrefix = "slingshot.plex.connection"
 
     init() {
         bootstrapTask = Task { [weak self] in
