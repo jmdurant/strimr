@@ -163,6 +163,7 @@ targets:
         embed: true
         codeSign: true
       - target: SlingshotLiveActivity
+      - target: Slingshot-watchOS
 
   Slingshot-tvOS:
     type: application
@@ -342,7 +343,7 @@ targets:
         INFOPLIST_FILE: Slingshot-watchOS/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Slingshot
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
-        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.doctordurant.slingshot
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: "$(IOS_BUNDLE_IDENTIFIER)"
         LD_RUNPATH_SEARCH_PATHS:
           - "$(inherited)"
           - "@executable_path/Frameworks"
