@@ -73,3 +73,4 @@ WatchTogetherServer/dist/
 WatchTogetherServer/watchtogether-server
 WatchTogetherServer/watchtogether-server-*
 WatchTogetherServer/bun.lock
+.mcp.json
